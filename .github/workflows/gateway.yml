@@ -66,14 +66,7 @@ jobs:
           import sys
           from pathlib import Path
           file = Path('worker/wrangler.toml')
-          updated, count = re.subn(r'(?m)^id = "[^"]+"        if: steps.configured.outputs.ready == 'true'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          cd worker
-          npx --yes wrangler@4 deploy
-, 'id = "' + sys.argv[1] + '"', file.read_text())
+          updated, count = re.subn(r'(?m)^id = "[^"]+"$', 'id = "' + sys.argv[1] + '"', file.read_text())
           if count != 1:
               raise SystemExit('Expected exactly one RESULTS KV id in worker/wrangler.toml')
           file.write_text(updated)
