@@ -1,0 +1,43 @@
+name: On-demand A2A search
+
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: 'Skill, capability, or agent search term'
+        type: string
+        required: true
+      request_id:
+        description: 'Gateway-issued request UUID'
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: search-${{ inputs.request_id }}
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Discover Agent Cards
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SEARCH_QUERY: ${{ inputs.query }}
+        run: python3 src/discover.py --query "$SEARCH_QUERY" --output /tmp/searcha2a-results.json
+      - name: Return results to request gateway
+        if: always()
+        env:
+          RESULT_CALLBACK_URL: ${{ vars.SEARCHA2A_API_URL }}
+          RESULT_CALLBACK_SECRET: ${{ secrets.RESULT_CALLBACK_SECRET }}
+          SEARCH_QUERY: ${{ inputs.query }}
+          REQUEST_ID: ${{ inputs.request_id }}
+        run: python3 src/report.py --input /tmp/searcha2a-results.json

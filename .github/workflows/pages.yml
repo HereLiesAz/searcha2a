@@ -1,0 +1,82 @@
+name: Reindex and publish Pages
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '29 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: searcha2a-pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build public catalog
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p dist
+          cp -R site/. dist/
+          python3 src/discover.py --output dist/api/v1/catalog.json
+      - name: Export Azphalt external-agent listings
+        run: python3 src/azphalt_listings.py --catalog dist/api/v1/catalog.json --output dist/api/v1/azphalt-listings.json
+      - name: Build stable agent resolution files
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          catalog = json.loads(Path('dist/api/v1/catalog.json').read_text())
+          target = Path('dist/api/v1/agents')
+          target.mkdir(parents=True, exist_ok=True)
+          for agent in catalog['results']:
+              (target / (agent['id'] + '.json')).write_text(json.dumps(agent, ensure_ascii=False))
+          PY
+      - name: Configure public client
+        env:
+          API_URL: ${{ vars.SEARCHA2A_API_URL }}
+          TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          with open('dist/config.json', 'w', encoding='utf-8') as f:
+              json.dump({'apiBaseUrl': os.getenv('API_URL', ''),
+                         'turnstileSiteKey': os.getenv('TURNSTILE_SITE_KEY', '')}, f)
+          PY
+      - name: Check Pages is enabled
+        id: pages-enabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          response=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages")
+          if [ "$response" = 200 ]; then
+            echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::GitHub Pages not enabled (HTTP $response); deploy skipped."
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.pages-enabled.outputs.enabled == 'true'
+        with:
+          path: dist
+      - id: deployment
+        if: steps.pages-enabled.outputs.enabled == 'true'
+        uses: actions/deploy-pages@v4

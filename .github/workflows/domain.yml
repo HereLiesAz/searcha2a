@@ -1,0 +1,70 @@
+name: Configure searcha2a.azphalt.store
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  domain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PAGES_ADMIN_TOKEN: ${{ secrets.PAGES_ADMIN_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      DOMAIN: searcha2a.azphalt.store
+      DNS_TARGET: hereliesaz.github.io
+    steps:
+      - name: Check independent deployment credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in PAGES_ADMIN_TOKEN CLOUDFLARE_API_TOKEN CLOUDFLARE_ZONE_ID; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing $name. See docs/ARCHITECTURE.md."
+              exit 1
+            fi
+          done
+      - name: Register GitHub Pages domain before publishing DNS
+        shell: bash
+        run: |
+          set -euo pipefail
+          pages="https://api.github.com/repos/${GITHUB_REPOSITORY}/pages"
+          headers=(-H "Authorization: Bearer $PAGES_ADMIN_TOKEN" -H 'Accept: application/vnd.github+json' -H 'X-GitHub-Api-Version: 2026-03-10')
+          code="$(curl --silent --show-error -o /tmp/pages.json -w '%{http_code}' "${headers[@]}" "$pages")"
+          if [[ "$code" == 404 ]]; then
+            curl --fail-with-body --silent --show-error -X POST "${headers[@]}" \
+              -H 'Content-Type: application/json' -d '{"build_type":"workflow"}' "$pages" >/dev/null
+          elif [[ "$code" != 200 ]]; then
+            cat /tmp/pages.json >&2
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error -X PUT "${headers[@]}" \
+            -H 'Content-Type: application/json' \
+            -d "$(jq -n --arg cname "$DOMAIN" '{cname:$cname,build_type:"workflow"}')" "$pages" >/dev/null
+          echo "Registered $DOMAIN with GitHub Pages."
+      - name: Create DNS CNAME without overwriting other records
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/dns_records"
+          headers=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H 'Content-Type: application/json')
+          existing="$(curl --fail-with-body --silent --show-error --get "${headers[@]}" \
+            --data-urlencode "name=$DOMAIN" "$api")"
+          jq -e '.success == true and (.result | type == "array")' <<<"$existing" >/dev/null
+          if [[ "$(jq '.result | length' <<<"$existing")" != 0 ]]; then
+            if jq -e --arg target "$DNS_TARGET" '.result | length == 1 and .[0].type == "CNAME" and (.[0].content | ascii_downcase) == $target and .[0].proxied == false' <<<"$existing" >/dev/null; then
+              echo "Existing DNS CNAME is correct."
+              exit 0
+            fi
+            echo "::error::$DOMAIN already has a conflicting DNS record. No changes made to DNS."
+            exit 1
+          fi
+          payload="$(jq -n --arg name "$DOMAIN" --arg content "$DNS_TARGET" \
+            '{type:"CNAME",name:$name,content:$content,ttl:1,proxied:false}')"
+          created="$(curl --fail-with-body --silent --show-error -X POST "${headers[@]}" \
+            -d "$payload" "$api")"
+          jq -e '.success == true and .result.type == "CNAME"' <<<"$created" >/dev/null
+          echo "Created DNS-only CNAME: $DOMAIN → $DNS_TARGET"

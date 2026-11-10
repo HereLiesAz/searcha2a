@@ -1,0 +1,9 @@
+{
+  "card_urls": [
+    "https://registry.ip402.xyz/.well-known/agent-card.json",
+    "https://api.trustboost.dev/.well-known/agent-card.json"
+  ],
+  "registry_urls": [
+    "https://agora.sovont.com/v1/agents"
+  ]
+}

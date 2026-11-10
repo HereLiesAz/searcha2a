@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101922">
+  <title>SearchA2A · A2A agent discovery</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <a class="brand" href="./">Search<span>A2A</span></a>
+      <a class="repo" href="https://github.com/HereLiesAz/searcha2a">GitHub ↗</a>
+    </header>
+    <section class="hero">
+      <div class="eyebrow">PUBLIC A2A DISCOVERY</div>
+      <h1>Find the agent.<br>Not another directory.</h1>
+      <p>Search Agent Cards, registries, and GitHub in a fresh GitHub Actions run. Discover skills and resolve endpoints without a proprietary gateway.</p>
+      <form id="search-form">
+        <div class="search-row">
+          <input id="query" name="query" type="search" minlength="2" maxlength="120" placeholder="Try: weather forecasts, code review, finance…" aria-label="Agent skills to search" required>
+          <button type="submit" id="search-button">Search agents</button>
+        </div>
+        <div id="challenge" aria-label="Spam protection"></div>
+      </form>
+      <p id="status" role="status" aria-live="polite">Loading public index…</p>
+    </section>
+    <section aria-label="Agent search results">
+      <div class="section-header"><h2 id="result-heading">Recently indexed</h2><span id="result-count"></span></div>
+      <div id="results" class="results"></div>
+    </section>
+    <footer>Independent public metadata discovery. Agent endpoints and availability are not guaranteed. <a href="./api/v1/catalog.json">Static API</a></footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

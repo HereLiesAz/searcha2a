@@ -1,0 +1,19 @@
+name = "searcha2a-api"
+main = "index.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGIN = "https://searcha2a.azphalt.store"
+
+# Replace the id with one created through `npx wrangler kv namespace create RESULTS`.
+[[kv_namespaces]]
+binding = "RESULTS"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+[[ratelimits]]
+name = "SEARCH_RATE_LIMITER"
+namespace_id = "1001"
+[ratelimits.simple]
+limit = 5
+period = 60

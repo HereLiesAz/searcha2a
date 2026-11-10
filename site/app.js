@@ -1,0 +1,113 @@
+const form = document.querySelector('#search-form');
+const queryInput = document.querySelector('#query');
+const button = document.querySelector('#search-button');
+const status = document.querySelector('#status');
+const results = document.querySelector('#results');
+const heading = document.querySelector('#result-heading');
+const count = document.querySelector('#result-count');
+let config = {};
+let widgetId;
+
+function textNode(tag, value, className = '') {
+  const element = document.createElement(tag);
+  element.textContent = String(value ?? '');
+  if (className) element.className = className;
+  return element;
+}
+
+function addLink(container, label, url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:') return;
+    const link = textNode('a', label);
+    link.href = parsed.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    container.append(link);
+  } catch { /* Ignore malformed URLs from external agent cards. */ }
+}
+
+function display(records) {
+  results.replaceChildren();
+  const items = Array.isArray(records) ? records : [];
+  count.textContent = `${items.length} agents`;
+  if (!items.length) {
+    results.append(textNode('div', 'No matching Agent Cards found. Discovery coverage depends on public registries and indexed GitHub cards.', 'empty'));
+    return;
+  }
+  for (const agent of items) {
+    const card = textNode('article', '', 'result');
+    card.append(textNode('h3', agent.name), textNode('p', agent.description || 'No description supplied.'));
+    const tags = textNode('div', '', 'tags');
+    for (const skill of (agent.skills || []).slice(0, 6)) tags.append(textNode('span', skill.name, 'tag'));
+    card.append(tags, textNode('small', `${agent.source || 'discovered'} · ${agent.verification || 'unverified'}`));
+    const links = textNode('div', '', 'links');
+    addLink(links, 'Agent Card ↗', agent.source_url);
+    addLink(links, 'Endpoint ↗', agent.endpoint);
+    card.append(links);
+    results.append(card);
+  }
+}
+
+async function jsonRequest(url, options) {
+  const response = await fetch(url, { cache: 'no-store', ...options });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+  return data;
+}
+
+async function initialize() {
+  try { config = await jsonRequest('./config.json'); } catch { config = {}; }
+  try {
+    const catalog = await jsonRequest('./api/v1/catalog.json');
+    display(catalog.results);
+    status.textContent = catalog.generated_at ? `Index refreshed ${new Date(catalog.generated_at).toLocaleString()}. Live searches start new Actions runs.` : 'Public index is not built yet.';
+  } catch { status.textContent = 'Public index unavailable.'; }
+  if (!config.apiBaseUrl || !config.turnstileSiteKey) {
+    button.disabled = true;
+    status.textContent += ' Live search awaits gateway configuration.';
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+  script.async = true;
+  script.onload = () => { widgetId = window.turnstile.render('#challenge', { sitekey: config.turnstileSiteKey }); };
+  script.onerror = () => { button.disabled = true; status.textContent = 'Spam challenge could not load.'; };
+  document.head.append(script);
+}
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+form.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (button.disabled) return;
+  const query = queryInput.value.trim();
+  const turnstile = window.turnstile?.getResponse(widgetId);
+  if (!turnstile) { status.textContent = 'Complete the verification challenge to start a search.'; return; }
+  button.disabled = true;
+  status.textContent = 'Dispatching GitHub Actions search…';
+  heading.textContent = `Results for “${query}”`;
+  try {
+    const base = config.apiBaseUrl.replace(/\/$/, '');
+    const request = await jsonRequest(`${base}/api/v1/search`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, turnstile }),
+    });
+    status.textContent = 'Search queued in GitHub Actions. Waiting for results…';
+    for (let attempt = 0; attempt < 48; attempt++) {
+      await sleep(3000);
+      const data = await jsonRequest(`${base}/api/v1/results/${encodeURIComponent(request.id)}`);
+      if (data.status === 'complete') {
+        display(data.results);
+        status.textContent = `GitHub Actions search complete. ${data.count} cards matched.${data.warnings?.length ? ' Some sources were unavailable.' : ''}`;
+        return;
+      }
+    }
+    status.textContent = 'Search is still running. Check the workflow or retry shortly.';
+  } catch (error) {
+    status.textContent = `Search failed: ${error.message}`;
+  } finally {
+    button.disabled = false;
+    if (widgetId !== undefined) window.turnstile?.reset(widgetId);
+  }
+});
+initialize();
