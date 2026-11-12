@@ -143,7 +143,7 @@ def clean_text(value, max_length: int = 500) -> str:
     return value.strip()[:max_length] if isinstance(value, str) else ""
 
 
-def normalize_card(card, source_url: str, source: str):
+def normalize_card(card, source_url: str, source: str, *, identity_salt: str = ""):
     if not isinstance(card, dict):
         return None
     name = clean_text(card.get("name"), 160)
@@ -184,7 +184,10 @@ def normalize_card(card, source_url: str, source: str):
     capabilities = capabilities if isinstance(capabilities, dict) else {}
     security = card.get("securitySchemes")
     security = sorted(security.keys())[:15] if isinstance(security, dict) else []
-    stable = endpoint or source_url
+    # A shared MCP endpoint can serve many distinct opaque resources. Keep
+    # source_url as the actual HTTPS MCP endpoint, but distinguish records
+    # without a public A2A endpoint using the opaque resource identity.
+    stable = endpoint or (source_url + "|" + identity_salt if identity_salt else source_url)
     identity = hashlib.sha256(stable.encode("utf-8")).hexdigest()[:20]
     # Preserve complete publisher-defined names; truncation would silently change identity.
     raw_name = card.get("ansName") or card.get("ans_name")
@@ -869,7 +872,7 @@ def post_mcp_metadata(url: str, method: str, params, token: str = ""):
                     or result.get("error") is not None):
                 raise DiscoveryError("Invalid MCP response")
             return result["result"]
-    except (ValueError, urllib.error.URLError, TimeoutError, OSError) as exc:
+    except (ValueError, RecursionError, urllib.error.URLError, TimeoutError, OSError) as exc:
         raise DiscoveryError("MCP source unavailable") from exc
 
 
@@ -927,7 +930,12 @@ def mcp_metadata_sources(config, post=post_mcp_metadata):
                           mcp_resource_card_uri(uri) and uri not in seen_resources):
                         seen_resources.add(uri)
                         reads += 1
-                        response_card = post(endpoint, "resources/read", {"uri": uri}, token)
+                        try:
+                            response_card = post(endpoint, "resources/read", {"uri": uri}, token)
+                        except (DiscoveryError, ValueError, TypeError, RecursionError):
+                            # One stale or broken resource must not discard
+                            # other discoveries from the same MCP directory.
+                            continue
                         contents = response_card.get("contents") if isinstance(response_card, dict) else None
                         if not isinstance(contents, list):
                             continue
@@ -940,8 +948,9 @@ def mcp_metadata_sources(config, post=post_mcp_metadata):
                             if not isinstance(text, str) or len(text) > MAX_MCP_DOCUMENT:
                                 continue
                             try:
-                                card = normalize_card(json.loads(text), endpoint, "mcp-resource")
-                            except (ValueError, TypeError):
+                                card = normalize_card(json.loads(text), endpoint, "mcp-resource",
+                                                      identity_salt=uri)
+                            except (ValueError, TypeError, RecursionError):
                                 card = None
                             if card:
                                 card.pop("raw_card", None)
@@ -954,7 +963,7 @@ def mcp_metadata_sources(config, post=post_mcp_metadata):
                 next_cursor = cursor
             cards.extend(local_cards)
             links.extend(local_links)
-        except (DiscoveryError, ValueError, TypeError):
+        except (DiscoveryError, ValueError, TypeError, RecursionError):
             # Configured MCP hosts and Bearer secrets may be private; no leaks.
             warnings.append("MCP discovery unavailable")
     return cards, list(dict.fromkeys(links))[:MAX_FOLLOWUP_CARD_URLS], warnings
