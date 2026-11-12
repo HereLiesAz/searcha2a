@@ -6,10 +6,14 @@ workers_dev = true
 [vars]
 ALLOWED_ORIGIN = "https://searcha2a.azphalt.store"
 
-# Replace the id with one created through `npx wrangler kv namespace create RESULTS`.
-[[kv_namespaces]]
-binding = "RESULTS"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+# One SQLite-backed Durable Object per request UUID, created automatically on deploy.
+[[durable_objects.bindings]]
+name = "RESULTS"
+class_name = "SearchResult"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SearchResult"]
 
 [[ratelimits]]
 name = "SEARCH_RATE_LIMITER"

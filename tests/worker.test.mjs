@@ -1,12 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { handle } from '../worker/index.mjs';
+import { handle, SearchResult } from '../worker/index.mjs';
 
 function mockEnvironment() {
-  const map = new Map();
+  const mailboxes = new Map();
+  const alarms = new Map();
   return {
     ALLOWED_ORIGIN: 'https://searcha2a.azphalt.store',
-    RESULTS: { get: async key => map.get(key) || null, put: async (key, value) => map.set(key, value), delete: async key => map.delete(key) },
+    RESULTS: {
+      idFromName: id => id,
+      get(id) {
+        if (!mailboxes.has(id)) {
+          const values = new Map();
+          mailboxes.set(id, new SearchResult({ storage: {
+            kv: {
+              get: key => values.get(key),
+              put: (key, value) => values.set(key, structuredClone(value)),
+              delete: key => values.delete(key),
+            },
+            setAlarm: async when => alarms.set(id, when),
+            deleteAll: async () => { values.clear(); alarms.delete(id); },
+          } }));
+        }
+        return mailboxes.get(id);
+      },
+    },
+    alarms,
     SEARCH_RATE_LIMITER: { limit: async () => ({ success: true }) },
     GITHUB_DISPATCH_TOKEN: 'fake', TURNSTILE_SECRET: 'fake', RESULT_CALLBACK_SECRET: 'secret',
   };
@@ -33,7 +52,9 @@ test('invalid query never dispatches', async () => {
 test('callback requires secret and matching pending request', async () => {
   const env = mockEnvironment();
   const id = 'aab1cc22-1111-4111-8111-123456789abc';
-  await env.RESULTS.put(`search:${id}`, JSON.stringify({ id, query: 'weather', status: 'queued' }));
+  await env.RESULTS.get(env.RESULTS.idFromName(id)).fetch(new Request('https://results.internal/create', {
+    method: 'PUT', body: JSON.stringify({ id, query: 'weather' }),
+  }));
   let response = await handle(req('/internal/results', { method: 'POST',
     body: JSON.stringify({ request_id: id, query: 'weather', results: [{ name: 'Weather' }] }) }), env);
   assert.equal(response.status, 401);
@@ -86,4 +107,89 @@ test('validated search dispatches a workflow and returns an ID', async () => {
     const status = await handle(req(`/api/v1/results/${result.id}`), env);
     assert.equal((await status.json()).status, 'queued');
   } finally { globalThis.fetch = originalFetch; }
+});
+
+test('a completed result cannot be overwritten by a duplicate callback', async () => {
+  const env = mockEnvironment();
+  const id = 'aab1cc22-1111-4111-8111-123456789abc';
+  await env.RESULTS.get(id).fetch(new Request('https://results.internal/create', {
+    method: 'PUT', body: JSON.stringify({ id, query: 'weather' }),
+  }));
+  const callback = results => handle(req('/internal/results', {
+    method: 'POST', headers: { Authorization: 'Bearer secret' },
+    body: JSON.stringify({ request_id: id, query: 'weather', results }),
+  }), env);
+  assert.equal((await callback([{ name: 'Original' }])).status, 200);
+  assert.equal((await callback([{ name: 'Overwrite' }])).status, 409);
+  const result = await handle(req(`/api/v1/results/${id}`), env);
+  assert.equal((await result.json()).results[0].name, 'Original');
+});
+
+test('fast callback completion survives late dispatch metadata', async () => {
+  const env = mockEnvironment();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url, options) => {
+    if (url.includes('turnstile')) return new Response('{"success":true}');
+    if (url.includes('api.github.com')) {
+      const { inputs } = JSON.parse(options.body);
+      const callback = await handle(req('/internal/results', {
+        method: 'POST', headers: { Authorization: 'Bearer secret' },
+        body: JSON.stringify({ request_id: inputs.request_id, query: inputs.query, results: [{ name: 'Fast agent' }] }),
+      }), env);
+      assert.equal(callback.status, 200);
+      return new Response('{"workflow_run_id":123}');
+    }
+    throw new Error('Unexpected network request');
+  };
+  try {
+    const response = await handle(req('/api/v1/search', {
+      method: 'POST', body: JSON.stringify({ query: 'weather', turnstile: 'valid' }),
+    }), env);
+    assert.equal(response.status, 202);
+    const queued = await response.json();
+    const result = await handle(req(`/api/v1/results/${queued.id}`), env);
+    assert.equal(result.status, 200);
+    const body = await result.json();
+    assert.equal(body.status, 'complete');
+    assert.equal(body.results[0].name, 'Fast agent');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('failed dispatch removes the mailbox instead of leaving an unfinishable search', async () => {
+  const env = mockEnvironment();
+  const originalFetch = globalThis.fetch;
+  let requestId;
+  globalThis.fetch = async (url, options) => {
+    if (url.includes('turnstile')) return new Response('{"success":true}');
+    requestId = JSON.parse(options.body).inputs.request_id;
+    return new Response('{"message":"Denied"}', { status: 403 });
+  };
+  try {
+    const response = await handle(req('/api/v1/search', {
+      method: 'POST', body: JSON.stringify({ query: 'weather', turnstile: 'valid' }),
+    }), env);
+    assert.equal(response.status, 502);
+    assert.match((await response.json()).error, /403/);
+    assert.equal((await handle(req(`/api/v1/results/${requestId}`), env)).status, 404);
+    assert.equal(env.alarms.has(requestId), false);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('mailbox expires after seven days, and the storage alarm deletes its record', async () => {
+  const env = mockEnvironment();
+  const id = 'aab1cc22-1111-4111-8111-123456789abc';
+  const mailbox = env.RESULTS.get(id);
+  const originalNow = Date.now;
+  Date.now = () => 1700000000000;
+  try {
+    const created = await mailbox.fetch(new Request('https://results.internal/create', {
+      method: 'PUT', body: JSON.stringify({ id, query: 'weather' }),
+    }));
+    assert.equal(created.status, 201);
+    assert.equal(env.alarms.get(id), 1700604800000);
+    Date.now = () => 1700604800001;
+    assert.equal((await handle(req(`/api/v1/results/${id}`), env)).status, 404);
+    await mailbox.alarm();
+    assert.equal(env.alarms.has(id), false);
+  } finally { Date.now = originalNow; }
 });
