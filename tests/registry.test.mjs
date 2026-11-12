@@ -373,6 +373,7 @@ test('semantic directory paginates every persisted card and honors moderation be
     assert.equal(response.status, 200);
     let data = await response.json();
     assert.equal(data.truncated, false);
+    assert.equal(data.candidate_count, 205);
     assert.deepEqual(data.results.map(agent => agent.id), [records[204].id]);
     assert.equal(data.match_mode, 'semantic');
     assert.deepEqual(calls, [100, 100, 5, 1]);

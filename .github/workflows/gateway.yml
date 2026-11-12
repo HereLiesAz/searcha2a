@@ -85,6 +85,21 @@ jobs:
             .schema == 1 and .source == "searcha2a" and
             (.match_mode == "semantic" or .match_mode == "keyword-fallback") and
             .verification == "card_read_only" and
+            .candidate_scope == "persistent-registry" and
+            .truncated == false and
+            (.candidate_count | type == "number") and
             (.results | type == "array") and (.count | type == "number")
           ' /tmp/searcha2a-directory.json >/dev/null
-          jq -r '"Indexed directory verified: mode=\(.match_mode), results=\(.count)"' /tmp/searcha2a-directory.json
+          # Compare all eligible SQL rows against the number actually passed to
+          # the semantic ranker, not the separately bounded top-20 response.
+          code="$(curl --silent --show-error --retry 3 --retry-delay 2 \
+            -o /tmp/searcha2a-visible.json -w '%{http_code}' \
+            "${SEARCHA2A_API_URL%/}/api/v1/agents?limit=1")"
+          [[ "$code" = 200 ]] || { echo "::error::Registry coverage read HTTP $code"; exit 1; }
+          jq -e --slurpfile registry /tmp/searcha2a-visible.json \
+            '.candidate_count == $registry[0].total and .candidate_count >= .count' \
+            /tmp/searcha2a-directory.json >/dev/null || {
+              echo "::error::Semantic candidate count differs from visible persistent registry total"
+              exit 1
+            }
+          jq -r '"Indexed directory verified: mode=\(.match_mode), candidates=\(.candidate_count), results=\(.count)"' /tmp/searcha2a-directory.json
