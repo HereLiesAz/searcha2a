@@ -75,6 +75,31 @@ Requires the same administrator secret. Returns the current listing and review s
 
 **Public visibility:** `GET /api/v1/agents` and `GET /api/v1/agents/{id}` include only active, non-rejected entries. Visible Agent Cards include a `curation_status` of `unreviewed` or `approved`; the underlying `verification` remains `card_read_only`. Reingesting a card updates its metadata but preserves curator-controlled states. The static Pages snapshot and Azphalt feed are filtered against the registry's suppression manifest on the next scheduled, push-triggered, or manual index publication. An administrator decision takes effect immediately on the live registry, and on the static feeds after publication. A crawler sync fails closed if suppression information is missing.
 
+## Publisher-defined ANS names
+
+SearchA2A accepts `ans://<version>.<agentHost>` with an opaque,
+publisher-defined version. For example `ans://1.0.0.weather.example.com` or
+`ans://release-2026.11.weather.example.com`. DNS labels must be valid,
+but SearchA2A neither enforces SemVer nor adds or removes `v`.
+The Agent Card must explicitly supply both `ansName` and `agentHost`:
+dotted versions cannot safely be separated from a host by guessing.
+
+### `GET /api/v1/ans/resolve?name=ans%3A%2F%2F1.0.0.weather.example.com`
+
+Reads a name claim from the *persistent curated registry*. It performs no
+DNS, certificate, transparency-log, or live endpoint requests. On a match,
+returns `{"name":"...","count":1,"results":[...],"identity_verified":false}`.
+Each matching record contains `ans: {name,agent_host,version,verification:"unverified"}`.
+It returns 404 for unknown or suppressed names, and 400 for invalid syntax.
+Multiple claimed matches are returned without asserting which is authoritative.
+
+A future independent DNS identity verifier must check DNSSEC, certificates,
+transparency proofs, trust anchors and freshness before any identity claim
+is labelled verified. Linux Foundation ANS v2 currently specifies a stricter
+`ans://v{semver}.{agentHost}` wire format. SearchA2A's broader publisher
+names are *not* automatically standards-compliant or verified, and no
+version rewriting is performed.
+
 ## Static GitHub Pages endpoints
 
 - `GET /api/v1/catalog.json`: latest bounded crawl snapshot, **not** the full persistent registry.
