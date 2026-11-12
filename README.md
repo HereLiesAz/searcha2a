@@ -34,3 +34,7 @@ transparency evidence require a separate verifier.
 The legacy `POST /api/v1/search` dispatch route now returns **410 Gone**. Existing result UUIDs remain readable until their seven-day retention expires. The separate `/api/v1/directory?q=...` semantic API remains available for clients such as Aive. It ranks candidates from the persistent curated registry with optional Workers AI; it also never triggers a crawl.
 
 See [API](docs/API.md), [Architecture](docs/ARCHITECTURE.md), and [Operations](docs/OPERATIONS.md) for protocol, security, and deployment details.
+
+## Bring your own compute
+
+Fork SearchA2A to expose an owner-operated text agent over **A2A 1.0 JSON-RPC**, with an automatically generated Agent Card. GitHub Actions deploys an **opt-in Worker into the fork owner's Cloudflare account**; the central registry never executes agents or pays for inference. See [Federated execution](docs/FEDERATION.md) for setup, security and limitations.

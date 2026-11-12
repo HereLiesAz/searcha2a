@@ -1,0 +1,8 @@
+# Deployed only from an explicitly enabled fork, into that fork owner's CF account.
+name = "searcha2a-federation"
+main = "index.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+# No SearchA2A REGISTRY, AI, or Durable Object bindings. This worker never
+# runs other people's models. PUBLIC_ORIGIN is injected by Actions on deploy.
