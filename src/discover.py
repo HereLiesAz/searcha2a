@@ -32,6 +32,8 @@ MAX_RAW_CARD_BYTES = 4096
 MAX_PRIVATE_CATALOGS = 5
 MAX_INLINE_NESTED_CATALOGS = 8
 MAX_WEBFINGER_ACCOUNTS = 8
+MAX_DNS_DOMAINS = 12
+MAX_DNS_TXT_ANSWERS = 8
 A2A_CATALOG_TYPES = {'application/a2a-agent-card+json', 'application/a2a+json'}
 # Paths are literal; unknown assistant identifiers are never enumerated.
 PROBE_PATHS = (
@@ -402,6 +404,69 @@ def domain_sources(config):
     return sources
 
 
+def dns_txt_sources(config, fetch=fetch_json):
+    """Follow configured NAIS _agent TXT pointers via public DNS-over-HTTPS.
+
+    Discovery is not NAIS validation: DNS records and card signatures are
+    not verified here. This method never publishes an identity assurance.
+    """
+    candidates, warnings = [], []
+    domains = config.get("dns_domains", [])
+    if not isinstance(domains, list):
+        return candidates, warnings
+    for value in domains[:MAX_DNS_DOMAINS]:
+        if not isinstance(value, str) or len(value) > 240:
+            continue
+        domain = value.lower().rstrip(".")
+        if not re.fullmatch(
+                r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}",
+                domain):
+            continue
+        name = "_agent." + domain
+        lookup = "https://dns.google/resolve?" + urllib.parse.urlencode(
+            {"name": name, "type": "TXT"})
+        try:
+            response = fetch(lookup)
+            if not isinstance(response, dict) or response.get("Status") != 0:
+                continue
+            answers = response.get("Answer", [])
+            if not isinstance(answers, list):
+                continue
+            for item in answers[:MAX_DNS_TXT_ANSWERS]:
+                if (not isinstance(item, dict) or item.get("type") != 16 or
+                        not isinstance(item.get("name"), str) or
+                        item["name"].rstrip(".").lower() != name):
+                    continue
+                data = item.get("data")
+                if not isinstance(data, str) or len(data) > 1200:
+                    continue
+                # DoH TXT answers may consist of adjacent quoted segments.
+                segments = re.findall(r'"(?:\\.|[^"\\])*"', data)
+                try:
+                    value = ("".join(json.loads(part) for part in segments)
+                             if segments else data if '"' not in data else "")
+                except ValueError:
+                    continue
+                if len(value) > 1000:
+                    continue
+                parts = [part.strip() for part in value.split(";")]
+                if not parts or parts[0].lower() != "v=nais1":
+                    continue
+                fields = dict(part.split("=", 1) for part in parts[1:]
+                              if "=" in part and part.split("=", 1)[0] in ("manifest", "k"))
+                url = (public_card_link(fields["manifest"], "https://" + domain,
+                                        explicit_card=True)
+                       if fields.get("manifest") else
+                       "https://" + domain + "/.well-known/agent.json")
+                if url:
+                    candidates.append((url, "dns-nais"))
+        except (DiscoveryError, ValueError, TypeError):
+            # Configured public domains are non-secret; do not include TXT
+            # payload contents in warning messages.
+            warnings.append("DNS discovery unavailable")
+    return list(dict.fromkeys(candidates)), warnings
+
+
 def candidate_sources(config):
     candidates = []
     for url in config.get("card_urls", []):
@@ -469,12 +534,15 @@ def rank(record, query: str) -> int:
 
 
 def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github=github_sources,
-             private_fetch=fetch_json):
+             private_fetch=fetch_json, dns_fetch=fetch_json):
     results = {}
     warnings = []
     candidates = candidate_sources(config)
     code_urls, search_warnings = github(query, token)
     warnings.extend(search_warnings)
+    dns_cards, dns_warnings = dns_txt_sources(config, fetch=dns_fetch)
+    candidates.extend(dns_cards)
+    warnings.extend(dns_warnings)
     rotation = config.get('rotation_index')
     if type(rotation) is not int or rotation < 0:
         rotation = datetime.now(timezone.utc).date().toordinal()
