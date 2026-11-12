@@ -1,6 +1,7 @@
 const form = document.querySelector('#search-form');
 const queryInput = document.querySelector('#query');
 const button = document.querySelector('#search-button');
+const indexedButton = document.querySelector('#indexed-search-button');
 const status = document.querySelector('#status');
 const results = document.querySelector('#results');
 const heading = document.querySelector('#result-heading');
@@ -63,9 +64,15 @@ async function initialize() {
     display(catalog.results);
     status.textContent = catalog.generated_at ? `Index refreshed ${new Date(catalog.generated_at).toLocaleString()}. Live searches start new Actions runs.` : 'Public index is not built yet.';
   } catch { status.textContent = 'Public index unavailable.'; }
-  if (!config.apiBaseUrl || !config.turnstileSiteKey) {
+  if (!config.apiBaseUrl) {
     button.disabled = true;
-    status.textContent += ' Live search awaits gateway configuration.';
+    indexedButton.disabled = true;
+    status.textContent += ' Search awaits gateway configuration.';
+    return;
+  }
+  if (!config.turnstileSiteKey) {
+    button.disabled = true;
+    status.textContent += ' Live search awaits spam challenge configuration.';
     return;
   }
   const script = document.createElement('script');
@@ -76,6 +83,29 @@ async function initialize() {
   document.head.append(script);
 }
 
+indexedButton.addEventListener('click', async () => {
+  if (indexedButton.disabled) return;
+  const query = queryInput.value.trim();
+  if (query.length < 2 || query.length > 120) {
+    status.textContent = 'Enter 2–120 characters to search indexed agents.';
+    return;
+  }
+  indexedButton.disabled = true;
+  status.textContent = 'Matching indexed agents…';
+  heading.textContent = 'Indexed matches for “' + query + '”';
+  try {
+    const base = config.apiBaseUrl.replace(/\/$/, '');
+    const data = await jsonRequest(base + '/api/v1/directory?q=' + encodeURIComponent(query));
+    display(data.results);
+    status.textContent = data.match_mode === 'semantic'
+      ? 'Ranked by text embeddings over the published catalog. Agent Cards remain unverified.'
+      : 'Embedding search unavailable. Showing keyword-ranked catalog matches instead.';
+  } catch (error) {
+    status.textContent = 'Indexed search failed: ' + error.message;
+  } finally {
+    indexedButton.disabled = false;
+  }
+});
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 form.addEventListener('submit', async event => {
   event.preventDefault();
