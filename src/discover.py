@@ -254,7 +254,7 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
         if not isinstance(url, str):
             continue
         seen = 0
-        for page in range(MAX_REGISTRY_PAGES):
+        for page in range(1 if query else MAX_REGISTRY_PAGES):
             if seen >= MAX_REGISTRY_CARD_URLS:
                 break
             params = {"limit": REGISTRY_PAGE_SIZE, "offset": page * REGISTRY_PAGE_SIZE}

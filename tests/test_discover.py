@@ -97,6 +97,24 @@ class DiscoverTests(unittest.TestCase):
         ])
         self.assertNotIn('https://private.example/agents', requested)
 
+    def test_live_search_uses_only_one_registry_page(self):
+        cards = [{'wellKnownURI': f'https://agent{i}.example/card.json'} for i in range(30)]
+        fetched = []
+        def get(url):
+            fetched.append(url)
+            if '/api/agents?' in url:
+                return {'agents': cards}
+            return CARD
+
+        discover.discover('weather', {
+            'card_urls': [], 'registry_urls': [],
+            'paginated_registry_urls': ['https://registry.example.com/api/agents'],
+        }, fetch=get, github=lambda *_: ([], []))
+        registry_requests = [url for url in fetched if '/api/agents?' in url]
+        self.assertEqual(registry_requests, [
+            'https://registry.example.com/api/agents?limit=30&offset=0&search=weather',
+        ])
+
     def test_bad_paginated_registry_does_not_discard_seeded_cards(self):
         def get(url):
             if url == 'https://registry.example.com/api/agents?limit=30&offset=0&search=weather':
