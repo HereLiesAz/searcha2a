@@ -85,6 +85,9 @@ def verify_publisher(record: dict, card: dict, *, fetch, now: datetime | None = 
     if not isinstance(proof, dict) or proof.get("schema") != 1 or not (
         proof.get("listing") == "azphalt-external-a2a"
         and proof.get("consent") is True
+        # An explicit grant to redistribute the publisher's descriptive card metadata
+        # in an MIT-licensed, Store-signed wrapper; no claim over the remote software.
+        and proof.get("license") == "MIT"
         and proof.get("card_url") == card_url
         and proof.get("endpoint") == endpoint
     ):
@@ -96,7 +99,7 @@ def verify_publisher(record: dict, card: dict, *, fetch, now: datetime | None = 
     checked = checked.astimezone(timezone.utc)
     issued = _utc_date(proof.get("issued_at"))
     expires = _utc_date(proof.get("expires_at"))
-    if not issued or not expires or issued > checked + timedelta(minutes=5):
+    if not issued or not expires or issued > checked:
         return None
     if checked - issued > MAX_PROOF_AGE or not (checked < expires <= issued + MAX_PROOF_AGE):
         return None
