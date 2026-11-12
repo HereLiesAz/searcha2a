@@ -31,6 +31,9 @@ PUBLIC_ORIGINS = frozenset({
     "public-directory", "manifest",
 })
 STATUSES = frozenset({"accepted", "invalid", "unavailable"})
+RETRYABLE_ORIGINS = frozenset({
+    "registry", "github", "erc8004-registration", "public-directory", "manifest",
+})
 EMPTY_STATE = {"version": 1, "run_day": 0, "pending": []}
 
 
@@ -77,7 +80,8 @@ def validate_retry_state(state):
         if (not isinstance(entry, dict)
                 or set(entry) != {"url", "source", "failures", "retry_day"}
                 or not safe_public_card_url(entry["url"])
-                or entry["source"] not in PUBLIC_ORIGINS
+                or not isinstance(entry["source"], str)
+                or entry["source"] not in RETRYABLE_ORIGINS
                 or type(entry["failures"]) is not int
                 or not 1 <= entry["failures"] <= MAX_FAILURES
                 or type(entry["retry_day"]) is not int
@@ -135,9 +139,17 @@ def record_outcomes(state, outcomes, today):
         if status != "unavailable":
             previous.pop(url, None)
             continue
+        if origin not in RETRYABLE_ORIGINS:
+            # Reprobed daily: retaining domain-path 404s would crowd out
+            # rotating registries and transient on-chain registration links.
+            continue
         old = previous.get(url)
         failures = min(MAX_FAILURES, 1 + (old["failures"] if old else 0))
         if old is None and len(previous) >= MAX_PENDING:
+            if origin == "erc8004-registration":
+                # Keep a confirmed block window retriable if chain URLs cannot
+                # be saved. This error aborts the build before cursor commit.
+                raise RetryStateError("Unpersisted chain registration URLs")
             total["queue_full"] += 1
             continue
         wait_days = min(30, 2 ** (failures - 1))
