@@ -43,6 +43,12 @@ The existing semantic capability discovery endpoint remains available to clients
 
 Errors for public endpoints: 400 invalid input, 404 unknown agent, 503 registry binding unavailable, 500 unexpected failure. GET responses do not allocate per-request result mailboxes.
 
+## Static crawler health snapshot
+
+### `GET https://searcha2a.azphalt.store/api/v1/crawler-health.json`
+
+Pages publishes aggregate public-source Agent Card fetch statistics from the latest **successful scheduled indexing run**, independently of the persistent registry API. Counters include `attempted`, `accepted`, `invalid`, `unavailable`, `pending`, `queue_full`, `due_selected`, `retry_deferred`, `generated_at`, and `by_source` categories. `accepted` means a card or manifest pointer was readable, **not** that an agent answered an A2A task. Only public source categories are counted. No individual URLs, private catalog names, RPC tokens, agent endpoints, or raw error messages are exposed. This is a publication-time health snapshot, not a live health probe or liveness guarantee.
+
 ## Scheduled ingest (private)
 
 ### `POST /internal/registry/ingest`
