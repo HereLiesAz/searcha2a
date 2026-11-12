@@ -6,7 +6,7 @@
 
 ```text
 Scheduled or manually triggered Pages indexing (GitHub Actions)
-  -> discover.py: curated HTTPS Agent Cards, bounded domain probes, JSON manifests, registry feeds, GitHub leads
+  -> discover.py: curated HTTPS cards, domain probes, AI Catalog/WebFinger/ERC-8004 links, opt-in authorized feeds, registry and GitHub leads
   -> bounded discovery catalog JSON
   -> registry_sync.py (existing private shared secret)
   -> Worker POST /internal/registry/ingest
@@ -85,6 +85,7 @@ Azphalt package signing remains a separate authority.
 | A batch is all-or-nothing and does not delete unseen agents | `AgentRegistry.fetch`: input validation before `storage.transactionSync`, `INSERT ... ON CONFLICT DO UPDATE` |
 | Public search is bounded | `AgentRegistry.fetch`: 120-char query, up to 12 terms, limit <= 100, bounded offset |
 | Crawling never invokes advertised execution endpoints | `src/discover.py`: `card_references`, `unpack_cards`, `fetch_json` (GET only and one hop) |
+| Private catalogs require explicit publication permission, and credentials never leave the configured feed request | `src/discover.py`: `private_catalogs` with `publish is True`, `fetch_json(private_auth=...)`, `NoRedirect`, no authenticated link traversal; `.github/workflows/pages.yml` passes the secret only to the crawler |
 | Card fetches are limited to public HTTPS, JSON media types and reject redirects | `src/discover.py`: `require_public_https`, `NoRedirect`, `fetch_json` |
 | Store entries remain read-only and non-installable | `src/azphalt_listings.py`: `build_listings` |
 
@@ -102,7 +103,7 @@ endpoint, fresh publisher-origin proof evidence takes precedence; no unverified
 registry row can suppress it. Neither ranking nor this provenance precedence
 establishes Linux Foundation ANS identity, approved execution, or Azphalt signing.
 
-The crawler only accepts HTTP GET application/json (or application/*+json) documents over HTTPS, rejects HTTP redirects and private DNS results, limits each document to 512 KiB, and follows at most 100 explicit card links one hop from bounded manifests. Probe domains and assistant IDs are explicitly configured: no wildcard enumeration, task execution, authenticated extended-card retrieval, on-chain events, DNS TXT sweeps, MCP tool calls, or enterprise directory access. Missing skills are retained only when an explicit v1 supportedInterface identifies an agent. Raw public card JSON is retained only when <= 4 KiB; otherwise its SHA-256 is recorded. Raw fields are untrusted and **not** proof of A2A conformance or JWS integrity. DNS safety checks happen before HTTP connection, so DNS rebinding remains a known limitation. Query output is third-party metadata only.
+The crawler only accepts HTTP GET application/json (or application/*+json) documents over HTTPS, rejects HTTP redirects and private DNS results, limits ordinary card documents to 512 KiB, and follows at most 100 explicit card links one hop from bounded manifests. The domain matrix includes 11 JSON paths; known WebFinger accounts are limited to eight per configured domain. Probe domains, assistant IDs, and WebFinger accounts are explicitly configured. The crawler reads AI Catalog typed A2A entries (including bounded inline subcatalogs), WebFinger JRD self links and ERC-8004 registration services; it does **not** assert WebFinger or ERC-8004 identity verification. Private/enterprise HTTPS JSON feeds (up to five, 8 MiB each), including the five-page, read-only Google Cloud Agent Registry list API, are supported with one-feed-only bearer or X-API-Key credentials and **explicit `publish: true`**, never implicit or wildcard access. All linked card fetches are unauthenticated and use the ordinary public HTTPS guard; private raw card JSON is never published, but an opted-in feed's normalized names, skills, endpoints and source URL are public. No wildcard enumeration, task execution, authenticated extended-card retrieval, on-chain events, DNS TXT sweeps, MCP tool calls or enterprise service discovery without configured access. Missing skills are retained only when an explicit v1 supportedInterface identifies an agent. Raw public card JSON is retained only when <= 4 KiB; otherwise its SHA-256 is recorded. Raw fields are untrusted and **not** proof of A2A conformance or JWS integrity. DNS safety checks happen before HTTP connection, so DNS rebinding remains a known limitation. Query output is third-party metadata only.
 
 ## Deployment ordering
 

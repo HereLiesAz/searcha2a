@@ -31,7 +31,7 @@ Response shape:
 }
 ```
 
-The counts and timestamp above are illustrative. `count` is the total number of query matches before pagination; `total` is the registry-wide record count. `results` contains the requested page of normalized Agent Cards (empty in this illustrative response). Fields include a 20-character hexadecimal `id`, `name`, `description`, `source_url`, `endpoint`, `skills`, `protocols`, `capabilities`, `security_schemes`, `version`, `schema_status`, `raw_sha256`, optional `raw_card` (public JSON capped at 4 KiB), and `verification: "card_read_only"`. Partial v1 cards with an explicit HTTPS supported interface may legitimately have an empty `skills` list. Raw Agent Card metadata is untrusted; JWS verification is not implied. An unknown agent returns no match, not a live discovery job.
+The counts and timestamp above are illustrative. `count` is the total number of query matches before pagination; `total` is the registry-wide record count. `results` contains the requested page of normalized Agent Cards (empty in this illustrative response). Fields include a 20-character hexadecimal `id`, `name`, `description`, `source_url`, `endpoint`, `skills`, `protocols`, `capabilities`, `security_schemes`, `version`, `schema_status`, `raw_sha256`, optional `raw_card` (public JSON capped at 4 KiB), and `verification: "card_read_only"`. Partial v1 cards with an explicit HTTPS supported interface may legitimately have an empty `skills` list. Raw Agent Card metadata is untrusted; JWS verification is not implied. Authorized sources with explicit public-publication permission are labeled `source: "authorized-catalog"`; their raw card objects are not exported, but normalized metadata and source URLs are publicly visible. An unknown agent returns no match, not a live discovery job.
 
 ### `GET /api/v1/agents/{id}`
 
@@ -51,7 +51,7 @@ Called only by `src/registry_sync.py` during the scheduled/push-triggered Pages 
 
 The request is a JSON discovery catalog with `query: ""` and up to 70 normalized `results` per upload. The scheduled synchronizer splits crawls of up to 150 cards into uploads of 70 cards / 1,000,000 encoded bytes, combining suppression IDs across all responses. A single oversized card fails closed. Each row must contain a valid card ID, name, public HTTPS card source, a skills array (possibly empty only for marked partial A2A interface cards), and `verification: "card_read_only"`. The entire batch is validated before an atomic SQLite upsert. Existing entries absent from a crawl are retained. A successful response is `{"status":"stored","ingested":N,"total":M,"suppressed_ids":[]}`; errors include 400 invalid data, 401 missing secret, 413 excessive size, and 503 unconfigured registry.
 
-No public write or agent execution endpoint is enabled.
+No public write or agent execution endpoint is enabled. Authenticated private catalog connectors only read a configured HTTPS JSON feed (or the explicitly allowlisted Google Cloud Agent Registry listing API with bounded pagination) with a scoped credential provided to the scheduled crawler; they never expose an authorization header to browsers, public registry APIs, or linked Agent Card requests. Publication requires explicit `publish: true` and is subject to normal registry moderation.
 
 ## Registry review and lifecycle (private)
 

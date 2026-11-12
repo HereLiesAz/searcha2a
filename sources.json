@@ -3,7 +3,14 @@
     "https://registry.ip402.xyz/.well-known/agent-card.json",
     "https://api.trustboost.dev/.well-known/agent-card.json",
     "https://allagents.app/.well-known/agent-card.json",
-    "https://agentgalaxy.dev/.well-known/agent-card.json"
+    "https://agentgalaxy.dev/.well-known/agent-card.json",
+    "https://www.a2a-registry.org/.well-known/agent-card.json",
+    "https://directhireagents.com/.well-known/agent.json",
+    "https://machinerealms.com/.well-known/agent-card.json",
+    "https://botmarket.bot/.well-known/agent-card.json",
+    "https://alion.io/.well-known/agent-card.json",
+    "https://agoragentic.com/.well-known/agent-card.json",
+    "https://api.berrergate.com/.well-known/agent-card.json"
   ],
   "registry_urls": [
     "https://agora.sovont.com/v1/agents"
@@ -19,9 +26,14 @@
     "https://agentsandboxes.fyi",
     "https://itinagents.fyi",
     "https://publicadjusters.fyi",
-    "https://agentgalaxy.dev"
+    "https://agentgalaxy.dev",
+    "https://quantumcompanies.fyi",
+    "https://robotaxis.fyi",
+    "https://doulas.fyi",
+    "https://marriagelicense.fyi"
   ],
   "assistant_ids": {},
   "rotate_registry_feeds": true,
-  "rotate_paginated_registry": true
+  "rotate_paginated_registry": true,
+  "webfinger_accounts": {}
 }
