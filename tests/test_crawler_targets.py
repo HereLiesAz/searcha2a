@@ -227,5 +227,26 @@ class CrawlerTargetsTests(unittest.TestCase):
 
 
 
+    def test_curated_guide_master_catalog_seed_urls_are_explicit(self):
+        import json
+        source_path = Path(__file__).resolve().parents[1] / "sources.json"
+        config = json.loads(source_path.read_text(encoding="utf-8"))
+        urls = config["card_urls"]
+        self.assertEqual(len(urls), len(set(urls)))
+        self.assertEqual(len(urls), 31)
+        self.assertTrue(all(url.startswith("https://") for url in urls))
+        for expected in (
+            "https://www.cloudflare.com/.well-known/agent.json",
+            "https://api.cdq.com/a2a/cdq-genius/.well-known/agent-card.json",
+            "https://mydanktank.com/agent-card.json",
+            "https://councilof.ai/.well-known/agent-card.json",
+            "https://business.agentum.lat/.well-known/agent-card.json",
+            "https://readr.hatchagent.workers.dev/.well-known/agent-card.json",
+        ):
+            with self.subTest(url=expected):
+                self.assertIn(expected, urls)
+
+
+
 if __name__ == "__main__":
     unittest.main()
