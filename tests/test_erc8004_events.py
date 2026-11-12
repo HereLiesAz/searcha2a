@@ -72,6 +72,23 @@ class ERC8004EventTests(unittest.TestCase):
               "topics": [[REGISTERED, UPDATED]]}]
         )])
 
+    def test_uri_updated_supersedes_registered_within_a_window(self):
+        updated_data = (
+            "0x0000000000000000000000000000000000000000000000000000000000000020"
+            "0000000000000000000000000000000000000000000000000000000000000023"
+            "68747470733a2f2f6167656e742e6578616d706c652e6e65742f6e657874"
+            "2e6a736f6e0000000000000000000000000000000000000000000000000000000000"
+        )
+        next_event = {**EVENT, "topics": [UPDATED, *EVENT["topics"][1:]],
+                      "data": updated_data}
+        def rpc(url, method, params):
+            return {"result": [EVENT, next_event]}
+        urls, warnings = discover.erc8004_event_sources(
+            {"erc8004_rpc_sources": [SOURCE]}, post=rpc)
+        self.assertEqual(urls, [
+            ("https://agent.example.net/next.json", "erc8004-registration")])
+        self.assertEqual(warnings, [])
+
     def test_latest_block_window_is_bounded(self):
         calls = []
         def rpc(url, method, params):
