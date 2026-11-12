@@ -73,7 +73,7 @@ export class AgentRegistry {
               record=excluded.record, updated_at=excluded.updated_at`,
               agent.id, name, skills, description, search, JSON.stringify(agent), updatedAt);
         }
-        this.sql.exec(`INSERT INTO registry_meta (key, value) VALUES ('last_ingested_at', ?)
+        if (entries.length) this.sql.exec(`INSERT INTO registry_meta (key, value) VALUES ('last_ingested_at', ?)
           ON CONFLICT(key) DO UPDATE SET value=excluded.value`, updatedAt);
       });
       const count = this.sql.exec('SELECT COUNT(*) AS total FROM agents').one().total;
@@ -202,21 +202,49 @@ async function handle(request, env) {
   const origin = request.headers.get('Origin') || '';
   const allowedOrigin = env.ALLOWED_ORIGIN || '';
   const reply = (body, status) => respond(body, status, origin, allowedOrigin);
+  // Read-only directory endpoints are public APIs, including to other web apps.
+  const isPublic = url.pathname === '/api/v1/agents' ||
+    url.pathname.startsWith('/api/v1/agents/') ||
+    url.pathname === '/api/v1/directory';
+  const publicReply = (body, status) => {
+    const result = respond(body, status);
+    result.headers.set('Access-Control-Allow-Origin', '*');
+    return result;
+  };
   if (request.method === 'OPTIONS') {
+    if (isPublic) {
+      const result = publicReply({}, 204);
+      result.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+      return result;
+    }
     return origin === allowedOrigin ? reply({}, 204) : reply({ error: 'Origin not allowed' }, 403);
   }
   // Legacy POST dispatch is deliberately retired; all interactive searches are registry reads.
   if (request.method === 'POST' && url.pathname === '/api/v1/search') {
     return reply({ error: 'Per-query crawling retired. Use GET /api/v1/agents?query=...' }, 410);
   }
-  if (request.method === 'GET' &&
-      (url.pathname === '/api/v1/agents' || url.pathname.startsWith('/api/v1/agents/'))) {
-    if (!env.REGISTRY) return reply({ error: 'Registry not configured' }, 503);
-    const path = url.pathname === '/api/v1/agents'
-      ? '/search' + url.search
+  if (request.method === 'GET' && isPublic) {
+    if (!env.REGISTRY) return publicReply({ error: 'Registry not configured' }, 503);
+    const legacy = url.pathname === '/api/v1/directory';
+    const search = legacy
+      ? '?query=' + encodeURIComponent(url.searchParams.get('q') || '') + '&limit=20'
+      : url.search;
+    const path = (url.pathname === '/api/v1/agents' || legacy)
+      ? '/search' + search
       : '/agent/' + url.pathname.slice('/api/v1/agents/'.length);
     const result = await registryStub(env).fetch(new Request('https://registry.internal' + path));
-    return reply(await result.json(), result.status);
+    const data = await result.json();
+    if (legacy && result.ok) {
+      return publicReply({
+        schema: 1, source: 'searcha2a', query: data.query,
+        generated_at: data.generated_at, count: data.results.length,
+        match_mode: 'keyword-fallback', verification: 'card_read_only',
+        results: data.results.map(agent => ({
+          ...agent, kind: 'a2a-agent', installable: false, verification: 'card_read_only',
+        })),
+      });
+    }
+    return publicReply(data, result.status);
   }
   if (request.method === 'POST' && url.pathname === '/internal/registry/ingest') {
     // Reuse the already-provisioned shared Actions/Worker secret. No browser writes.
