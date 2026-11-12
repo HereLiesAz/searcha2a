@@ -134,6 +134,96 @@ class MCPResourceDiscoveryTests(unittest.TestCase):
             discover.post_mcp_metadata(ENDPOINT, "resources/read",
                                        {"uri": "a2a://evil", "arguments": {}})
 
+    def test_opaque_resources_without_http_endpoint_keep_distinct_ids(self):
+        names = ["First Public Directory Agent", "Second Public Directory Agent"]
+        uri1 = "agent-card://directory.example.org/first"
+        uri2 = "agent-card://directory.example.org/second"
+        def rpc(_url, method, params, _token):
+            if method == "resources/list":
+                return {"resources": [
+                    {"uri": uri1, "mimeType": MIME},
+                    {"uri": uri2, "mimeType": MIME},
+                ]}
+            uri = params["uri"]
+            name = names[0] if uri == uri1 else names[1]
+            return {"contents": [{"mimeType": MIME, "text": json.dumps({
+                "name": name, "description": "No public HTTP endpoint",
+                "skills": [{"name": "Lookup", "tags": ["search"]}],
+            })}]}
+        response = discover.discover("", {"mcp_sources": [{
+            "endpoint": ENDPOINT, "publish": True, "allow_resource_read": True,
+        }]}, mcp_post=rpc, github=lambda *_: ([], []))
+        self.assertEqual(response["count"], 2)
+        self.assertEqual([x["name"] for x in response["results"]], names)
+        self.assertEqual(len({x["id"] for x in response["results"]}), 2)
+        self.assertEqual({x["source_url"] for x in response["results"]}, {ENDPOINT})
+
+    def test_unavailable_resource_does_not_discard_siblings_or_other_links(self):
+        url = "https://agent.example.org/metadata/card.json"
+        broken = "agent-card://directory.example.org/missing"
+        healthy = "agent-card://directory.example.org/available"
+        calls = []
+        def rpc(_url, method, params, _token):
+            calls.append((method, dict(params)))
+            if method == "resources/list":
+                return {"resources": [
+                    {"uri": url, "mimeType": MIME},
+                    {"uri": broken, "mimeType": MIME},
+                    {"uri": healthy, "mimeType": MIME},
+                ]}
+            if params["uri"] == broken:
+                raise discover.DiscoveryError("MCP resource deleted")
+            return {"contents": [{"mimeType": MIME, "text": json.dumps(CARD)}]}
+        cards, links, warnings = discover.mcp_metadata_sources({
+            "mcp_sources": [{
+                "endpoint": ENDPOINT, "publish": True, "allow_resource_read": True,
+            }]}, post=rpc)
+        self.assertEqual([x["name"] for x in cards], ["History Agent"])
+        self.assertEqual(links, [url])
+        self.assertEqual(warnings, [])
+        self.assertEqual([x[0] for x in calls],
+                         ["resources/list", "resources/read", "resources/read"])
+
+    def test_deeply_nested_rpc_response_is_reported_not_raised(self):
+        deeply_nested = "[" * 20000 + "0" + "]" * 20000
+        response = '{"jsonrpc":"2.0","id":1,"result":{"resources":' + deeply_nested + '}}'
+        class Response(io.BytesIO):
+            status = 200
+            headers = {"Content-Type": "application/json"}
+        class Opener:
+            def open(self, request, timeout):
+                return Response(response.encode("utf-8"))
+        with patch.object(discover, "require_public_https", return_value=ENDPOINT), \
+             patch.object(discover, "OPENER", Opener()), \
+             self.assertRaises(discover.DiscoveryError):
+            discover.post_mcp_metadata(ENDPOINT, "resources/list", {})
+        # A mocked connector can also fail similarly; other sources survive.
+        def fail(_url, _method, _params, _token):
+            raise RecursionError("malformed MCP response")
+        self.assertEqual(discover.mcp_metadata_sources({
+            "mcp_sources": [{"endpoint": ENDPOINT, "publish": True}]}, post=fail),
+            ([], [], ["MCP discovery unavailable"]))
+
+    def test_deeply_nested_resource_text_does_not_abort_other_cards(self):
+        bad = "agent-card://directory.example.org/deep"
+        good = "agent-card://directory.example.org/healthy"
+        nested = "[" * 20000 + "0" + "]" * 20000
+        def rpc(_url, method, params, _token):
+            if method == "resources/list":
+                return {"resources": [
+                    {"uri": bad, "mimeType": MIME},
+                    {"uri": good, "mimeType": MIME},
+                ]}
+            return {"contents": [{"mimeType": MIME, "text":
+                                  nested if params["uri"] == bad else json.dumps(CARD)}]}
+        cards, links, warnings = discover.mcp_metadata_sources({
+            "mcp_sources": [{
+                "endpoint": ENDPOINT, "publish": True, "allow_resource_read": True,
+            }]}, post=rpc)
+        self.assertEqual([c["name"] for c in cards], ["History Agent"])
+        self.assertEqual(links, [])
+        self.assertEqual(warnings, [])
+
     def test_post_transport_uses_stateless_mcp_headers_and_body(self):
         requests = []
         class Response(io.BytesIO):
