@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { handle } from '../worker/index.mjs';
-import { keywordScore, cosineSimilarity, searchIndexedAgents, readPublishedAgents } from '../worker/semantic.mjs';
+import { keywordScore, cosineSimilarity, searchIndexedAgents, readPublishedAgents, rankAgentCandidates } from '../worker/semantic.mjs';
 
 const weather = {
   kind: 'a2a-agent', installable: false, verification: 'card_read_only',
@@ -163,6 +163,42 @@ test('all 150 scheduled catalog entries remain eligible for semantic ranking', a
   assert.equal(indexed.entries.length, 150);
   const found = await searchIndexedAgents('starlingcapability', {}, async () => new Response(raw));
   assert.deepEqual(found.results.map(x => x.name), ['Agent 149']);
+});
+
+test('semantic ranking batches 150 candidates within the model input limit', async () => {
+  const entries = Array.from({ length: 150 }, (_, i) => ({
+    ...weather, name: 'Agent ' + i, description: 'unrelated topic',
+    source_url: 'https://agent' + i + '.example.org/card',
+  }));
+  const batches = [];
+  const env = { AI: { run: async (_model, input) => {
+    batches.push(input.text);
+    assert.ok(input.text.length <= 100);
+    return { data: input.text.map((text, i) =>
+      i === 0 || text.includes('Agent 149') ? [1, 0] : [0, 1]) };
+  } } };
+  const result = await rankAgentCandidates('astral sky', env, entries);
+  assert.equal(result.match_mode, 'semantic');
+  assert.deepEqual(result.results.map(x => x.name), ['Agent 149']);
+  assert.deepEqual(batches.map(batch => batch.length), [100, 52]);
+  assert.equal(batches[0][0], batches[1][0]);
+  assert.equal(result.results[0].match_score, 0.85);
+});
+
+test('an invalid later embedding batch falls back consistently for every candidate', async () => {
+  const entries = Array.from({ length: 101 }, (_, i) =>
+    ({ ...weather, name: 'Agent ' + i, description: 'unrelated topic' }));
+  let calls = 0;
+  const result = await rankAgentCandidates('astral sky', {
+    AI: { run: async (_model, input) => {
+      calls++;
+      if (calls === 2) throw new Error('AI unavailable');
+      return { data: input.text.map(() => [1, 0]) };
+    } },
+  }, entries);
+  assert.equal(calls, 2);
+  assert.equal(result.match_mode, 'keyword-fallback');
+  assert.deepEqual(result.results, []);
 });
 
 test('unexpected skill metadata cannot crash catalog matching', async () => {
