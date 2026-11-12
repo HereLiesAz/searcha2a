@@ -11,9 +11,17 @@ ALLOWED_ORIGIN = "https://searcha2a.azphalt.store"
 name = "RESULTS"
 class_name = "SearchResult"
 
+[[durable_objects.bindings]]
+name = "REGISTRY"
+class_name = "AgentRegistry"
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["SearchResult"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["AgentRegistry"]
 
 [[ratelimits]]
 name = "SEARCH_RATE_LIMITER"
