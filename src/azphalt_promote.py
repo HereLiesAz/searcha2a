@@ -138,7 +138,7 @@ if card.query or card.fragment or api.query or api.fragment:
     raise SystemExit("A2A endpoint cannot contain query parameters or fragments")
 if data.get("auth") not in ("none", "required-bearer"):
     raise SystemExit("Unsupported A2A authentication type")
-print("A2A configuration validated. Revalidate Agent Card and request consent before connection.")
+print("A2A configuration validated. Host must revalidate Agent Card and request consent.")
 PY
 """
 
@@ -156,7 +156,12 @@ def _connection(manifest: dict) -> dict:
 def _write_submission(folder: Path, manifest: dict):
     """Write a fully deterministic script and data; no publisher code is bundled."""
     setup = folder / "setup"
+    if setup.is_symlink():
+        raise ValueError("Refusing symlink setup directory")
     setup.mkdir(exist_ok=True)
+    for file in (folder / "manifest.json", setup / "agent.json", setup / "setup.sh"):
+        if file.is_symlink():
+            raise ValueError("Refusing symlink output file: " + str(file))
     (folder / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (setup / "agent.json").write_text(json.dumps(_connection(manifest), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (setup / "setup.sh").write_text(SETUP_SCRIPT, encoding="utf-8")
@@ -189,6 +194,14 @@ def _existing_manifest(folder: Path):
             isinstance(manifest["llm"].get("endpoint"), dict) and
             manifest["llm"]["endpoint"].get("protocols") == ["a2a-jsonrpc"]):
         raise ValueError("Refusing to overwrite a non-automated submission: " + str(folder))
+    files = {p.name for p in folder.iterdir()}
+    if files != {"manifest.json", "LICENSE", "setup"} or (folder / "LICENSE").is_symlink():
+        raise ValueError("Refusing unexpected files in automated submission: " + str(folder))
+    setup = folder / "setup"
+    if setup.is_symlink() or not setup.is_dir() or {p.name for p in setup.iterdir()} != {"agent.json", "setup.sh"}:
+        raise ValueError("Refusing unrecognized setup payload: " + str(folder))
+    if any((setup / p).is_symlink() for p in ("agent.json", "setup.sh")):
+        raise ValueError("Refusing symlink setup payload: " + str(folder))
     return manifest
 
 
