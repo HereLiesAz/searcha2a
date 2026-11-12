@@ -31,6 +31,7 @@ jobs:
       - name: Build public catalog
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          SEARCHA2A_AUTHORIZED_CATALOGS_JSON: ${{ secrets.SEARCHA2A_AUTHORIZED_CATALOGS_JSON }}
         run: |
           mkdir -p dist
           cp -R site/. dist/
