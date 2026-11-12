@@ -39,7 +39,7 @@ Read one persisted normalized Agent Card. Returns 404 if the ID is unknown.
 
 ### `GET /api/v1/directory?q=weather`
 
-Compatibility endpoint for existing discovery clients. Queries the **same registry** and returns up to 20 read-only external agents, with `schema: 1`, `source: "searcha2a"`, `match_mode: "keyword-fallback"`, `count`, `results`, and `installable: false` on each card. Unlike old documentation, it does **not** invoke Workers AI or GitHub Actions. The `q` value is optional, but clients should supply a meaningful search term.
+The existing semantic capability discovery endpoint remains available to clients such as Aive. It ranks up to 100 active, non-rejected candidates from the **persistent SQL registry** (newest indexed first) with Workers AI embeddings when available and otherwise reports `match_mode: "keyword-fallback"`. Its result cap is 20. The response carries `candidate_scope: "persistent-registry"` and `truncated` when more than 100 indexed agents exist. Requires `q` of 2–120 characters and uses the existing approximate five-requests-per-minute IP limiter. No remote Agent Cards, static feeds or GitHub Actions are contacted. A missing registry binding returns 503 instead of falling back to potentially suppressed static listings. For complete metadata keyword search, use `GET /api/v1/agents`.
 
 Errors for public endpoints: 400 invalid input, 404 unknown agent, 503 registry binding unavailable, 500 unexpected failure. GET responses do not allocate per-request result mailboxes.
 
@@ -52,6 +52,53 @@ Called only by `src/registry_sync.py` during the scheduled/push-triggered Pages 
 The request is a JSON discovery catalog with `query: ""` and up to 70 normalized `results`. Payloads over 1,000,000 characters are rejected. Each row must contain a valid card ID, name, public HTTPS card source, skills, and `verification: "card_read_only"`. The entire batch is validated before an atomic SQLite upsert. Existing entries absent from a crawl are retained. A successful response is `{"status":"stored","ingested":N,"total":M}`; errors include 400 invalid data, 401 missing secret, 413 excessive size, and 503 unconfigured registry.
 
 No public write or agent execution endpoint is enabled.
+
+## Registry review and lifecycle (private)
+
+### `POST /internal/registry/manage`
+
+Requires `Authorization: Bearer <REGISTRY_ADMIN_SECRET>`, which must be **different from** the crawler's `RESULT_CALLBACK_SECRET`. The gateway returns 401 if the administrator secret has not been configured. This separation prevents an indexing job from approving its own discoveries.
+
+Send a 20-character lowercase agent `id`, an `action`, and a non-empty `reason` (up to 240 characters):
+
+```json
+{"id":"aaaaaaaaaaaaaaaaaaaa","action":"deactivate","reason":"Publisher requested removal"}
+```
+
+Supported actions: `approve`, `reject`, `reset_review`, `hide`, `deactivate`, and `activate`. **Approval means metadata review only**, not identity proof, endpoint testing, or an Azphalt signature. Rejected entries remain excluded even after `activate` until their review is reset or approved.
+
+A 200 response includes `id`, `listing_state`, `review_status`, and `changed_at`. Invalid requests return 400; unknown agents 404; excess body size 413. Each decision and its reason are stored in a durable private audit trail.
+
+### `GET /internal/registry/audit/{id}`
+
+Requires the same administrator secret. Returns the current listing and review states plus the 100 most recent state changes, newest first. Audit records are private and independent of crawler metadata.
+
+**Public visibility:** `GET /api/v1/agents` and `GET /api/v1/agents/{id}` include only active, non-rejected entries. Visible Agent Cards include a `curation_status` of `unreviewed` or `approved`; the underlying `verification` remains `card_read_only`. Reingesting a card updates its metadata but preserves curator-controlled states. The static Pages snapshot and Azphalt feed are filtered against the registry's suppression manifest on the next scheduled, push-triggered, or manual index publication. An administrator decision takes effect immediately on the live registry, and on the static feeds after publication. A crawler sync fails closed if suppression information is missing.
+
+## Publisher-defined ANS names
+
+SearchA2A accepts `ans://<version>.<agentHost>` with an opaque,
+publisher-defined version. For example `ans://1.0.0.weather.example.com` or
+`ans://release-2026.11.weather.example.com`. DNS labels must be valid,
+but SearchA2A neither enforces SemVer nor adds or removes `v`.
+The Agent Card must explicitly supply both `ansName` and `agentHost`:
+dotted versions cannot safely be separated from a host by guessing.
+
+### `GET /api/v1/ans/resolve?name=ans%3A%2F%2F1.0.0.weather.example.com`
+
+Reads a name claim from the *persistent curated registry*. It performs no
+DNS, certificate, transparency-log, or live endpoint requests. On a match,
+returns `{"name":"...","count":1,"results":[...],"identity_verified":false}`.
+Each matching record contains `ans: {name,agent_host,version,verification:"unverified"}`.
+It returns 404 for unknown or suppressed names, and 400 for invalid syntax.
+Multiple claimed matches are returned without asserting which is authoritative. The response includes `count` (all matches), `ambiguous` (more than one claimant), and at most 20 `results` with `truncated` when the name has more claimants.
+
+A future independent DNS identity verifier must check DNSSEC, certificates,
+transparency proofs, trust anchors and freshness before any identity claim
+is labelled verified. Linux Foundation ANS v2 currently specifies a stricter
+`ans://v{semver}.{agentHost}` wire format. SearchA2A's broader publisher
+names are *not* automatically standards-compliant or verified, and no
+version rewriting is performed.
 
 ## Static GitHub Pages endpoints
 

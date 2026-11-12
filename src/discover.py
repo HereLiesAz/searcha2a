@@ -128,6 +128,11 @@ def normalize_card(card, source_url: str, source: str):
     security = sorted(security.keys())[:15] if isinstance(security, dict) else []
     stable = endpoint or source_url
     identity = hashlib.sha256(stable.encode("utf-8")).hexdigest()[:20]
+    # Preserve complete publisher-defined names; truncation would silently change identity.
+    raw_name = card.get("ansName") or card.get("ans_name")
+    raw_host = card.get("agentHost") or card.get("ansHost") or card.get("ans_host")
+    ans_name = raw_name if isinstance(raw_name, str) and len(raw_name) <= 259 else ""
+    ans_host = raw_host if isinstance(raw_host, str) and len(raw_host) <= 251 else ""
     return {
         "id": identity,
         "name": name,
@@ -140,6 +145,7 @@ def normalize_card(card, source_url: str, source: str):
         "capabilities": {k: bool(capabilities.get(k)) for k in ("streaming", "pushNotifications") if isinstance(capabilities.get(k), bool)},
         "security_schemes": security,
         "version": clean_text(card.get("version"), 80),
+        **({"ans_name": ans_name, "ans_host": ans_host} if ans_name and ans_host else {}),
         "verification": "card_read_only",  # No L2 protocol probe; don't claim the agent works.
     }
 

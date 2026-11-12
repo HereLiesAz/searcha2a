@@ -34,12 +34,12 @@ class RegistrySyncTests(unittest.TestCase):
         requests = []
         def opener(request, timeout):
             requests.append((request, timeout))
-            return Response(b'{"status":"stored","ingested":1,"total":7}')
+            return Response(b'{"status":"stored","ingested":1,"total":7,"suppressed_ids":[]}')
 
         result = registry_sync.ingest(
             {'query': '', 'results': [GOOD_CARD]}, 'https://api.example/', 'private',
             opener=opener, sleep=lambda _: self.fail('unexpected retry'))
-        self.assertEqual(result, {'status': 'stored', 'ingested': 1, 'total': 7})
+        self.assertEqual(result, {'status': 'stored', 'ingested': 1, 'total': 7, 'suppressed_ids': []})
         self.assertEqual(len(requests), 1)
         request, timeout = requests[0]
         self.assertEqual(timeout, 15)
@@ -54,7 +54,7 @@ class RegistrySyncTests(unittest.TestCase):
             requests.append(request.data)
             if len(requests) == 1:
                 raise urllib.error.HTTPError(request.full_url, 503, 'Unavailable', {}, None)
-            return Response(b'{"status":"stored","ingested":1,"total":1}')
+            return Response(b'{"status":"stored","ingested":1,"total":1,"suppressed_ids":[]}')
 
         result = registry_sync.ingest(
             {'query': '', 'results': [GOOD_CARD]}, 'https://api.example', 'private',
@@ -62,6 +62,26 @@ class RegistrySyncTests(unittest.TestCase):
         self.assertEqual(result['total'], 1)
         self.assertEqual(waits, [4])
         self.assertEqual(requests[0], requests[1])
+
+    def test_curator_rejection_filters_static_catalog_and_azphalt_export(self):
+        published = {
+            'query': '', 'count': 2,
+            'results': [GOOD_CARD, {**GOOD_CARD, 'id': 'bbbbbbbbbbbbbbbbbbbb', 'name': 'Rejected'}],
+            'warnings': ['Registry timeout'], 'generated_at': '2026-11-12T00:00:00Z',
+        }
+        output = registry_sync.filter_export_catalog(
+            published, {'status': 'stored', 'suppressed_ids': ['bbbbbbbbbbbbbbbbbbbb']})
+        self.assertEqual(output['count'], 1)
+        self.assertEqual(output['results'][0]['id'], 'aaaaaaaaaaaaaaaaaaaa')
+        self.assertEqual(output['warnings'], ['Registry timeout'])
+        self.assertEqual(published['count'], 2)  # Original crawler findings remain unchanged.
+
+    def test_publishing_fails_closed_if_registry_suppression_manifest_missing(self):
+        catalog = {'query': '', 'results': [GOOD_CARD]}
+        with self.assertRaisesRegex(ValueError, 'suppression manifest'):
+            registry_sync.filter_export_catalog(catalog, {'status': 'stored'})
+        with self.assertRaisesRegex(ValueError, 'suppression manifest'):
+            registry_sync.filter_export_catalog(catalog, {'suppressed_ids': ['NOT_AN_ID']})
 
     def test_rejected_secret_does_not_retry(self):
         calls = []

@@ -8,7 +8,7 @@
 | --- | --- |
 | Browser | https://searcha2a.azphalt.store |
 | Persistent registry | https://searcha2a-api.hereliesaz.workers.dev/api/v1/agents |
-| Compatibility directory | https://searcha2a-api.hereliesaz.workers.dev/api/v1/directory?q=weather |
+| Registry semantic directory | https://searcha2a-api.hereliesaz.workers.dev/api/v1/directory?q=weather |
 | Latest crawl snapshot | https://searcha2a.azphalt.store/api/v1/catalog.json |
 | Azphalt external-agent directory | https://azphalt.store/agents |
 
@@ -16,11 +16,11 @@
 
 - [Reindex and publish Pages](../.github/workflows/pages.yml): on pushes to main, daily at **03:29 UTC**, or manually. Crawls, syncs normalized cards into the persistent registry, exports the bounded Pages snapshot and Azphalt directory.
 - [Deploy API Gateway](../.github/workflows/gateway.yml): on Worker or gateway workflow changes to main, or manually. Deploys `AgentRegistry` with `v2` SQLite migration and checks `GET /api/v1/agents?limit=1`. It also retains the legacy `SearchResult` `v1` class for pending seven-day mailboxes.
-- **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410.
+- **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410. The separate semantic `/api/v1/directory` endpoint ranks up to 100 visible records from the persistent registry with optional Workers AI, not Actions. It fails closed if the registry binding is absent and flags truncated candidate sets.
 
 ## Settings and credentials
 
-**Repository Actions variable:** `SEARCHA2A_API_URL=https://searcha2a-api.hereliesaz.workers.dev`.
+**Repository Actions variable:** `SEARCHA2A_API_URL=https://searcha2a-api.hereliesaz.workers.dev`. The Worker also retains the `AI` binding and `SEARCH_RATE_LIMITER` for the separate semantic directory endpoint.
 
 **Repository Actions secrets:** `CLOUDFLARE_API_TOKEN` (Worker deployment), `CLOUDFLARE_ACCOUNT_ID`, and `RESULT_CALLBACK_SECRET` (reused as the authenticated registry ingestion secret). The last value must match the **Worker secret** `RESULT_CALLBACK_SECRET`. The existing `GITHUB_DISPATCH_TOKEN`, `TURNSTILE_SECRET` and `TURNSTILE_SITE_KEY` are no longer required for public searches; do not delete or rotate them during a deployment without accounting for legacy requests and other consumers.
 
@@ -34,6 +34,26 @@ GitHub Pages uses GitHub Actions for build/deploy and `searcha2a.azphalt.store` 
 4. Confirm the Pages snapshot and Azphalt `agent-feed` mirror still publish normally.
 
 Existing `src/report.py` and historical result callbacks are for legacy in-flight requests only. They are not called by the website after migration.
+
+## ANS name claims
+
+`GET /api/v1/ans/resolve?name=ans%3A%2F%2Frelease-2026.agent.example.com`
+is a public, read-only query against the persistent, curated registry.
+The crawler stores publisher-supplied `ansName` + `agentHost` claims,
+which are neither signed attestations nor verified DNS identities.
+The response reports `identity_verified:false`; moderated or rejected
+entries remain hidden. No DNS lookup, task invocation, or GitHub workflow
+happens at query time. This change does not provision a verifier or its keys.
+
+## Registry administration
+
+Set a distinct Worker-only `REGISTRY_ADMIN_SECRET` before enabling curation. **Do not reuse** `RESULT_CALLBACK_SECRET` from GitHub Actions. In the Cloudflare Worker project, use `npx --yes wrangler@4 secret put REGISTRY_ADMIN_SECRET`; do not commit a secret or add it to the public Pages config. Registry search and scheduled ingest continue to function without this optional credential; admin operations fail closed with HTTP 401.
+
+A curator may POST `{"id":"<20 hex characters>","action":"deactivate","reason":"Reason"}` to `/internal/registry/manage` using `Authorization: Bearer <REGISTRY_ADMIN_SECRET>`. Valid actions are `approve`, `reject`, `reset_review`, `hide`, `deactivate`, `activate`. Inspect `GET /internal/registry/audit/{id}` with the same credential for the recent decision history. Do not log or paste secret values. Browser and crawler clients cannot modify review states.
+
+Newly ingested records default to active/unreviewed. Existing records are upgraded in place on Worker rollout; records and their original IDs remain intact. Public registry GETs hide deactivated, hidden, and rejected records, including direct-ID lookups. An ordinary scheduled crawl **cannot** reactivate a deactivated record or reverse a rejection. Approval is metadata-only review, not a signed Azphalt Store listing or proof of agent ownership.
+
+**Publishing:** curation takes effect immediately in the live registry. The next Pages reindex retrieves suppression IDs from the authenticated registry ingestion response and removes those cards from the static catalog, per-agent records, and Azphalt export. The job fails closed if the response does not contain a valid suppression manifest, preventing a rollout race from republishing a hidden card. A curator can manually run **Reindex and publish Pages** to propagate a decision sooner; no ordinary search triggers any Action. Approved cards remain metadata-only and are **not** signed publisher attestations.
 
 ## Automated verification
 
