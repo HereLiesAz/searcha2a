@@ -6,11 +6,13 @@
 
 ```text
 Scheduled or manually triggered Pages indexing (GitHub Actions)
-  -> discover.py: curated HTTPS cards, NAIS TXT, ERC-8004 pointers, AGNTCY OCI OASF artifacts, opt-in MCP metadata, AI Catalog/WebFinger records, authorized registries and GitHub
+  -> crawl_checkpoint.py: load numeric ERC-8004 cursor from GitHub crawler-state branch
+  -> discover.py: curated HTTPS cards, checkpointed ERC-8004 pointers, NAIS TXT, AGNTCY OCI OASF artifacts, opt-in MCP metadata, AI Catalog/WebFinger records, authorized registries and GitHub
   -> bounded discovery catalog JSON
   -> registry_sync.py (existing private shared secret)
   -> Worker POST /internal/registry/ingest
   -> SQLite-backed AgentRegistry Durable Object (persistent upsert)
+  -> crawl_checkpoint.py: commit advanced cursor only after acknowledged ingest
   
 Browser / public client
   -> Worker GET /api/v1/agents?query=...
@@ -32,6 +34,7 @@ In parallel, the Pages job publishes the latest **bounded crawl snapshot** as `/
 - **Why the original result mailbox used SQLite Durable Objects:** Workers KV propagation could delay callback visibility across regions. Existing seven-day result mailboxes remain readable for old requests but no new searches create them.
 - **Why registry review is independent of crawler ingest:** A discovered Agent Card is untrusted input; giving the indexing credential permission to approve or reactivate agents would erase the approval boundary. Separate administrator authorization, durable review state and audit history keep curator decisions intact across crawls.
 - **Why the registry also uses SQLite Durable Objects:** `AgentRegistry` stores normalized cards durably and atomically upserts scheduled batches without wiping unseen records. Its SQL interface provides immediate public reads with no GitHub dependency. `v2` in `worker/wrangler.toml` introduces this class without destroying the `v1` result class.
+- **Why ERC-8004 cursors are durable:** The original 512-block lookback missed block ranges between daily runs, especially on fast chains. A separate GitHub branch stores non-secret numeric per-RPC/registry cursors, supporting sequential backfill without moving them forward on a failed registry ingest. Windows shrink when provider responses saturate; the chain scan remains metadata-only and bounded.
 - **Why the Azphalt feed is mirrored to GitHub raw CDN:** A same-zone Cloudflare Worker subrequest to the SearchA2A Pages hostname previously returned 502. Keeping the existing `agent-feed` mirror avoids changing that working integration.
 - **Why the semantic directory is retained and moved to SQL:** It was introduced independently for clients such as Aive using the published snapshot to avoid per-search GitHub Actions. Now it ranks visible persisted registry candidates to share moderation, naming and freshness with keyword search; it still does not invoke Actions or external agents.
 - **Why metadata stays non-installable:** Discovering an Agent Card does not establish runtime health, ownership, conformance, or authorization. The export cannot be represented as a signed `.azp` package.
@@ -86,7 +89,8 @@ Azphalt package signing remains a separate authority.
 | Public search is bounded | `AgentRegistry.fetch`: 120-char query, up to 12 terms, limit <= 100, bounded offset |
 | Crawling never invokes advertised execution endpoints | `src/discover.py`: `card_references`, `unpack_cards`, `fetch_json` (card/meta GET only and one hop), `post_chain_rpc` (only allowlisted read-only Ethereum JSON-RPC calls), `post_public_directory_discover` (allowlisted metadata search only) |
 | Third-party directory POSTs cannot send arbitrary messages, prompts, credentials or start tasks | `src/discover.py`: `PUBLIC_DISCOVERY_ENDPOINTS`, `PUBLIC_DISCOVERY_TOPICS`, `post_public_directory_discover`, `public_directory_sources` (fixed body, daily three-topic rotation, no auth) |
-| On-chain registrations do not prove publisher identity, card integrity or live endpoint conformance | `src/discover.py`: `erc8004_event_sources`, `erc8004_event_uri` (HTTPS pointers only), `normalize_card` (`card_read_only`) |
+| On-chain registrations do not prove publisher identity, card integrity or live endpoint conformance | `src/discover.py`: `erc8004_checkpointed_sources`, `erc8004_event_uri` (HTTPS pointers only), `normalize_card` (`card_read_only`) |
+| ERC-8004 scans never skip unconfirmed/unread block windows or persist a cursor before registry ingest | `src/discover.py`: `erc8004_checkpointed_sources` (bounded adaptive sequential windows); `.github/workflows/pages.yml`: load before build, save after `src/registry_sync.py`; `src/crawl_checkpoint.py`: schema validation, monotonic content-addressed GitHub commit |
 | AGNTCY OCI artifacts require explicit publication consent and content-addressed integrity | `src/discover.py`: `agntcy_oci_sources`, `fetch_oci_bytes`, `oasf_a2a_cards` (manifest and layer SHA-256, typed A2A module only, bounded read-only HTTPS) |
 | Opt-in protocol requests cannot execute tools, tasks or arbitrary agent methods | `src/discover.py`: `post_mcp_metadata` (`resources/list`, `resources/read` only), `mcp_metadata_sources` (explicit `publish`/`allow_resource_read`), `.github/workflows/pages.yml` secret scope |
 | DNS produces unverified Agent Card leads, not authenticated ANS identities | `src/discover.py`: `dns_txt_sources`, `normalize_card` (`card_read_only`); `worker/ans.mjs`: publisher claims remain unverified |
