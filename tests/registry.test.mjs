@@ -263,3 +263,38 @@ test('invalid moderation requests cannot modify records or audit history', async
     assert.equal((await (await lookup(state.env)).json()).total, 1);
   } finally { state.close(); }
 });
+
+test('ANS names with opaque publisher-defined versions resolve only curated claims', async () => {
+  const state = registryEnvironment();
+  try {
+    const named = { ...weather, ans_name: 'ans://release-2026.11.weather.example.com',
+      ans_host: 'weather.example.com' };
+    assert.equal((await ingest(state.env, [named])).status, 200);
+    const url = '/api/v1/ans/resolve?name=' + encodeURIComponent(named.ans_name);
+    let response = await handle(request(url), state.env);
+    assert.equal(response.status, 200);
+    let body = await response.json();
+    assert.equal(body.count, 1);
+    assert.equal(body.identity_verified, false);
+    assert.equal(body.results[0].ans.version, 'release-2026.11');
+    assert.equal(body.results[0].ans.verification, 'unverified');
+    assert.equal((await handle(request('/api/v1/ans/resolve?name=bogus'), state.env)).status, 400);
+    assert.equal((await manage(state.env, weather.id, 'hide', 'Claim withdrawn')).status, 200);
+    assert.equal((await handle(request(url), state.env)).status, 404);
+    assert.equal((await ingest(state.env, [{ ...named, ans_name: 'ans://new.weather.example.com',
+      ans_host: 'attacker.example.com' }])).status, 200);
+    assert.equal((await handle(request(url), state.env)).status, 404);
+  } finally { state.close(); }
+});
+
+test('invalid ANS claim cannot pollute indexed agent record', async () => {
+  const state = registryEnvironment();
+  try {
+    await ingest(state.env, [{ ...weather, ans_name: 'ans://1.0.0.other.example',
+      ans_host: 'weather.example.com', ans: { verification: 'verified' } }]);
+    const result = (await (await lookup(state.env, 'weather')).json()).results[0];
+    assert.equal(Object.hasOwn(result, 'ans'), false);
+    assert.equal((await handle(request('/api/v1/ans/resolve?name=ans%3A%2F%2F1.0.0.other.example'),
+      state.env)).status, 404);
+  } finally { state.close(); }
+});
