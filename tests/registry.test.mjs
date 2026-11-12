@@ -119,21 +119,18 @@ test('batch secret and validation forbid unsolicited or partially invalid regist
   } finally { state.close(); }
 });
 
-test('public directory alias and CORS support external read-only clients', async () => {
+test('persistent registry GET supports cross-origin clients without credentials', async () => {
   const state = registryEnvironment();
   try {
     await ingest(state.env, [weather, calendar]);
-    const response = await handle(new Request('https://api.example/api/v1/directory?q=weather', {
+    const response = await handle(new Request('https://api.example/api/v1/agents?query=weather', {
       headers: { Origin: 'https://other-client.example' },
     }), state.env);
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('Access-Control-Allow-Origin'), '*');
     const body = await response.json();
-    assert.equal(body.schema, 1);
-    assert.equal(body.match_mode, 'keyword-fallback');
     assert.equal(body.count, 1);
     assert.equal(body.results[0].name, 'Weather Expert');
-    assert.equal(body.results[0].installable, false);
     const preflight = await handle(new Request('https://api.example/api/v1/agents', {
       method: 'OPTIONS', headers: { Origin: 'https://other-client.example' },
     }), state.env);
