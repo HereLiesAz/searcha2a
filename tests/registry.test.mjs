@@ -374,6 +374,9 @@ test('partial A2A cards are indexed with empty skills without accepting generic 
     assert.equal((await ingest(state.env, [{ ...partial, id: 'ffffffffffffffffffff',
       endpoint: '' }])).status, 400);
     assert.equal((await (await lookup(state.env)).json()).total, 1);
+  } finally { state.close(); }
+});
+
 test('ANS collision pagination exposes every claimant in deterministic order', async () => {
   const state = registryEnvironment();
   try {
