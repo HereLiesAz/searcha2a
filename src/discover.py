@@ -128,8 +128,11 @@ def normalize_card(card, source_url: str, source: str):
     security = sorted(security.keys())[:15] if isinstance(security, dict) else []
     stable = endpoint or source_url
     identity = hashlib.sha256(stable.encode("utf-8")).hexdigest()[:20]
-    ans_name = clean_text(card.get("ansName") or card.get("ans_name"), 253)
-    ans_host = clean_text(card.get("agentHost") or card.get("ansHost") or card.get("ans_host"), 237)
+    # Preserve complete publisher-defined names; truncation would silently change identity.
+    raw_name = card.get("ansName") or card.get("ans_name")
+    raw_host = card.get("agentHost") or card.get("ansHost") or card.get("ans_host")
+    ans_name = raw_name if isinstance(raw_name, str) and len(raw_name) <= 259 else ""
+    ans_host = raw_host if isinstance(raw_host, str) and len(raw_host) <= 251 else ""
     return {
         "id": identity,
         "name": name,
