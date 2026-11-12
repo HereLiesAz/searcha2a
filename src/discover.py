@@ -18,12 +18,13 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_DOCUMENT = 524288
-MAX_CANDIDATES = 90
-MAX_RESULTS = 70
+MAX_CANDIDATES = 210
+MAX_RESULTS = 150
+MAX_GITHUB_CANDIDATES = 50
 # Paginated registries are explicit, trusted configuration, never crawler-discovered links.
-MAX_REGISTRY_PAGES = 2
+MAX_REGISTRY_PAGES = 5
 REGISTRY_PAGE_SIZE = 30
-MAX_REGISTRY_CARD_URLS = 60
+MAX_REGISTRY_CARD_URLS = 150
 USER_AGENT = "SearchA2A/0.1 (+https://github.com/HereLiesAz/searcha2a)"
 
 
@@ -278,20 +279,35 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
                         break
             if len(records) < REGISTRY_PAGE_SIZE:
                 break
-    # Reserve remaining candidate slots for GitHub. Repositories cannot
-    # displace explicit, read-only card sources when search returns many hits.
-    candidates.extend(code_urls)
-    # Fetch cards concurrently so a handful of slow hosts cannot stall the
-    # whole interactive search. The list, worker count and per-fetch timeout
-    # are bounded; cards are only read, never invoked.
-    unique = list(dict.fromkeys(candidates[:MAX_CANDIDATES]))
+    # Reserve capacity for GitHub even when a large registry fills many pages.
+    # Deduplicate by URL, not (URL, discovery-origin), before applying budgets.
+    def distinct_url(items):
+        seen = set()
+        for url, origin in items:
+            if url not in seen:
+                seen.add(url)
+                yield url, origin
+
+    github_cards = list(distinct_url(code_urls))[:MAX_GITHUB_CANDIDATES]
+    reserved = min(len(github_cards), MAX_GITHUB_CANDIDATES)
+    unique = list(distinct_url(candidates))[:MAX_CANDIDATES - reserved]
+    existing_urls = {url for url, _ in unique}
+    unique.extend((url, origin) for url, origin in github_cards if url not in existing_urls)
+    unique = unique[:MAX_CANDIDATES]
+    # Cards are read only. Verify a publisher's explicit opt-in proof independently
+    # on the same HTTPS origin; no agent task endpoint is contacted.
     def pull(pair):
         url, origin = pair
         try:
-            return normalize_card(fetch(url), url, origin)
+            card = fetch(url)
+            record = normalize_card(card, url, origin)
+            if record:
+                from verify_agent import verify_publisher
+                record["publisher_verification"] = verify_publisher(record, fetch=fetch)
+            return record
         except (DiscoveryError, ValueError, TypeError):
             return None
-    with ThreadPoolExecutor(max_workers=8) as pool:
+    with ThreadPoolExecutor(max_workers=10) as pool:
         for record in pool.map(pull, unique):
             if record:
                 results.setdefault(record["id"], record)
