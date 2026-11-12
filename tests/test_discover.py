@@ -50,6 +50,45 @@ class DiscoverTests(unittest.TestCase):
         self.assertEqual(result['count'], 1)
         self.assertEqual(result['results'][0]['source'], 'registry')
 
+    def test_fresh_verified_card_wins_over_embedded_registry_duplicate(self):
+        from datetime import datetime, timedelta, timezone
+        registry_url = 'https://catalog.example.net/agents'
+        card_url = 'https://weather.example.com/.well-known/agent-card.json'
+        endpoint = 'https://weather.example.com/a2a'
+        proof_url = 'https://weather.example.com/.well-known/azphalt-a2a-verification.json'
+        now = datetime.now(timezone.utc)
+        card = {
+            **CARD,
+            'supportedInterfaces': [{'url': endpoint, 'protocolBinding': 'JSONRPC'}],
+            'azphalt': {'externalAgentListing': True},
+        }
+        proof = {
+            'schema': 1, 'listing': 'azphalt-external-a2a', 'consent': True,
+            'license': 'MIT', 'card_url': card_url, 'endpoint': endpoint,
+            'issued_at': (now - timedelta(minutes=1)).isoformat(),
+            'expires_at': (now + timedelta(days=2)).isoformat(),
+        }
+        requests = []
+        def get(url):
+            requests.append(url)
+            if url == registry_url:
+                return {'agents': [{'card': card}]}
+            if url == card_url:
+                return card
+            if url == proof_url:
+                return proof
+            raise AssertionError('Unexpected fetch: ' + url)
+
+        result = discover.discover('', {
+            'card_urls': [card_url], 'registry_urls': [registry_url],
+        }, fetch=get, github=lambda *_: ([], []))
+        self.assertEqual(result['count'], 1)
+        winner = result['results'][0]
+        self.assertEqual(winner['source_url'], card_url)
+        self.assertEqual(winner['source'], 'seed')
+        self.assertEqual(winner['publisher_verification']['method'], 'https-origin-opt-in')
+        self.assertEqual(requests.count(proof_url), 1)
+
     def test_paginated_registry_fetches_original_agent_cards(self):
         # Registry metadata is never mistaken for a trusted Agent Card.
         original_url = 'https://weather.example.com/.well-known/agent-card.json'

@@ -94,6 +94,14 @@ The current scheduled collector reads up to 350 initial candidate URLs (includin
 
 SQL keyword search scans stored normalized name/skill/description/endpoint text and ranks by name, skill and description hits. The separate semantic endpoint ranks up to 150 visible persisted candidates with optional Workers AI; a `truncated` response signals incomplete coverage when the registry has more than 150 visible entries. It does not fetch static feeds or third-party sites. A single Durable Object coordinates the registry; future high-traffic growth may require sharding or migrating to Cloudflare D1.
 
+Semantic search batches Workers AI text embeddings in groups of at most 99 candidates plus
+one query (100 strings per model request). A failure in any embedding batch falls back to
+keyword ranking for the whole query rather than mixing incompatible partial results.
+When an embedded registry row and an independently fetched card advertise the same
+endpoint, fresh publisher-origin proof evidence takes precedence; no unverified
+registry row can suppress it. Neither ranking nor this provenance precedence
+establishes Linux Foundation ANS identity, approved execution, or Azphalt signing.
+
 The crawler only accepts HTTP GET application/json (or application/*+json) documents over HTTPS, rejects HTTP redirects and private DNS results, limits each document to 512 KiB, and follows at most 100 explicit card links one hop from bounded manifests. Probe domains and assistant IDs are explicitly configured: no wildcard enumeration, task execution, authenticated extended-card retrieval, on-chain events, DNS TXT sweeps, MCP tool calls, or enterprise directory access. Missing skills are retained only when an explicit v1 supportedInterface identifies an agent. Raw public card JSON is retained only when <= 4 KiB; otherwise its SHA-256 is recorded. Raw fields are untrusted and **not** proof of A2A conformance or JWS integrity. DNS safety checks happen before HTTP connection, so DNS rebinding remains a known limitation. Query output is third-party metadata only.
 
 ## Deployment ordering

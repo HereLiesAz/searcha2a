@@ -128,13 +128,28 @@ export async function rankAgentCandidates(query, env, entries, generated_at = nu
   let embeddings = null;
   if (entries.length && env.AI && typeof env.AI.run === 'function') {
     try {
-      const response = await env.AI.run(EMBEDDING_MODEL, {
-        text: ['Represent this sentence for searching relevant passages: ' + query,
-          ...entries.map(descriptionOf)],
-        pooling: 'cls',
-      });
-      if (validEmbeddings(response?.data, entries.length + 1)) embeddings = response.data;
-    } catch { /* Missing inference entitlement or model outage: report keyword fallback. */ }
+      // bge-small-en-v1.5 accepts at most 100 inputs per call. Include the same
+      // query in each bounded batch, then reunite the candidate vectors.
+      const queryText = 'Represent this sentence for searching relevant passages: ' + query;
+      const vectors = [];
+      for (let start = 0; start < entries.length; start += 99) {
+        const descriptions = entries.slice(start, start + 99).map(descriptionOf);
+        const response = await env.AI.run(EMBEDDING_MODEL, {
+          text: [queryText, ...descriptions],
+          pooling: 'cls',
+        });
+        if (!validEmbeddings(response?.data, descriptions.length + 1) ||
+            (vectors.length && response.data[0].length !== vectors[0].length)) {
+          throw new Error('Invalid embedding batch');
+        }
+        if (!vectors.length) vectors.push(response.data[0]);
+        vectors.push(...response.data.slice(1));
+      }
+      if (validEmbeddings(vectors, entries.length + 1)) embeddings = vectors;
+    } catch {
+      // A failed batch must not leave partially semantic results masquerading as valid.
+      embeddings = null;
+    }
   }
   const semantic = embeddings !== null;
   const ranked = entries.map((agent, i) => {
