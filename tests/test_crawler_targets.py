@@ -207,6 +207,8 @@ class CrawlerTargetsTests(unittest.TestCase):
     def test_unreported_total_falls_back_to_existing_first_page_behavior(self):
         offsets = []
         def get(url):
+            if "/api/agents?" not in url:
+                raise discover.DiscoveryError("Card unavailable")
             from urllib.parse import parse_qs, urlsplit
             offset = int(parse_qs(urlsplit(url).query)["offset"][0])
             offsets.append(offset)
