@@ -350,7 +350,14 @@ test('ANS resolution exposes duplicate publisher claims without selecting an ide
 });
 
 test('semantic directory paginates every persisted card and honors moderation beyond 150', async () => {
-  const state = registryEnvironment();
+  const calls = [];
+  const ai = { run: async (_, input) => {
+    calls.push(input.text.length);
+    assert.ok(input.text.length <= 100);
+    return { data: input.text.map(text =>
+      text.includes('starlingcapability') ? [1, 0] : [0, 1]) };
+  } };
+  const state = registryEnvironment({ ai });
   state.env.SEARCH_RATE_LIMITER = { limit: async () => ({ success: true }) };
   try {
     const records = Array.from({ length: 205 }, (_, i) => card(
@@ -367,6 +374,13 @@ test('semantic directory paginates every persisted card and honors moderation be
     let data = await response.json();
     assert.equal(data.truncated, false);
     assert.deepEqual(data.results.map(agent => agent.id), [records[204].id]);
+    assert.equal(data.match_mode, 'semantic');
+    assert.deepEqual(calls, [100, 100, 5, 1]);
+    calls.length = 0;
+    const cached = await (await handle(
+      request('/api/v1/directory?q=starlingcapability'), state.env)).json();
+    assert.equal(cached.match_mode, 'semantic');
+    assert.deepEqual(calls, [1]); // Reuse all 205 persisted vectors across pages.
     assert.equal((await manage(state.env, records[204].id, 'reject', 'Unsafe listing')).status, 200);
     response = await handle(request('/api/v1/directory?q=starlingcapability'), state.env);
     data = await response.json();
