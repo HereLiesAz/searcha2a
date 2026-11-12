@@ -71,7 +71,7 @@ The initial Durable Object deployment used the `v1` migration in `worker/wrangle
 
 ## Limits
 
-- `src/discover.py` fetches up to 90 card candidates, up to 524,288 bytes per JSON document, with a seven-second timeout and eight concurrent card readers. It returns at most 70 cards and ten warnings.
+- `src/discover.py` fetches up to 90 card candidates, up to 524,288 bytes per JSON document, with a seven-second timeout and eight concurrent card readers. It returns at most 70 cards and ten warnings. Curated `paginated_registry_urls` are read in at most two pages of 30 records each for scheduled indexing, or just one page for live search latency; search terms use the registry's `search` parameter. Registry entries supply original `wellKnownURI` card URLs, which undergo the same read-only HTTPS/DNS checks and Agent Card normalization as seeded cards. Pagination never follows links returned by a registry. Seed and registry candidates are considered before GitHub candidates.
 - Its HTTPS/DNS checks apply to URLs it **fetches**, not to advertised agent endpoints. It disables redirects and rejects local/non-public IPs, but DNS can change between validation and connection.
 - An Agent Card is unverified descriptive data. It cannot prove identity, availability, supported protocols at runtime or authorization to act on the user's behalf.
 - GitHub search indexing and permissions, unavailable registries, malformed cards and network errors can reduce coverage. Results may legitimately be empty.

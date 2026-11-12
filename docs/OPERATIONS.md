@@ -63,6 +63,14 @@ node --check worker/index.mjs
 
 **End-to-end test:** From [the website](https://searcha2a.azphalt.store), submit `weather` and complete Turnstile. Confirm the page says a search was queued, then inspect the newest `On-demand A2A search` run in [Actions](https://github.com/HereLiesAz/searcha2a/actions/workflows/search.yml). Verify both **Discover Agent Cards** and **Return results to request gateway** succeeded, and that the page changes from queued to completed results (including a legitimate zero-match result). This is the evidence for live dispatch, callback and polling. Older workflow success, the indexed card list or the smoke test alone are insufficient.
 
+## Crawler coverage
+
+The crawler uses `src/discover.py` and the explicit inputs in `sources.json`: `card_urls` for single published cards, `registry_urls` for known compatible JSON registries, and `paginated_registry_urls` for list APIs such as `https://a2aregistry.org/api/agents`. A paginated source is queried with `limit=30&offset=0` and at most one more page for scheduled snapshots; live searches use one page and also supply `search=<query>`. The records are **discovery leads**, not proof. Only the original `wellKnownURI` is fetched as a candidate card, with redirects disabled and public HTTPS/DNS restrictions. The crawler never calls the advertised agent execution endpoint.
+
+The daily full-catalog build requests an empty query and the live workflow passes the browser's search term. A registry being unreachable is nonfatal and reported in `warnings`; it does not invalidate healthy seeds or other sources. The first 90 deduplicated candidates are read and at most 70 normalized records are published. These bounds can exclude valid agents, and the public index is a snapshot rather than a full directory.
+
+Review the latest [Reindex and publish Pages](../.github/workflows/pages.yml) job for the discovered count and warnings, and inspect `/api/v1/catalog.json` for the actual `warnings` array. A source must be a public HTTPS JSON API, not an HTML directory. Add new adapters only after inspecting real API shapes; avoid scraping unsupported formats or bypassing safety validation.
+
 ## Troubleshooting
 
 | Symptom | Check |
