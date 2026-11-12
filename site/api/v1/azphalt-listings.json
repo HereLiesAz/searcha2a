@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "source": "searcha2a",
-  "generated_at": "2026-11-12T15:13:04.867686+00:00",
+  "generated_at": "2026-11-12T15:14:40.954380+00:00",
   "count": 150,
   "listings": [
     {
@@ -1041,6 +1041,99 @@
         "alion_key",
         "alion_oauth"
       ],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
+      "id": "external.a2a.38e9d0db953b45156f5d",
+      "kind": "a2a-agent",
+      "name": "allagents",
+      "description": "Every AI agent — found and renowned. The reference directory of the agent web — a world directory of AI agents by specialty (16585 listed). Ask it what you need and it answers with matching agents: name, address, protocols. List yourself in one POST — free, instant, no account. Operated from Switzerland.",
+      "endpoint": "https://allagents.app/a2a",
+      "source_url": "https://allagents.app/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/38e9d0db953b45156f5d.json",
+      "skills": [
+        {
+          "name": "Find an agent",
+          "description": "POST /a2a message/send with what you need ('I need a translation agent') — the operator answers with matching listed agents and how to reach them. Or GET /search?q=.",
+          "tags": [
+            "directory",
+            "search",
+            "discovery",
+            "yellow-pages"
+          ]
+        },
+        {
+          "name": "List yourself",
+          "description": "POST /register {name, specialty, description, endpoints} — instant listing, no account, edit token + recovery phrase returned. The easiest listing on the agent web. An A2A agent can send only {\"agent_card\": \"https://…/.well-known/agent-card.json\"}: the book reads it and fills the rest.",
+          "tags": [
+            "registration",
+            "listing",
+            "identity",
+            "agent-card"
+          ]
+        },
+        {
+          "name": "Check an agent before you rely on it",
+          "description": "GET /agent/<slug>/trust — its track record, facts the book checked itself: door answered on each of the last 14 days, verified protocols and since when, keeper proved or not, real sales in 7 days (counts only), what the book does not know. Not an endorsement. MCP tool: check_trust.",
+          "tags": [
+            "trust",
+            "track-record",
+            "verification"
+          ]
+        },
+        {
+          "name": "The operator",
+          "description": "The directory is itself an A2A agent: tell it a need in plain language and it returns ranked agents with why each one fits. Specialties covered include trading, research, coding, legal, automation, memory, identity, commerce, monitoring, security, translation, social, marketing, finance, media and more.",
+          "tags": [
+            "concierge",
+            "matchmaking",
+            "routing",
+            "recommendation",
+            "orchestration",
+            "a2a",
+            "mcp",
+            "discovery"
+          ]
+        },
+        {
+          "name": "Discover with constraints",
+          "description": "POST /discover {need, alive, protocols, endpoint, payment, country, specialty, tags, exclude, claimed, limit} — agents that honour every constraint, ranked; alive means the endpoint answered today's check.",
+          "tags": [
+            "discovery",
+            "filter",
+            "liveness"
+          ]
+        },
+        {
+          "name": "Reach a listed agent",
+          "description": "POST /relay {from, token, to, text} — the book delivers your message once to the recipient's public A2A door, signed by your card, and returns its reply. Listed cards only; a card may refuse relays.",
+          "tags": [
+            "messaging",
+            "a2a",
+            "introduction"
+          ]
+        },
+        {
+          "name": "Use the book as an MCP server",
+          "description": "Add https://allagents.app/mcp to your assistant, your IDE or your agent (any MCP client; Streamable HTTP, stateless, no account to read): search_agents, get_agent, list_specialties, contact_agent (needs your card token), register_agent (edit token shown once).",
+          "tags": [
+            "mcp",
+            "tools",
+            "directory"
+          ]
+        }
+      ],
+      "protocols": [
+        "JSONRPC",
+        "JSONRPC"
+      ],
+      "security_schemes": [],
       "capabilities": {
         "streaming": false,
         "pushNotifications": false
@@ -2149,6 +2242,36 @@
         "urn:citydesk:colony-join:v1",
         "urn:mcp:streamable-http"
       ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
+      "id": "external.a2a.a603f19f785ba7d149ec",
+      "kind": "a2a-agent",
+      "name": "Cloudflare Site Agent",
+      "description": "Provides machine-readable context and endpoints for AI assistants to understand Cloudflare website content.",
+      "endpoint": "https://www.cloudflare.com/.well-known/agent.json",
+      "source_url": "https://www.cloudflare.com/.well-known/agent.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/a603f19f785ba7d149ec.json",
+      "skills": [
+        {
+          "name": "Site Context",
+          "description": "Returns curated and markdown-first content for assistants.",
+          "tags": []
+        },
+        {
+          "name": "Page Markdown",
+          "description": "Fetches markdown snapshots of site pages for citation-ready context.",
+          "tags": []
+        }
+      ],
+      "protocols": [],
       "security_schemes": [],
       "capabilities": {
         "streaming": false,
@@ -9842,61 +9965,6 @@
       "source": "searcha2a"
     },
     {
-      "id": "external.a2a.002ba424c6a577941a78",
-      "kind": "a2a-agent",
-      "name": "Tenantback CAM Audit Agent",
-      "description": "Audits a commercial landlord's CAM / operating expense reconciliation against the tenant's lease and returns every overcharge with the lease clause, the statement line and the arithmetic. Also abstracts leases (pro-rata share, CAM cap, admin fee, exclusions, audit window, critical dates). Built for multi-location tenants: franchisees, restaurant and retail groups, healthcare practices. Never contacts a landlord without the tenant's approval.",
-      "endpoint": "https://tenantback.com/a2a",
-      "source_url": "https://tenantback.com/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/002ba424c6a577941a78.json",
-      "skills": [
-        {
-          "name": "Audit a CAM reconciliation",
-          "description": "Send the lease (and amendments) plus the landlord's annual CAM / operating expense reconciliation as file parts (raw bytes or HTTPS URLs). Returns a task; poll GetTask. The completed task carries a JSON artifact with totals, findings, lease citations and calculations. Without an API key, include a data part {\"contactEmail\": \"...\", \"contactName\": \"...\"} for the business the documents belong to: a free workspace is opened for them and the artifact includes a sign-in link. Limits: 10 files, 20 MB e",
-          "tags": [
-            "cam",
-            "lease",
-            "audit",
-            "commercial real estate",
-            "tenant",
-            "overcharge",
-            "recovery"
-          ]
-        },
-        {
-          "name": "Abstract a commercial lease",
-          "description": "Send only a lease. The completed task returns key terms with verified citations: pro-rata share, CAM cap, admin fee, cost exclusions, audit window and critical dates. Same contact rules as the audit skill.",
-          "tags": [
-            "lease abstraction",
-            "critical dates",
-            "commercial lease"
-          ]
-        },
-        {
-          "name": "Portfolio status",
-          "description": "With an API key: money claimable, in dispute and recovered, open findings, and deadlines in the next 60 days. Send a data part {\"skill\": \"portfolio_status\"}.",
-          "tags": [
-            "portfolio",
-            "deadlines",
-            "recoveries"
-          ]
-        }
-      ],
-      "protocols": [
-        "JSONRPC"
-      ],
-      "security_schemes": [
-        "tenantbackApiKey"
-      ],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a"
-    },
-    {
       "id": "external.a2a.5331d9c11a24b7b9cec2",
       "kind": "a2a-agent",
       "name": "The Agent Forge",
@@ -10799,85 +10867,6 @@
         "HTTP+JSON"
       ],
       "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a"
-    },
-    {
-      "id": "external.a2a.4a3ba46cb795f0c33553",
-      "kind": "a2a-agent",
-      "name": "YourAITools",
-      "description": "Directory and tool hub for AI agents that pay per call (mostly USDC over x402): read web pages as Markdown, scan for prompt injection, OFAC address screening, package vulnerability checks, x402 endpoint grading, and find paid APIs for a task. Free tiers available; paid calls via prepaid credits or x402. Failed calls are not charged.",
-      "endpoint": "https://api.youraitools.co/a2a",
-      "source_url": "https://youraitools.co/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/4a3ba46cb795f0c33553.json",
-      "skills": [
-        {
-          "name": "Read URL as Markdown",
-          "description": "Fetch a public web page and return clean Markdown, title and metadata (WebRead).",
-          "tags": [
-            "web",
-            "markdown",
-            "scraping"
-          ]
-        },
-        {
-          "name": "Scan for prompt injection",
-          "description": "Score text, a URL or MCP tool definitions for prompt injection and tool poisoning (InjectScan).",
-          "tags": [
-            "security",
-            "prompt-injection",
-            "mcp"
-          ]
-        },
-        {
-          "name": "OFAC SDN address screen",
-          "description": "Screen one crypto address against the public OFAC SDN list (PayGuard). Informational, not legal advice.",
-          "tags": [
-            "security",
-            "compliance",
-            "crypto"
-          ]
-        },
-        {
-          "name": "Package vulnerability check",
-          "description": "Check an npm/PyPI/Go/crates package version against OSV.dev (PkgGuard).",
-          "tags": [
-            "security",
-            "dependencies",
-            "osv"
-          ]
-        },
-        {
-          "name": "x402 endpoint grader",
-          "description": "Grade a paid x402 URL (transport, headers, discovery, payment terms) and list fixes (x402fix).",
-          "tags": [
-            "x402",
-            "payments",
-            "debugging"
-          ]
-        },
-        {
-          "name": "Find a paid API for a task",
-          "description": "Rank paid x402 APIs from the YourAITools directory for a plain-language need (ToolPick).",
-          "tags": [
-            "x402",
-            "discovery",
-            "directory"
-          ]
-        }
-      ],
-      "protocols": [
-        "JSONRPC",
-        "JSONRPC"
-      ],
-      "security_schemes": [
-        "creditsKey"
-      ],
       "capabilities": {
         "streaming": false,
         "pushNotifications": false
