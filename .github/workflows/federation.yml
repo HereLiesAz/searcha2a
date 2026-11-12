@@ -7,6 +7,11 @@ on:
       - 'federation/**'
       - 'tests/federation.test.mjs'
       - '.github/workflows/federation.yml'
+  pull_request:
+    paths:
+      - 'federation/**'
+      - 'tests/federation.test.mjs'
+      - '.github/workflows/federation.yml'
   workflow_dispatch:
 
 permissions:
@@ -26,7 +31,7 @@ jobs:
   deploy:
     needs: test
     # Never deploy from the central repo or a newly-created fork by default.
-    if: vars.FEDERATION_ENABLED == 'true'
+    if: github.event_name != 'pull_request' && vars.FEDERATION_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     environment: federation
