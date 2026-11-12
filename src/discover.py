@@ -34,6 +34,11 @@ MAX_INLINE_NESTED_CATALOGS = 8
 MAX_WEBFINGER_ACCOUNTS = 8
 MAX_DNS_DOMAINS = 12
 MAX_DNS_TXT_ANSWERS = 8
+MAX_ERC8004_RPC_SOURCES = 4
+MAX_ERC8004_BLOCK_WINDOW = 512
+MAX_ERC8004_LOGS = 120
+REGISTERED_TOPIC = "0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a"
+URI_UPDATED_TOPIC = "0x3a2c7fffc2cba7582c690e3b82c453ea02a308326a98a3ad7576c606336409fb"
 A2A_CATALOG_TYPES = {'application/a2a-agent-card+json', 'application/a2a+json'}
 # Paths are literal; unknown assistant identifiers are never enumerated.
 PROBE_PATHS = (
@@ -467,6 +472,131 @@ def dns_txt_sources(config, fetch=fetch_json):
     return list(dict.fromkeys(candidates)), warnings
 
 
+def post_chain_rpc(url: str, method: str, params):
+    """Bounded read-only Ethereum RPC; never send tasks or transactions."""
+    if method not in ("eth_blockNumber", "eth_getLogs"):
+        raise DiscoveryError("Unsupported chain RPC method")
+    require_public_https(url)
+    payload = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method,
+                          "params": params}, separators=(",", ":")).encode("utf-8")
+    if len(payload) > 3000:
+        raise DiscoveryError("Oversized chain RPC request")
+    headers = {"User-Agent": USER_AGENT, "Accept": "application/json",
+               "Content-Type": "application/json"}
+    try:
+        with OPENER.open(urllib.request.Request(url, data=payload, headers=headers,
+                                                method="POST"), timeout=7) as response:
+            if response.status != 200:
+                raise DiscoveryError("Chain RPC unavailable")
+            media = response.headers.get("Content-Type", "").split(";", 1)[0].lower()
+            if media != "application/json" and not media.endswith("+json"):
+                raise DiscoveryError("Chain RPC not JSON")
+            body = response.read(MAX_DOCUMENT + 1)
+            if len(body) > MAX_DOCUMENT:
+                raise DiscoveryError("Oversized chain RPC response")
+            result = json.loads(body)
+            if not isinstance(result, dict) or result.get("jsonrpc") != "2.0" or result.get("id") != 1:
+                raise DiscoveryError("Invalid chain RPC response")
+            return result
+    except (ValueError, urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise DiscoveryError("Chain RPC unavailable") from exc
+
+
+def erc8004_event_uri(log, contract: str) -> str:
+    """Extract the one non-indexed dynamic string in registered/updated logs."""
+    if not isinstance(log, dict) or log.get("removed") is True:
+        return ""
+    if not isinstance(log.get("address"), str) or log["address"].lower() != contract.lower():
+        return ""
+    topics = log.get("topics")
+    if not isinstance(topics, list) or len(topics) != 3 or not isinstance(topics[0], str):
+        return ""
+    if topics[0].lower() not in (REGISTERED_TOPIC, URI_UPDATED_TOPIC):
+        return ""
+    for value in topics[1:]:
+        if not isinstance(value, str) or not re.fullmatch(r"0x[0-9a-fA-F]{64}", value):
+            return ""
+    data = log.get("data")
+    if not isinstance(data, str) or not re.fullmatch(r"0x(?:[0-9a-fA-F]{2}){64,4096}", data):
+        return ""
+    try:
+        raw = bytes.fromhex(data[2:])
+        offset = int.from_bytes(raw[:32], "big")
+        if offset != 32 or len(raw) < 64:
+            return ""
+        size = int.from_bytes(raw[32:64], "big")
+        if size < 1 or size > 2048 or len(raw) < 64 + size:
+            return ""
+        uri = raw[64:64 + size].decode("utf-8")
+        return uri if len(uri) <= 2048 else ""
+    except (ValueError, UnicodeError):
+        return ""
+
+
+def erc8004_event_sources(config, post=post_chain_rpc):
+    """Bounded, explicitly enabled log discovery, never agent execution.
+
+    Registrations are pointers, not verified chain ownership, reputation or
+    publisher identity. HTTPS registration files are fetched by normal crawl.
+    """
+    sources = config.get("erc8004_rpc_sources", [])
+    candidates, warnings = [], []
+    if not isinstance(sources, list):
+        return candidates, warnings
+    for entry in sources[:MAX_ERC8004_RPC_SOURCES]:
+        if not isinstance(entry, dict) or entry.get("enabled") is not True:
+            continue
+        rpc = entry.get("rpc_url")
+        address = entry.get("registry_address")
+        if (not isinstance(rpc, str) or not isinstance(address, str)
+                or not re.fullmatch(r"0x[0-9a-fA-F]{40}", address)):
+            warnings.append("ERC-8004 source misconfigured")
+            continue
+        fixed_start = entry.get("from_block")
+        fixed_end = entry.get("to_block")
+        if (fixed_start is None) != (fixed_end is None):
+            warnings.append("ERC-8004 source misconfigured")
+            continue
+        try:
+            if fixed_start is None:
+                lookback = entry.get("lookback_blocks", 128)
+                if type(lookback) is not int or not 1 <= lookback <= MAX_ERC8004_BLOCK_WINDOW:
+                    raise DiscoveryError("Invalid lookback")
+                status = post(rpc, "eth_blockNumber", [])
+                latest = status.get("result") if isinstance(status, dict) else None
+                if not isinstance(latest, str) or not re.fullmatch(r"0x[0-9a-fA-F]{1,16}", latest):
+                    raise DiscoveryError("Invalid chain tip")
+                end = int(latest, 16)
+                start = max(0, end - lookback + 1)
+            else:
+                if (type(fixed_start) is not int or type(fixed_end) is not int
+                        or fixed_start < 0 or fixed_end < fixed_start
+                        or fixed_end - fixed_start >= MAX_ERC8004_BLOCK_WINDOW):
+                    raise DiscoveryError("Invalid block bounds")
+                start, end = fixed_start, fixed_end
+            reply = post(rpc, "eth_getLogs", [{
+                "address": address,
+                "fromBlock": hex(start),
+                "toBlock": hex(end),
+                "topics": [[REGISTERED_TOPIC, URI_UPDATED_TOPIC]],
+            }])
+            logs = reply.get("result") if isinstance(reply, dict) else None
+            if not isinstance(logs, list):
+                raise DiscoveryError("Invalid log response")
+            if len(logs) > MAX_ERC8004_LOGS:
+                warnings.append("ERC-8004 log window truncated")
+            for log in logs[:MAX_ERC8004_LOGS]:
+                uri = erc8004_event_uri(log, address)
+                link = public_card_link(uri, "https://not-used.example",
+                                        explicit_card=True)
+                if link:
+                    candidates.append((link, "erc8004-registration"))
+        except (DiscoveryError, ValueError, TypeError):
+            # RPC URLs may contain API keys. Never include them in warnings.
+            warnings.append("ERC-8004 source unavailable")
+    return list(dict.fromkeys(candidates)), warnings
+
+
 def candidate_sources(config):
     candidates = []
     for url in config.get("card_urls", []):
@@ -534,7 +664,7 @@ def rank(record, query: str) -> int:
 
 
 def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github=github_sources,
-             private_fetch=fetch_json, dns_fetch=fetch_json):
+             private_fetch=fetch_json, dns_fetch=fetch_json, chain_rpc=post_chain_rpc):
     results = {}
     warnings = []
     candidates = candidate_sources(config)
@@ -543,6 +673,9 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     dns_cards, dns_warnings = dns_txt_sources(config, fetch=dns_fetch)
     candidates.extend(dns_cards)
     warnings.extend(dns_warnings)
+    chain_cards, chain_warnings = erc8004_event_sources(config, post=chain_rpc)
+    candidates.extend(chain_cards)
+    warnings.extend(chain_warnings)
     rotation = config.get('rotation_index')
     if type(rotation) is not int or rotation < 0:
         rotation = datetime.now(timezone.utc).date().toordinal()
@@ -758,6 +891,15 @@ def main():
         if not isinstance(sources, list):
             raise SystemExit("Authorized catalog configuration must be a JSON array")
         config["private_catalogs"] = sources
+    chain_sources = os.environ.get("SEARCHA2A_ERC8004_RPC_SOURCES_JSON", "")
+    if chain_sources:
+        try:
+            sources = json.loads(chain_sources)
+        except ValueError as exc:
+            raise SystemExit("Invalid ERC-8004 source configuration JSON") from exc
+        if not isinstance(sources, list):
+            raise SystemExit("ERC-8004 source configuration must be a JSON array")
+        config["erc8004_rpc_sources"] = sources
     data = discover(args.query.strip(), config, token=os.environ.get("GITHUB_TOKEN", ""))
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
