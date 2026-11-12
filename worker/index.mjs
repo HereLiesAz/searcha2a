@@ -121,7 +121,7 @@ export class AgentRegistry {
         `SELECT record FROM agents ${where} ORDER BY ${sort} LIMIT ? OFFSET ?`,
         ...bindings, ...rankParams, limit, offset).toArray();
       const meta = this.sql.exec(
-        "SELECT value FROM registry_meta WHERE key='last_ingested_at'").one();
+        "SELECT value FROM registry_meta WHERE key='last_ingested_at'").toArray()[0];
       return respond({
         query, count: matched, total, offset, limit,
         generated_at: meta ? meta.value : null,
@@ -132,7 +132,7 @@ export class AgentRegistry {
 
     const idMatch = path.match(/^\/agent\/([0-9a-f]{20})$/);
     if (request.method === 'GET' && idMatch) {
-      const record = this.sql.exec('SELECT record FROM agents WHERE id=?', idMatch[1]).one();
+      const record = this.sql.exec('SELECT record FROM agents WHERE id=?', idMatch[1]).toArray()[0];
       return record ? respond(JSON.parse(record.record)) : respond({ error: 'Agent unknown' }, 404);
     }
     return respond({ error: 'Not found' }, 404);

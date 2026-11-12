@@ -6,7 +6,7 @@ const results = document.querySelector('#results');
 const heading = document.querySelector('#result-heading');
 const count = document.querySelector('#result-count');
 let config = {};
-let widgetId;
+let apiBaseUrl = '';
 
 function textNode(tag, value, className = '') {
   const element = document.createElement(tag);
@@ -56,58 +56,45 @@ async function jsonRequest(url, options) {
   return data;
 }
 
-async function initialize() {
-  try { config = await jsonRequest('./config.json'); } catch { config = {}; }
-  try {
-    const catalog = await jsonRequest('./api/v1/catalog.json');
-    display(catalog.results);
-    status.textContent = catalog.generated_at ? `Index refreshed ${new Date(catalog.generated_at).toLocaleString()}. Live searches start new Actions runs.` : 'Public index is not built yet.';
-  } catch { status.textContent = 'Public index unavailable.'; }
-  if (!config.apiBaseUrl || !config.turnstileSiteKey) {
-    button.disabled = true;
-    status.textContent += ' Live search awaits gateway configuration.';
-    return;
-  }
-  const script = document.createElement('script');
-  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-  script.async = true;
-  script.onload = () => { widgetId = window.turnstile.render('#challenge', { sitekey: config.turnstileSiteKey }); };
-  script.onerror = () => { button.disabled = true; status.textContent = 'Spam challenge could not load.'; };
-  document.head.append(script);
+async function searchRegistry(query) {
+  const path = `/api/v1/agents?query=${encodeURIComponent(query)}&limit=70`;
+  const data = await jsonRequest(apiBaseUrl + path);
+  display(data.results);
+  status.textContent = `${data.count} matches in ${data.total} registered agents. ${data.generated_at ? 'Registry updated ' + new Date(data.generated_at).toLocaleString() + '.' : 'Registry has not been populated yet.'}`;
 }
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+async function initialize() {
+  button.disabled = true;
+  try {
+    const config = await jsonRequest('./config.json');
+    if (!config.apiBaseUrl || !config.apiBaseUrl.startsWith('https://')) {
+      status.textContent = 'Registry API configuration unavailable.';
+      return;
+    }
+    apiBaseUrl = config.apiBaseUrl.replace(/\/$/, '');
+    await searchRegistry('');
+    status.textContent += ' Searches read the registry directly; crawls run independently.';
+    button.disabled = false;
+  } catch (error) {
+    status.textContent = `Registry unavailable: ${error.message}`;
+  }
+}
+
 form.addEventListener('submit', async event => {
   event.preventDefault();
   if (button.disabled) return;
   const query = queryInput.value.trim();
-  const turnstile = window.turnstile?.getResponse(widgetId);
-  if (!turnstile) { status.textContent = 'Complete the verification challenge to start a search.'; return; }
+  if (query.length < 2 || query.length > 120) return;
   button.disabled = true;
-  status.textContent = 'Dispatching GitHub Actions search…';
   heading.textContent = `Results for “${query}”`;
+  status.textContent = 'Searching registry…';
   try {
-    const base = config.apiBaseUrl.replace(/\/$/, '');
-    const request = await jsonRequest(`${base}/api/v1/search`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, turnstile }),
-    });
-    status.textContent = 'Search queued in GitHub Actions. Waiting for results…';
-    for (let attempt = 0; attempt < 48; attempt++) {
-      await sleep(3000);
-      const data = await jsonRequest(`${base}/api/v1/results/${encodeURIComponent(request.id)}`);
-      if (data.status === 'complete') {
-        display(data.results);
-        status.textContent = `GitHub Actions search complete. ${data.count} cards matched.${data.warnings?.length ? ' Some sources were unavailable.' : ''}`;
-        return;
-      }
-    }
-    status.textContent = 'Search is still running. Check the workflow or retry shortly.';
+    await searchRegistry(query);
   } catch (error) {
-    status.textContent = `Search failed: ${error.message}`;
+    display([]);
+    status.textContent = `Registry search failed: ${error.message}`;
   } finally {
     button.disabled = false;
-    if (widgetId !== undefined) window.turnstile?.reset(widgetId);
   }
 });
 initialize();
