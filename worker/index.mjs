@@ -1,5 +1,5 @@
 /** Scheduled registry, unified semantic ANS search, and legacy result mailboxes. */
-import { rankAgentCandidates } from './semantic.mjs';
+import { rankAgentCandidates, descriptionOf, EMBEDDING_MODEL, validEmbeddings } from './semantic.mjs';
 import { normalizeAnsName, parseAnsClaim } from './ans.mjs';
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -20,8 +20,9 @@ function respond(body, status = 200, origin = '', allowedOrigin = '') {
  * A failed or empty crawl never erases previously indexed agent records.
  */
 export class AgentRegistry {
-  constructor(ctx) {
+  constructor(ctx, env) {
     this.ctx = ctx;
+    this.ai = env?.AI;
     this.sql = ctx.storage.sql;
     this.sql.exec(`CREATE TABLE IF NOT EXISTS agents (
       id TEXT PRIMARY KEY,
@@ -45,6 +46,14 @@ export class AgentRegistry {
       this.sql.exec('ALTER TABLE agents ADD COLUMN ans_name TEXT');
     }
     this.sql.exec('CREATE INDEX IF NOT EXISTS idx_agents_ans_name ON agents(ans_name)');
+    // Store vectors separately from the public Agent Card and moderation state.
+    // The model and exact embedding input form the cache version.
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS agent_embeddings (
+      id TEXT PRIMARY KEY,
+      model TEXT NOT NULL,
+      input_text TEXT NOT NULL,
+      vector TEXT NOT NULL
+    )`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS registry_audit (
       revision INTEGER PRIMARY KEY AUTOINCREMENT,
       agent_id TEXT NOT NULL,
@@ -54,6 +63,38 @@ export class AgentRegistry {
       reason TEXT NOT NULL,
       changed_at TEXT NOT NULL
     )`);
+  }
+
+  async indexMissingEmbeddings(candidates) {
+    if (!this.ai || typeof this.ai.run !== 'function' || !candidates.length) return new Map();
+    const stored = new Map();
+    try {
+      // The Workers AI model accepts up to 100 input strings per request.
+      for (let start = 0; start < candidates.length; start += 100) {
+        const batch = candidates.slice(start, start + 100);
+        const response = await this.ai.run(EMBEDDING_MODEL, {
+          text: batch.map(item => item.text), pooling: 'cls',
+        });
+        if (!validEmbeddings(response?.data, batch.length)) return stored;
+        this.ctx.storage.transactionSync(() => {
+          batch.forEach((item, i) => {
+            // A concurrent crawl may have changed the record while inference ran.
+            // Never persist a vector against stale or moderated metadata.
+            const latest = this.sql.exec(`SELECT record FROM agents WHERE id=?
+              AND listing_state='active' AND review_status != 'rejected'`, item.id).toArray()[0];
+            if (!latest || descriptionOf(JSON.parse(latest.record)) !== item.text) return;
+            this.sql.exec(`INSERT INTO agent_embeddings (id, model, input_text, vector)
+              VALUES (?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET
+              model=excluded.model, input_text=excluded.input_text, vector=excluded.vector`,
+            item.id, EMBEDDING_MODEL, item.text, JSON.stringify(response.data[i]));
+            stored.set(item.id, response.data[i]);
+          });
+        });
+      }
+    } catch {
+      // A model outage must not corrupt a durable index or bypass moderation.
+    }
+    return stored;
   }
 
   async fetch(request) {
@@ -80,6 +121,7 @@ export class AgentRegistry {
         return respond({ error: 'Invalid Agent Card record' }, 400);
       }
       const updatedAt = new Date().toISOString();
+      const pendingEmbeddings = [];
       this.ctx.storage.transactionSync(() => {
         for (const agent of entries) {
           const name = agent.name.toLowerCase();
@@ -92,6 +134,13 @@ export class AgentRegistry {
           const claim = parseAnsClaim(agent.ans_name, agent.ans_host);
           const { ans, ans_name, ans_host, ...metadata } = agent;
           const record = { ...metadata, ...(claim ? { ans: claim } : {}) };
+          const embeddingText = descriptionOf(record);
+          const cached = this.sql.exec(
+            'SELECT input_text, model FROM agent_embeddings WHERE id=?', agent.id).toArray()[0];
+          if (!cached || cached.input_text !== embeddingText || cached.model !== EMBEDDING_MODEL) {
+            this.sql.exec('DELETE FROM agent_embeddings WHERE id=?', agent.id);
+            pendingEmbeddings.push({ id: agent.id, text: embeddingText });
+          }
           const search = [name, description, skills, agent.endpoint || '', claim?.name || ''].join(' ').toLowerCase();
           this.sql.exec(`INSERT INTO agents
             (id, name_search, skills_search, description_search, search_text, record, updated_at, ans_name)
@@ -106,6 +155,11 @@ export class AgentRegistry {
         if (entries.length) this.sql.exec(`INSERT INTO registry_meta (key, value) VALUES ('last_ingested_at', ?)
           ON CONFLICT(key) DO UPDATE SET value=excluded.value`, updatedAt);
       });
+      // Background index updates are best-effort. Failed embeddings remain missing
+      // and are retried by the next directory read without failing ingestion.
+      if (pendingEmbeddings.length && this.ctx.waitUntil && this.ai) {
+        this.ctx.waitUntil(this.indexMissingEmbeddings(pendingEmbeddings));
+      }
       const count = this.sql.exec('SELECT COUNT(*) AS total FROM agents').one().total;
       const marks = entries.map(() => '?').join(', ');
       const suppressed = entries.length ? this.sql.exec(
@@ -160,13 +214,28 @@ export class AgentRegistry {
         return respond({ error: 'Invalid candidate offset' }, 400);
       }
       const offset = Number(offsetText);
-      const rows = this.sql.exec(`SELECT record FROM agents
-        WHERE listing_state='active' AND review_status != 'rejected'
-        ORDER BY updated_at DESC, name_search ASC, id ASC LIMIT 101 OFFSET ?`, offset).toArray();
+      const rows = this.sql.exec(`SELECT agents.id, agents.record, embedding.vector,
+          embedding.input_text, embedding.model FROM agents
+        LEFT JOIN agent_embeddings AS embedding ON embedding.id=agents.id
+        WHERE agents.listing_state='active' AND agents.review_status != 'rejected'
+        ORDER BY agents.updated_at DESC, agents.name_search ASC, agents.id ASC
+        LIMIT 101 OFFSET ?`, offset).toArray();
+      const page = rows.slice(0, 100);
+      const entries = page.map(row => JSON.parse(row.record));
+      const missing = page.flatMap((row, i) => {
+        const text = descriptionOf(entries[i]);
+        return row.vector && row.model === EMBEDDING_MODEL && row.input_text === text
+          ? [] : [{ id: row.id, text }];
+      });
+      const indexed = await this.indexMissingEmbeddings(missing);
+      const vectors = page.map((row, i) => {
+        const text = descriptionOf(entries[i]);
+        return row.model === EMBEDDING_MODEL && row.input_text === text
+          ? JSON.parse(row.vector) : indexed.get(row.id) || null;
+      });
       const meta = this.sql.exec(
         "SELECT value FROM registry_meta WHERE key='last_ingested_at'").toArray()[0];
-      return respond({ entries: rows.slice(0, 100).map(row => JSON.parse(row.record)),
-        next_offset: rows.length > 100 ? offset + 100 : null,
+      return respond({ entries, vectors, next_offset: rows.length > 100 ? offset + 100 : null,
         truncated: false, generated_at: meta?.value || null });
     }
     if (request.method === 'GET' && path === '/search') {
@@ -350,6 +419,7 @@ async function handle(request, env) {
     if (!env.REGISTRY) return directoryReply({ error: 'Registry not configured' }, 503);
     try {
       const entries = [];
+      const candidateVectors = [];
       let offset = 0;
       let generatedAt = null;
       const registry = registryStub(env);
@@ -359,10 +429,15 @@ async function handle(request, env) {
         if (!candidates.ok) throw new Error('Registry unavailable');
         const data = await candidates.json();
         if (!Array.isArray(data.entries)) throw new Error('Invalid registry candidates');
+        if (data.vectors !== undefined &&
+            (!Array.isArray(data.vectors) || data.vectors.length !== data.entries.length)) {
+          throw new Error('Invalid registry embedding page');
+        }
         generatedAt = data.generated_at ?? generatedAt;
         entries.push(...data.entries.map(agent => ({
           ...agent, kind: 'a2a-agent', installable: false,
         })));
+        candidateVectors.push(...(data.vectors || data.entries.map(() => null)));
         if (data.next_offset == null) break;
         if (!Number.isSafeInteger(data.next_offset) ||
             data.next_offset <= offset || data.entries.length !== 100) {
@@ -370,7 +445,7 @@ async function handle(request, env) {
         }
         offset = data.next_offset;
       }
-      const ranked = await rankAgentCandidates(query, env, entries, generatedAt);
+      const ranked = await rankAgentCandidates(query, env, entries, generatedAt, candidateVectors);
       return directoryReply({ ...ranked, candidate_scope: 'persistent-registry',
         truncated: false });
     } catch { return directoryReply({ error: 'Indexed directory temporarily unavailable' }, 502); }
