@@ -344,6 +344,18 @@ def unpack_cards(document, source_url: str, source: str, *, offset: int = 0,
             if not isinstance(item, dict):
                 continue
             embedded = item.get("card") or item.get("agentCard") or item
+            # Google Agent Registry returns a typed Card {type, content}.
+            # Only A2A_AGENT_CARD content is a candidate; MCP/NO_SPEC is not.
+            if isinstance(embedded, dict) and embedded.get("type") == "A2A_AGENT_CARD":
+                content = embedded.get("content")
+                if isinstance(content, str) and len(content) <= MAX_DOCUMENT:
+                    try:
+                        content = json.loads(content)
+                    except (ValueError, TypeError):
+                        content = None
+                embedded = content if isinstance(content, dict) else None
+            elif isinstance(embedded, dict) and "type" in embedded and "content" in embedded:
+                embedded = None
             normalized = normalize_card(embedded, source_url, source)
             if normalized:
                 cards.append(normalized)
@@ -495,18 +507,43 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
                 warnings.append("Authorized catalog configuration missing")
                 continue
             try:
-                if private_fetch is fetch_json:
-                    document = private_fetch(url, max_bytes=MAX_PUBLIC_REGISTRY_JSON,
-                                             private_auth=(scheme, secret))
-                else:
-                    document = private_fetch(url, scheme, secret)
-                embedded, links = unpack_cards(document, url, "authorized-catalog")
-                for record in embedded:
-                    # Private raw metadata (potentially including credentials,
-                    # prompts, or internal paths) must not be republished.
-                    record.pop("raw_card", None)
-                    results.setdefault(record["id"], record)
-                candidates.extend((link, "authorized-catalog") for link in links)
+                is_gcp = entry.get("kind") == "gcp_agents_list"
+                if is_gcp:
+                    parsed = urllib.parse.urlsplit(url)
+                    if (parsed.hostname != "agentregistry.googleapis.com"
+                            or parsed.query or parsed.fragment or
+                            not re.fullmatch(
+                                r"/v1/projects/[A-Za-z0-9_.-]+/locations/[A-Za-z0-9_-]+/agents",
+                                parsed.path)):
+                        raise DiscoveryError("Unsupported authorized registry API")
+                page_token = ""
+                for _page in range(MAX_REGISTRY_PAGES if is_gcp else 1):
+                    page_url = url
+                    if is_gcp:
+                        args = {"pageSize": REGISTRY_PAGE_SIZE}
+                        if page_token:
+                            args["pageToken"] = page_token
+                        page_url += "?" + urllib.parse.urlencode(args)
+                    if private_fetch is fetch_json:
+                        document = private_fetch(page_url, max_bytes=MAX_PUBLIC_REGISTRY_JSON,
+                                                 private_auth=(scheme, secret))
+                    else:
+                        document = private_fetch(page_url, scheme, secret)
+                    # The stable source is the configured URL; a page token must
+                    # never be included in public registry metadata.
+                    embedded, links = unpack_cards(document, url, "authorized-catalog")
+                    for record in embedded:
+                        # Private raw metadata (potentially including credentials,
+                        # prompts, or internal paths) must not be republished.
+                        record.pop("raw_card", None)
+                        results.setdefault(record["id"], record)
+                    candidates.extend((link, "authorized-catalog") for link in links)
+                    if not is_gcp or not isinstance(document, dict):
+                        break
+                    token_next = document.get("nextPageToken")
+                    if not isinstance(token_next, str) or not token_next or len(token_next) > 1024:
+                        break
+                    page_token = token_next
             except (DiscoveryError, ValueError, TypeError):
                 # Do not put private feed URLs or credentials into public warnings.
                 warnings.append("Authorized catalog unavailable")
