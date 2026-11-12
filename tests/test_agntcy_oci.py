@@ -150,12 +150,113 @@ class AGNTCYOciTests(unittest.TestCase):
 
     def test_deprecated_inline_card_data_is_bounded_and_not_raw(self):
         record = {"modules": [
-            {"name": "integration/a2a", "data": {"a2a_card_data": CARD}}]}
+            {"name": "integration/a2a", "data": {"card_data": CARD}}]}
         cards, links = discover.oasf_a2a_cards(
             record, "https://oci.example.org/v2/pub/manifests/sha256:123")
         self.assertEqual([x["name"] for x in cards], ["Flight Agent"])
         self.assertEqual(links, [])
         self.assertNotIn("raw_card", cards[0])
+
+    def test_module_layer_annotations_reconstruct_a2a_card(self):
+        record = {"name": "Outer catalog", "modules": []}
+        module = {"data": {"card_data": CARD, "card_schema_version": "0.3.0"}}
+        base = json.dumps(record, sort_keys=True).encode()
+        module_raw = json.dumps(module, sort_keys=True).encode()
+        base_digest = "sha256:" + hashlib.sha256(base).hexdigest()
+        module_digest = "sha256:" + hashlib.sha256(module_raw).hexdigest()
+        manifest = {
+            "schemaVersion": 2, "artifactType": ARTIFACT_TYPE,
+            "layers": [
+                {"mediaType": LAYER_TYPE, "digest": base_digest,
+                 "data": base64.b64encode(base).decode()},
+                {"mediaType": "application/vnd.agntcy.oasf.types.v1alpha2.Module+json",
+                 "digest": module_digest,
+                 "annotations": {
+                     "agntcy.oasf.module/id": "317",
+                     "agntcy.oasf.module/name": "integration/a2a",
+                 }},
+            ],
+        }
+        manifest_raw = json.dumps(manifest, sort_keys=True).encode()
+        digest = "sha256:" + hashlib.sha256(manifest_raw).hexdigest()
+        manifest_url = ORIGIN + "/v2/" + REPOSITORY + "/manifests/" + digest
+        blob_url = ORIGIN + "/v2/" + REPOSITORY + "/blobs/" + module_digest
+        reads = []
+        def get(url, auth):
+            reads.append(url)
+            return {manifest_url: manifest_raw, blob_url: module_raw}[url]
+        cards, links, warnings = discover.agntcy_oci_sources({
+            "agntcy_oci_sources": [{
+                "registry_origin": ORIGIN, "repository": REPOSITORY,
+                "manifest_digest": digest, "publish": True,
+            }]}, read=get)
+        self.assertEqual([card["name"] for card in cards], ["Flight Agent"])
+        self.assertEqual(links, [])
+        self.assertEqual(warnings, [])
+        self.assertEqual(reads, [manifest_url, blob_url])
+
+    def test_descriptor_urls_array_is_followed_for_a2a_only(self):
+        target = "https://flight.example.org/agent-card.json"
+        record = {"modules": [
+            {"name": "integration/a2a", "artifact": {
+                "media_type": "application/a2a+json",
+                "urls": [target, "http://local.example/agent-card.json",
+                         "file:///etc/passwd", target]}},
+            {"name": "integration/mcp", "artifact": {
+                "media_type": "application/a2a+json",
+                "urls": ["https://invalid.example.org/card.json"]}},
+        ]}
+        cards, urls = discover.oasf_a2a_cards(
+            record, "https://oci.example.org/v2/approved/manifests/sha256:42")
+        self.assertEqual(cards, [])
+        self.assertEqual(urls, [target])
+
+    def test_manifest_accept_header_and_digest_checked_blob_octet_stream(self):
+        manifest_url = "https://oci.example.org/v2/approved/manifests/sha256:" + "a" * 64
+        blob_url = "https://oci.example.org/v2/approved/blobs/sha256:" + "b" * 64
+        requests = []
+        class Response(io.BytesIO):
+            status = 200
+            def __init__(self, content, mime):
+                super().__init__(content)
+                self.headers = {"Content-Type": mime}
+        class Registry:
+            def open(self, req, timeout):
+                requests.append(req)
+                if "/manifests/" in req.full_url:
+                    if "application/vnd.oci.image.manifest.v1+json" not in req.get_header("Accept"):
+                        raise discover.DiscoveryError("Registry would reject missing OCI Accept")
+                    return Response(b'{"schemaVersion":2}',
+                        "application/vnd.oci.image.manifest.v1+json")
+                return Response(b'{"data":{}}', "application/octet-stream")
+        with patch.object(discover, "require_public_https", return_value=ORIGIN), \
+             patch.object(discover, "OPENER", Registry()):
+            self.assertEqual(discover.fetch_oci_bytes(manifest_url),
+                             b'{"schemaVersion":2}')
+            self.assertEqual(discover.fetch_oci_bytes(blob_url),
+                             b'{"data":{}}')
+        self.assertEqual(requests[0].get_method(), "GET")
+        self.assertEqual(requests[1].get_method(), "GET")
+        self.assertEqual(requests[1].get_header("Accept"), "application/octet-stream")
+
+    def test_malformed_module_layer_cannot_publish_partial_artifact(self):
+        record = {"modules": []}
+        source, manifest_raw, _, manifest_url, _ = fixture(record)
+        manifest = json.loads(manifest_raw)
+        manifest["layers"].append({
+            "mediaType": "application/vnd.agntcy.oasf.types.v1alpha2.Module+json",
+            "digest": "sha256:" + "0" * 64,
+            "annotations": {"agntcy.oasf.module/name": "integration/a2a"},
+        })
+        changed = json.dumps(manifest, sort_keys=True).encode()
+        digest = "sha256:" + hashlib.sha256(changed).hexdigest()
+        revised = {**source, "manifest_digest": digest}
+        cards, urls, warnings = discover.agntcy_oci_sources({
+            "agntcy_oci_sources": [revised],
+        }, read=lambda *_: changed if "manifests" in _[0] else b'{}')
+        self.assertEqual(cards, [])
+        self.assertEqual(urls, [])
+        self.assertEqual(warnings, ["AGNTCY OCI source unavailable"])
 
     def test_transport_only_reads_json_https_and_does_not_follow_redirects(self):
         class Response(io.BytesIO):
