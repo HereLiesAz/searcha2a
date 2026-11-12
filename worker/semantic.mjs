@@ -16,8 +16,9 @@ function words(text) {
 }
 
 function descriptionOf(agent) {
-  const skillText = (agent.skills || []).slice(0, 8).flatMap(skill => [
-    skill.name || '', skill.description || '', ...(Array.isArray(skill.tags) ? skill.tags.slice(0, 5) : []),
+  const skillText = (Array.isArray(agent.skills) ? agent.skills : []).slice(0, 8).flatMap(skill => [
+    skill?.name || '', skill?.description || '',
+    ...(Array.isArray(skill?.tags) ? skill.tags.slice(0, 5) : []),
   ]).join(' ');
   return [agent.name || '', skillText, agent.description || ''].join(' ').slice(0, 900);
 }
@@ -27,7 +28,9 @@ export function keywordScore(query, agent) {
   const terms = [...new Set(words(query))];
   if (!terms.length) return 0;
   const name = new Set(words(agent.name || ''));
-  const skills = new Set(words((agent.skills || []).flatMap(s => [s.name || '', s.description || '', ...(s.tags || [])]).join(' ')));
+  const skills = new Set(words((Array.isArray(agent.skills) ? agent.skills : [])
+    .flatMap(s => [s?.name || '', s?.description || '', ...(Array.isArray(s?.tags) ? s.tags : [])])
+    .join(' ')));
   const about = new Set(words(agent.description || ''));
   let score = 0;
   for (const term of terms) score += name.has(term) ? 5 : skills.has(term) ? 4 : about.has(term) ? 1 : 0;
@@ -59,6 +62,35 @@ function publicCardUrl(raw) {
   } catch { return false; }
 }
 
+/** Stream-capped JSON; checking Content-Length alone cannot bound chunked responses. */
+async function readBoundedText(response, limit) {
+  if (!response.body) throw new Error('Catalog response body missing');
+  const reader = response.body.getReader();
+  const chunks = [];
+  let length = 0;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      length += value.byteLength;
+      if (length > limit) {
+        await reader.cancel();
+        throw new Error('Catalog too large');
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(length);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 /** Read the mirrored feed rather than introducing another independently maintained registry. */
 export async function readPublishedAgents(fetcher = fetch) {
   const response = await fetcher(CATALOG_URL, {
@@ -69,8 +101,7 @@ export async function readPublishedAgents(fetcher = fetch) {
   if (!response.ok || (Number(response.headers.get('content-length') || 0) > MAX_CATALOG_BYTES)) {
     throw new Error('Catalog not available');
   }
-  const text = await response.text();
-  if (text.length > MAX_CATALOG_BYTES) throw new Error('Catalog too large');
+  const text = await readBoundedText(response, MAX_CATALOG_BYTES);
   const feed = JSON.parse(text);
   if (feed?.schema !== 1 || feed.source !== 'searcha2a' || !Array.isArray(feed.listings)) {
     throw new Error('Unexpected catalog schema');
