@@ -1480,7 +1480,7 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     reserved = len(github_cards)
     unique = list(distinct_url(
         (url, origin) for url, origin in [*retry_prefix, *candidates]
-        if url not in deferred))[:MAX_CANDIDATES - reserved]
+        if url not in deferred or origin not in crawl_retry.PUBLIC_ORIGINS))[:MAX_CANDIDATES - reserved]
     existing_urls = {url for url, _ in unique}
     unique.extend((url, origin) for url, origin in github_cards if url not in existing_urls)
     unique = unique[:MAX_CANDIDATES]
@@ -1496,8 +1496,15 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
                 if evidence:
                     cards[0]["publisher_verification"] = evidence
             return cards, links, "accepted" if cards or links else "invalid", pair
-        except (DiscoveryError, ValueError, TypeError, OverflowError, RecursionError):
-            return [], [], "unavailable", pair
+        except DiscoveryError as exc:
+            # An HTML fallback or malformed JSON is not a transient offline
+            # Agent Card. Don't keep retrying permanent non-card responses.
+            malformed = (
+                str(exc) in ("Non-JSON response Content-Type", "Oversized JSON") or
+                str(exc).endswith(": JSONDecodeError"))
+            return [], [], "invalid" if malformed else "unavailable", pair
+        except (ValueError, TypeError, OverflowError, RecursionError):
+            return [], [], "invalid", pair
 
     def prefer_verified(card):
         """Preserve a fresh publisher proof over an unverified registry copy.
@@ -1525,6 +1532,8 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     visited = {url for url, _ in unique}
     followups = []
     for url, parent_origin in discovered:
+        if (url in deferred and parent_origin in crawl_retry.PUBLIC_ORIGINS):
+            continue
         if url not in visited:
             visited.add(url)
             followups.append((url, "manifest"))
