@@ -1,6 +1,9 @@
 import importlib.util
 from pathlib import Path
+import sys
 import unittest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('discover', Path(__file__).parents[1] / 'src/discover.py')
