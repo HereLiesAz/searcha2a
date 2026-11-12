@@ -285,7 +285,7 @@ def unpack_cards(document, source_url: str, source: str, *, offset: int = 0,
         # artifacts, contribute Agent Cards or card URLs.
         if is_ai_catalog:
             nested = 0
-            for entry in entries[:MAX_MANIFEST_ITEMS]:
+            for entry in extract_registry_items(entries, offset=offset, limit=MAX_MANIFEST_ITEMS):
                 if not isinstance(entry, dict):
                     continue
                 media = clean_text(entry.get("mediaType"), 100).lower()
