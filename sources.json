@@ -1,12 +1,26 @@
 {
   "card_urls": [
     "https://registry.ip402.xyz/.well-known/agent-card.json",
-    "https://api.trustboost.dev/.well-known/agent-card.json"
+    "https://api.trustboost.dev/.well-known/agent-card.json",
+    "https://allagents.app/.well-known/agent-card.json",
+    "https://agentgalaxy.dev/.well-known/agent-card.json"
   ],
   "registry_urls": [
-    "https://agora.sovont.com/v1/agents"
+    "https://agora.sovont.com/v1/agents",
+    "https://www.a2aregistry.org/registry.json"
   ],
   "paginated_registry_urls": [
     "https://a2aregistry.org/api/agents"
-  ]
+  ],
+  "domain_urls": [
+    "https://www.cloudflare.com",
+    "https://allagents.app",
+    "https://aiagencies.fyi",
+    "https://mcpdirectory.fyi",
+    "https://agentsandboxes.fyi",
+    "https://itinagents.fyi",
+    "https://publicadjusters.fyi",
+    "https://agentgalaxy.dev"
+  ],
+  "assistant_ids": {}
 }
