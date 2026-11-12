@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "source": "searcha2a",
+  "generated_at": "2026-11-12T09:49:56.101992+00:00",
+  "count": 1,
+  "listings": [
+    {
+      "id": "external.a2a.b739a82148a2b0b5b008",
+      "kind": "a2a-agent",
+      "name": "TrustBoost PII Sanitizer",
+      "description": "TrustBoost sanitizes PII from text before it reaches LLMs. Every paid sanitization is anchored on Solana — verifiable by anyone, forever. The only PII sanitizer with on-chain proof.",
+      "endpoint": "https://api.trustboost.dev",
+      "source_url": "https://api.trustboost.dev/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/b739a82148a2b0b5b008.json",
+      "skills": [
+        {
+          "name": "PII Sanitization",
+          "description": "Detects and redacts PII from text before it reaches LLMs. Supports 8 languages and 5 context modes. Returns sanitized_content, safety_score, risk_category, and entities[].",
+          "tags": [
+            "pii",
+            "privacy",
+            "sanitization",
+            "gdpr",
+            "compliance",
+            "llm-security"
+          ]
+        },
+        {
+          "name": "Proof of Sanitization Verification",
+          "description": "Verifies a Proof of Sanitization anchored on Solana. Returns immutable audit trail for EU AI Act compliance.",
+          "tags": [
+            "proof",
+            "solana",
+            "audit",
+            "eu-ai-act",
+            "compliance"
+          ]
+        },
+        {
+          "name": "TrustBoost Score",
+          "description": "M2M trust verification — returns trust tier (NEW/ACTIVE/VERIFIED/TRUSTED) based on agent sanitization history.",
+          "tags": [
+            "trust",
+            "m2m",
+            "score",
+            "reputation"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {},
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    }
+  ]
+}
