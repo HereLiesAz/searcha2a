@@ -1,0 +1,199 @@
+"""Durable ERC-8004 cursors advance only through complete confirmed windows."""
+from pathlib import Path
+import sys
+import unittest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+import discover
+
+CONTRACT = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
+RPC = "https://rpc.example.org/reads"
+SOURCE = {"enabled": True, "registry_address": CONTRACT, "rpc_url": RPC,
+          "start_block": 100, "finality_blocks": 0, "window_blocks": 100}
+EVENT = {
+    "address": CONTRACT,
+    "topics": [
+        "0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a",
+        "0x" + "0" * 63 + "2",
+        "0x" + "0" * 24 + "f" * 40,
+    ],
+    "data": (
+        "0x0000000000000000000000000000000000000000000000000000000000000020"
+        "000000000000000000000000000000000000000000000000000000000000002b"
+        "68747470733a2f2f6167656e742e6578616d706c652e6e65742f726567697374"
+        "726174696f6e2e6a736f6e000000000000000000000000000000000000000000"
+    ),
+}
+URL = "https://agent.example.net/registration.json"
+
+
+def config(**override):
+    return {"erc8004_rpc_sources": [{**SOURCE, **override}]}
+
+
+def cursor(state):
+    return next(iter(state["erc8004"].values()))
+
+
+class ERC8004CheckpointTests(unittest.TestCase):
+    def test_bootstrap_from_configured_historical_block_without_gaps(self):
+        seen = []
+        def rpc(url, method, args):
+            self.assertEqual(url, RPC)
+            if method == "eth_blockNumber":
+                return {"result": "0x12c"}  # 300
+            self.assertEqual(method, "eth_getLogs")
+            begin = int(args[0]["fromBlock"], 16)
+            end = int(args[0]["toBlock"], 16)
+            seen.append((begin, end))
+            return {"result": [EVENT] if begin == 100 else []}
+        state = {"version": 1, "erc8004": {}}
+        urls, warnings = discover.erc8004_checkpointed_sources(
+            config(), state, post=rpc)
+        self.assertEqual(urls, [(URL, "erc8004-registration")])
+        self.assertEqual(seen, [(100, 199), (200, 299), (300, 300)])
+        self.assertEqual(cursor(state), {"next_block": 301, "window": 100})
+        self.assertEqual(warnings, [])
+
+    def test_second_run_resumes_exactly_where_first_finished(self):
+        state = {"version": 1, "erc8004": {}}
+        seen = []
+        def rpc(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x12c"}  # 300
+            seen.append((int(params[0]["fromBlock"], 16),
+                         int(params[0]["toBlock"], 16)))
+            return {"result": []}
+        discover.erc8004_checkpointed_sources(config(), state, post=rpc)
+        seen.clear()
+        def later(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x15e"}  # 350
+            seen.append((int(params[0]["fromBlock"], 16),
+                         int(params[0]["toBlock"], 16)))
+            return {"result": []}
+        urls, warnings = discover.erc8004_checkpointed_sources(
+            config(start_block=0), state, post=later)
+        self.assertEqual(seen, [(301, 350)])
+        self.assertEqual(cursor(state)["next_block"], 351)
+        self.assertEqual(urls, [])
+        self.assertEqual(warnings, [])
+
+    def test_first_run_uses_finality_and_bounded_recent_lookback(self):
+        calls = []
+        def rpc(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x1000"}  # 4096
+            calls.append((int(params[0]["fromBlock"], 16),
+                          int(params[0]["toBlock"], 16)))
+            return {"result": []}
+        state = {"version": 1, "erc8004": {}}
+        discover.erc8004_checkpointed_sources(config(
+            start_block=None, finality_blocks=64, lookback_blocks=512,
+            window_blocks=1024), state, post=rpc)
+        self.assertEqual(calls, [(3521, 4032)])
+        self.assertEqual(cursor(state)["next_block"], 4033)
+
+    def test_overfull_block_range_is_retried_with_smaller_windows(self):
+        seen = []
+        def rpc(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x40"}  # 64
+            begin = int(params[0]["fromBlock"], 16)
+            end = int(params[0]["toBlock"], 16)
+            seen.append((begin, end))
+            return {"result": [EVENT] * 121 if end - begin >= 64 else []}
+        state = {"version": 1, "erc8004": {}}
+        urls, warnings = discover.erc8004_checkpointed_sources(
+            config(start_block=0, window_blocks=128), state, post=rpc)
+        self.assertEqual(seen, [(0, 64), (0, 63), (64, 64)])
+        self.assertEqual(cursor(state)["next_block"], 65)
+        self.assertEqual(urls, [])
+        self.assertEqual(warnings, [])
+
+    def test_overfull_single_block_never_advances_cursor(self):
+        requests = []
+        def rpc(_, method, args):
+            if method == "eth_blockNumber":
+                return {"result": "0x0"}
+            requests.append(args)
+            return {"result": [EVENT] * 121}
+        state = {"version": 1, "erc8004": {}}
+        urls, warnings = discover.erc8004_checkpointed_sources(
+            config(start_block=0, window_blocks=1), state, post=rpc)
+        self.assertEqual(len(requests), 1)
+        self.assertEqual(urls, [])
+        self.assertEqual(cursor(state)["next_block"], 0)
+        self.assertIn("ERC-8004 single block exceeds bounded log budget", warnings)
+
+    def test_rpc_failure_retries_without_advancing_prior_checkpoint(self):
+        state = {"version": 1, "erc8004": {}}
+        def good(_, method, __):
+            return {"result": "0x14"} if method == "eth_blockNumber" else {"result": []}
+        discover.erc8004_checkpointed_sources(config(start_block=20), state, post=good)
+        prior = dict(cursor(state))
+        def bad(_, method, __):
+            if method == "eth_blockNumber":
+                return {"result": "0x1e"}
+            raise discover.DiscoveryError("Network secret")
+        urls, errors = discover.erc8004_checkpointed_sources(
+            config(start_block=0), state, post=bad)
+        self.assertEqual(urls, [])
+        self.assertEqual(cursor(state), prior)
+        self.assertEqual(errors, ["ERC-8004 source unavailable"])
+        self.assertNotIn("secret", str(errors))
+
+    def test_fixed_manual_backfill_does_not_mutate_incremental_cursor(self):
+        state = {"version": 1, "erc8004": {}}
+        def rpc(_, method, params):
+            self.assertEqual(method, "eth_getLogs")
+            self.assertEqual(params[0]["fromBlock"], "0x2")
+            self.assertEqual(params[0]["toBlock"], "0x4")
+            return {"result": [EVENT]}
+        urls, warnings = discover.erc8004_checkpointed_sources(
+            config(from_block=2, to_block=4), state, post=rpc)
+        self.assertEqual(urls, [(URL, "erc8004-registration")])
+        self.assertEqual(warnings, [])
+        self.assertEqual(state["erc8004"], {})
+
+    def test_invalid_cursor_stops_before_rpc(self):
+        state = {"version": 1, "erc8004": {
+            "0" * 32: {"next_block": "100", "window": 10},
+        }}
+        # The source key must match before the invalid value is consulted.
+        key = discover.hashlib.sha256(
+            (RPC + "|" + CONTRACT.lower()).encode()).hexdigest()[:32]
+        state["erc8004"] = {key: {"next_block": "100", "window": 10}}
+        with self.assertRaises(discover.DiscoveryError):
+            discover.erc8004_checkpointed_sources(
+                config(), state,
+                post=lambda *_: (_ for _ in ()).throw(AssertionError()))
+
+    def test_partial_window_budget_is_bounded_with_retriable_height(self):
+        called = []
+        def rpc(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x186a0"}  # 100000
+            called.append(params)
+            return {"result": []}
+        state = {"version": 1, "erc8004": {}}
+        _, errors = discover.erc8004_checkpointed_sources(
+            config(start_block=0, window_blocks=4096), state, post=rpc)
+        self.assertEqual(len(called), 16)
+        self.assertEqual(cursor(state)["next_block"], 65536)
+        self.assertEqual(errors, ["ERC-8004 backfill continues at saved cursor"])
+
+    def test_chain_progress_not_exposed_as_claim_of_verification(self):
+        def rpc(_, method, params):
+            return {"result": "0x64"} if method == "eth_blockNumber" else {"result": [EVENT]}
+        state = {"version": 1, "erc8004": {}}
+        urls, errors = discover.erc8004_checkpointed_sources(
+            config(start_block=100), state, post=rpc)
+        self.assertEqual(urls, [(URL, "erc8004-registration")])
+        self.assertEqual(errors, [])
+        self.assertEqual(set(cursor(state)), {"next_block", "window"})
+        self.assertNotIn("verified", str(state))
+
+
+if __name__ == "__main__":
+    unittest.main()
