@@ -185,7 +185,7 @@ class MCPResourceDiscoveryTests(unittest.TestCase):
                          ["resources/list", "resources/read", "resources/read"])
 
     def test_deeply_nested_rpc_response_is_reported_not_raised(self):
-        deeply_nested = "[" * 1200 + "0" + "]" * 1200
+        deeply_nested = "[" * 20000 + "0" + "]" * 20000
         response = '{"jsonrpc":"2.0","id":1,"result":{"resources":' + deeply_nested + '}}'
         class Response(io.BytesIO):
             status = 200
@@ -207,7 +207,7 @@ class MCPResourceDiscoveryTests(unittest.TestCase):
     def test_deeply_nested_resource_text_does_not_abort_other_cards(self):
         bad = "agent-card://directory.example.org/deep"
         good = "agent-card://directory.example.org/healthy"
-        nested = "[" * 1200 + "0" + "]" * 1200
+        nested = "[" * 20000 + "0" + "]" * 20000
         def rpc(_url, method, params, _token):
             if method == "resources/list":
                 return {"resources": [
