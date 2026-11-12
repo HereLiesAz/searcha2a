@@ -1,83 +1,67 @@
 # SearchA2A architecture
 
-[User guide](../README.md) · [API reference](API.md) · [Operations](OPERATIONS.md)
-
-SearchA2A separates **static discovery**, **live execution**, **authenticated dispatch**, and **strongly consistent results**. It searches public agent metadata, not running agent services.
+[User guide](../README.md) · [API](API.md) · [Operations](OPERATIONS.md)
 
 ## Data flow
 
 ```text
-Browser (GitHub Pages + Turnstile)
-    -> Worker (origin, Turnstile, query, rate checks)
-    -> SearchResult Durable Object (queued mailbox, UUID)
-    -> GitHub workflow_dispatch (search.yml)
-    -> discover.py (curated Agent Cards + registries + GitHub search)
-    -> report.py (authenticated callback)
-    -> Worker -> same Durable Object (completed result)
-    -> GET /api/v1/results/{uuid} -> browser
+Scheduled or manually triggered Pages indexing (GitHub Actions)
+  -> discover.py: curated public HTTPS Agent Cards, registries, GitHub leads
+  -> bounded discovery catalog JSON
+  -> registry_sync.py (existing private shared secret)
+  -> Worker POST /internal/registry/ingest
+  -> SQLite-backed AgentRegistry Durable Object (persistent upsert)
+  
+Browser / Aive / public client
+  -> Worker GET /api/v1/agents?query=... (or /api/v1/directory?q=...)
+  -> AgentRegistry SQL query
+  -> JSON response immediately, without Actions or external crawl
 ```
 
-The public catalog is a separate scheduled build:
+In parallel, the Pages job publishes the latest **bounded crawl snapshot** as `/api/v1/catalog.json`, per-card JSON, and the Azphalt non-installable directory feed. This static snapshot is **not** the complete accumulated registry.
 
-```text
-pages.yml -> discover.py (empty query)
-  -> /api/v1/catalog.json
-  -> /api/v1/agents/{id}.json
-  -> azphalt_listings.py -> /api/v1/azphalt-listings.json
-                         -> Git agent-feed branch (raw.githubusercontent.com)
-                         -> Azphalt Store /api/a2a/agents and /agents
-```
+## Original decisions and why they changed
 
-The live search does not rewrite the static catalog. The Azphalt Store feed is a non-installable metadata export, not an agent registry that executes code.
+- **Why GitHub Actions originally ran every search:** GitHub code discovery needed token-protected APIs; a Worker mediated dispatch to avoid exposing an Actions-write credential to browsers. Turnstile and per-IP rate limits were needed to protect this expensive public operation.
+- **Why per-query dispatch was retired:** GitHub Actions startup, callback polling, and occupied workflow slots caused unnecessary latency and contention. Searches now run only against our own persistent index. Actions is used **only** for scheduled/push/manual indexing.
+- **Why the original result mailbox used SQLite Durable Objects:** Workers KV propagation could delay callback visibility across regions. Existing seven-day result mailboxes remain readable for old requests but no new searches create them.
+- **Why the registry also uses SQLite Durable Objects:** `AgentRegistry` stores normalized cards durably and atomically upserts scheduled batches without wiping unseen records. Its SQL interface provides immediate public reads with no GitHub dependency. `v2` in `worker/wrangler.toml` introduces this class without destroying the `v1` result class.
+- **Why the Azphalt feed is mirrored to GitHub raw CDN:** A same-zone Cloudflare Worker subrequest to the SearchA2A Pages hostname previously returned 502. Keeping the existing `agent-feed` mirror avoids changing that working integration.
+- **Why metadata stays non-installable:** Discovering an Agent Card does not establish runtime health, ownership, conformance, or authorization. The export cannot be represented as a signed `.azp` package.
 
-## Decisions and reasons
+## Components
 
-- **GitHub Actions for live discovery.** External-source discovery is bounded and uses GitHub search permissions; keeping it in Actions avoids leaking a write-authorized dispatch token to the browser. The Worker only authorizes requests and dispatches jobs.
-- **SQLite-backed Durable Objects rather than Workers KV for results.** Cross-region KV reads could lag behind callback writes. Mapping each random UUID to one Durable Object ensures the callback and poller access the same strongly consistent mailbox. It does not remove GitHub Actions startup or network latency.
-- **Static GitHub Pages plus separate Worker origin.** Pages hosts read-only files and cannot safely store GitHub Actions-write or Turnstile secrets. The gateway accepts only the configured browser origin for dispatch.
-- **An external-only Azphalt feed.** Discovery proves only that card metadata was readable. Azphalt must not confuse an unverified card with a signed `.azp` package, model or trusted, installed agent.
-- **Raw GitHub mirror for the store feed.** An Azphalt Cloudflare Worker subrequest to `searcha2a.azphalt.store` on the same Cloudflare zone previously returned 502. The feed is mirrored to `agent-feed` and fetched from `raw.githubusercontent.com` instead.
-
-## Implementation map
-
-| Concern | Implementation |
+| Component | Source |
 | --- | --- |
-| Browser UI, challenge rendering, poller | `site/app.js` and `site/index.html` |
-| Public JSON and mirror publication | `.github/workflows/pages.yml` |
-| Cloudflare gateway and mailbox | `worker/index.mjs`; `worker/wrangler.toml` |
-| Gateway deployment and smoke test | `.github/workflows/gateway.yml` |
-| On-demand discovery and callback | `.github/workflows/search.yml`; `src/discover.py`; `src/report.py` |
-| Normalized store listings | `src/azphalt_listings.py` |
-| Test suites | `tests/`; `.github/workflows/ci.yml` |
+| Browser search | `site/app.js`, `site/index.html` |
+| Registry SQL and HTTP routes | `worker/index.mjs` (`AgentRegistry`, `handle`) |
+| Durable Object migration | `worker/wrangler.toml` (`v2`) |
+| Scheduled discovery | `src/discover.py`, `sources.json`, `.github/workflows/pages.yml` |
+| Authenticated sync | `src/registry_sync.py`, `POST /internal/registry/ingest` |
+| Azphalt export | `src/azphalt_listings.py` and `agent-feed` mirror |
+| Deployment smoke checks | `.github/workflows/gateway.yml` |
+| Regression tests | `tests/registry.test.mjs`, `tests/test_registry_sync.py`, existing test suites |
 
-## Mailbox lifecycle
+## Invariants and enforcement
 
-`SearchResult` is a Durable Object class with an SQLite-backed storage binding. Its `ctx.storage.kv` API is **Durable Object synchronous storage**, not Workers KV. A random UUID selects an object via `RESULTS.idFromName(id)`. On creation, the object records a `queued` request and schedules a seven-day alarm. On callback it accepts only the matching request ID and query while still queued, writes bounded `complete` results, and rejects duplicate completion. Dispatch metadata updates cannot overwrite a completed callback. A failed GitHub dispatch deletes the pending mailbox. Reads of unknown or expired IDs return 404; the alarm removes stored data.
-
-The initial Durable Object deployment used the `v1` migration in `worker/wrangler.toml`. Previous Workers KV requests were intentionally **not** migrated, because the old mailbox was eventually consistent and the cutover introduced a new storage identity. A request started on the old Worker must be resubmitted; the old KV namespace is no longer bound.
-
-## Trust boundaries and enforcement
-
-| Invariant | Enforced by |
+| Invariant | Enforcement |
 | --- | --- |
-| Exact browser origin check, valid Turnstile token and approximate per-IP rate limit before dispatch | `worker/index.mjs`: `handle` (`POST /api/v1/search`), `verifyTurnstile` |
-| Dispatch secret stays server-side | `worker/index.mjs`: private GitHub Authorization header; `worker` secret configuration |
-| Callback requires separate secret | `worker/index.mjs`: `POST /internal/results` |
-| Callback matches the still-queued UUID and query; duplicate completion refused | `SearchResult.fetch` (`/complete`) |
-| Expiration after seven days | `SearchResult.fetch` expiry guard; `SearchResult.alarm` |
-| Maximum of 70 completed result cards | `SearchResult.fetch` (`/complete`) |
-| External listings cannot advertise themselves as installable | `src/azphalt_listings.py`: `build_listings` |
-| Discovery inputs are bounded and restricted to public HTTPS | `src/discover.py`: `require_public_https`, `fetch_json`, `discover` |
+| No search can start a GitHub workflow | `worker/index.mjs`: `POST /api/v1/search` returns 410; `site/app.js` only uses GET |
+| Only authorized scheduled crawls can mutate the registry | `worker/index.mjs`: `POST /internal/registry/ingest` checks shared secret |
+| A batch is all-or-nothing and does not delete unseen agents | `AgentRegistry.fetch`: input validation before `storage.transactionSync`, `INSERT ... ON CONFLICT DO UPDATE` |
+| Public search is bounded | `AgentRegistry.fetch`: 120-char query, up to 12 terms, limit <= 100, bounded offset |
+| Crawling never invokes advertised execution endpoints | `src/discover.py`: `fetch_json` and `normalize_card` |
+| Card fetches are limited to public HTTPS and reject redirects | `src/discover.py`: `require_public_https`, `NoRedirect`, `fetch_json` |
+| Store entries remain read-only and non-installable | `src/azphalt_listings.py`: `build_listings` |
 
-## Limits
+## Limits and caveats
 
-- `src/discover.py` fetches up to 90 card candidates, up to 524,288 bytes per JSON document, with a seven-second timeout and eight concurrent card readers. It returns at most 70 cards and ten warnings. Curated `paginated_registry_urls` are read in at most two pages of 30 records each for scheduled indexing, or just one page for live search latency; search terms use the registry's `search` parameter. Registry entries supply original `wellKnownURI` card URLs, which undergo the same read-only HTTPS/DNS checks and Agent Card normalization as seeded cards. Pagination never follows links returned by a registry. Seed and registry candidates are considered before GitHub candidates.
-- Its HTTPS/DNS checks apply to URLs it **fetches**, not to advertised agent endpoints. It disables redirects and rejects local/non-public IPs, but DNS can change between validation and connection.
-- An Agent Card is unverified descriptive data. It cannot prove identity, availability, supported protocols at runtime or authorization to act on the user's behalf.
-- GitHub search indexing and permissions, unavailable registries, malformed cards and network errors can reduce coverage. Results may legitimately be empty.
-- The Worker requires a valid browser Turnstile response and restricts the origin, but `Origin` alone is not authentication. Turnstile and the approximate rate limiter do not cap total Actions spend.
-- Search IDs are opaque locators, not user login tokens. Anyone who knows a valid UUID can read its result until expiry. Do not search for private information.
+The current scheduled collector reads up to 90 card candidates and publishes up to 70 normalized cards per run. It also reads up to two pages of 30 agents from each explicitly configured paginated registry, including a2aregistry.org. Those are **per-crawl** limits, not a cap on accumulated registry records. The persistent registry retains IDs across runs. A new crawl does not invalidate a card it fails to rediscover, so stale entries are possible; there is no health probe, verified ownership, explicit self-registration, global search-engine crawl, or automatic removal policy yet.
 
-## Verification boundary
+SQL keyword search scans stored normalized name/skill/description/endpoint text and ranks by name, skill and description hits. It is not semantic embedding search. A single Durable Object coordinates the registry; future high-traffic growth may require sharding or migrating to Cloudflare D1.
 
-The gateway deployment workflow tests **404 from an unknown UUID**, which proves the mailbox binding responds. It does **not** test an authenticated dispatch, external GitHub Actions run or callback. Full integration verification requires a real browser Turnstile challenge, an Actions run, a successful callback and a subsequent `status: "complete"` result. See [Operations](OPERATIONS.md).
+The crawler's DNS safety checks happen before HTTP connection, so DNS rebinding remains a known limitation. Query output is third-party metadata only.
+
+## Deployment ordering
+
+Gateway deployment creates the SQLite registry class. Pages indexing attempts authenticated ingest with bounded retries to tolerate simultaneous push-triggered gateway and Pages workflows. A failed ingest **fails the Pages job**, rather than falsely declaring the persistent registry current. The gateway smoke test checks the public registry's JSON route, but does not itself prove a crawl was uploaded; end-to-end verification requires the scheduled ingest step to succeed and a real query to return stored records.
