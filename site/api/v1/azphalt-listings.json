@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "source": "searcha2a",
-  "generated_at": "2026-11-12T15:36:57.544024+00:00",
+  "generated_at": "2026-11-12T15:39:28.183299+00:00",
   "count": 150,
   "listings": [
     {
@@ -8057,86 +8057,6 @@
       "source": "searcha2a"
     },
     {
-      "id": "external.a2a.4642e20dcb8bd59641b1",
-      "kind": "a2a-agent",
-      "name": "Moonbeam paid calls",
-      "description": "Paid calls bought through Moonbeam, one skill each. Each call is priced in USDC on Base mainnet and paid with x402; the answer is checked before you are charged.",
-      "endpoint": "https://next.moonbeam.network/api/acp/x402/a2a",
-      "source_url": "https://next.moonbeam.network/api/acp/x402/a2a/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/4642e20dcb8bd59641b1.json",
-      "skills": [
-        {
-          "name": "Data onchain query",
-          "description": "One data.onchain_query answer, bought through Moonbeam. The answer is checked before you are charged, and a failed answer is not charged. One call is 0.013714 USDC, paid with x402 on Base.",
-          "tags": [
-            "x402",
-            "paid",
-            "base",
-            "data"
-          ]
-        },
-        {
-          "name": "Market price",
-          "description": "One market.price answer, bought through Moonbeam. The answer is checked before you are charged, and a failed answer is not charged. One call is 0.001714 USDC, paid with x402 on Base.",
-          "tags": [
-            "x402",
-            "paid",
-            "base",
-            "market"
-          ]
-        },
-        {
-          "name": "Risk address",
-          "description": "One risk.address answer, bought through Moonbeam. The answer is checked before you are charged, and a failed answer is not charged. One call is 0.0012 USDC, paid with x402 on Base.",
-          "tags": [
-            "x402",
-            "paid",
-            "base",
-            "risk"
-          ]
-        },
-        {
-          "name": "MCP digest",
-          "description": "One mcp.digest answer, bought through Moonbeam. The answer is checked before you are charged, and a failed answer is not charged. One call is 0.0012 USDC, paid with x402 on Base.",
-          "tags": [
-            "x402",
-            "paid",
-            "base",
-            "mcp"
-          ]
-        },
-        {
-          "name": "Mech predict",
-          "description": "Olas-style yes/no forecast: { question } in, { p_yes, p_no, confidence, info_utility } out with reasoning and sources. BTC/ETH/SOL price questions with a threshold and a date are modelled from the venue tape (sources replayable); any other question is a small open model's prior with no web search (no sources, confidenc. One call is 0.002586 USDC, paid with x402 on Base.",
-          "tags": [
-            "x402",
-            "paid",
-            "base",
-            "mech"
-          ]
-        },
-        {
-          "name": "Plan steps",
-          "description": "One plan.steps answer, bought through Moonbeam. The answer is checked before you are charged, and a failed answer is not charged. One call is 0.00198 USDC, paid with x402 on Base.",
-          "tags": [
-            "x402",
-            "paid",
-            "base",
-            "plan"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a"
-    },
-    {
       "id": "external.a2a.765d7923590255479ca3",
       "kind": "a2a-agent",
       "name": "MoveHome.org Property Agent",
@@ -11577,6 +11497,59 @@
         "JSONRPC"
       ],
       "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
+      "id": "external.a2a.e46733728ed1324f2af5",
+      "kind": "a2a-agent",
+      "name": "Visit Keswick",
+      "description": "Visit Keswick: places to stay, places to eat and drink and things to do in Keswick and the Lake District, from its own members. A curated collection, discoverable and verifiable by AI agents. Agents can also book a stay and pay by card themselves, with no link, through UCP checkout (https://visitkeswick.com/.well-known/ucp): `match` answers carry the checkout to create as `cardCheckout`.",
+      "endpoint": "https://visitkeswick.com/api/registry/a2a",
+      "source_url": "https://visitkeswick.com/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/e46733728ed1324f2af5.json",
+      "skills": [
+        {
+          "name": "Discover places",
+          "description": "Ask an open question about places to stay, eat and do, and get ranked places, recommended areas, and live availability when dates are given.",
+          "tags": [
+            "discovery",
+            "search",
+            "availability"
+          ]
+        },
+        {
+          "name": "Match known places",
+          "description": "Name the places you already mean — by id, or by name with an optional website and location — and get each one in full, with live rooms and offers when dates are given.",
+          "tags": [
+            "identity",
+            "detail",
+            "availability",
+            "offers"
+          ]
+        },
+        {
+          "name": "Prepare booking review link",
+          "description": "Prepares a short-lived Visit Keswick browser review link for the selected live option at a published Visit Keswick venue. It never reserves, pays or confirms. The result states whether the link allows review only (booking confirmation and payment are gated separately); the guest signs in on Visit Keswick to see the current price and terms.",
+          "tags": [
+            "booking",
+            "handoff",
+            "review"
+          ]
+        }
+      ],
+      "protocols": [
+        "JSONRPC",
+        "JSONRPC"
+      ],
+      "security_schemes": [
+        "bearer"
+      ],
       "capabilities": {
         "streaming": false,
         "pushNotifications": false
