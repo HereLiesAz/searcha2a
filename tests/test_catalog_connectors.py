@@ -182,6 +182,61 @@ class CatalogConnectorTests(unittest.TestCase):
         self.assertEqual(recorded[1]["X-api-key"], "redacted2")
         self.assertNotIn("Authorization", recorded[1])
 
+    def test_google_agent_registry_wrapper_only_accepts_typed_a2a_cards(self):
+        feed = {"agents": [
+            {"card": {"type": "A2A_AGENT_CARD", "content": CARD}},
+            {"card": {"type": "MCP_SERVER_CARD", "content":
+                      {**CARD, "name": "Fake MCP Agent"}}},
+            {"card": {"type": "A2A_AGENT_CARD", "content": json.dumps(
+                {**CARD, "name": "JSON Agent", "url": "https://json.example.org/a2a"})}},
+        ]}
+        records, refs = discover.unpack_cards(
+            feed, "https://agentregistry.googleapis.com/v1/projects/p/locations/global/agents",
+            "authorized-catalog")
+        self.assertEqual([x["name"] for x in records], ["Weather Agent", "JSON Agent"])
+        self.assertEqual(refs, [])
+
+    def test_google_registry_lists_bounded_read_only_pages_with_source_privacy(self):
+        source = "https://agentregistry.googleapis.com/v1/projects/team/locations/global/agents"
+        visits = []
+        def read(url, scheme, secret):
+            visits.append((url, scheme, secret))
+            if "pageToken=" not in url:
+                return {"agents": [{"card": {"type": "A2A_AGENT_CARD", "content": CARD}}],
+                        "nextPageToken": "private-cursor"}
+            return {"agents": [{"card": {"type": "A2A_AGENT_CARD", "content":
+                                        {**CARD, "name": "Research Agent",
+                                         "url": "https://research.example.org/a2a"}}}]}
+        result = discover.discover("", {
+            "private_catalogs": [{
+                "url": source, "kind": "gcp_agents_list",
+                "auth_type": "bearer", "token": "private-access", "publish": True,
+            }],
+        }, private_fetch=read, github=lambda *_: ([], []))
+        self.assertEqual(result["count"], 2)
+        self.assertEqual(len(visits), 2)
+        self.assertEqual(visits[0], (source + "?pageSize=30", "bearer", "private-access"))
+        self.assertEqual(visits[1][0], source + "?pageSize=30&pageToken=private-cursor")
+        self.assertTrue(all(row["source_url"] == source for row in result["results"]))
+        self.assertNotIn("private-cursor", json.dumps(result))
+        self.assertNotIn("private-access", json.dumps(result))
+
+    def test_google_registry_kind_rejects_unapproved_hosts_and_routes(self):
+        calls = []
+        def dangerous(*args):
+            calls.append(args)
+            raise AssertionError("Should not fetch Google-like API on arbitrary host")
+        result = discover.discover("", {
+            "private_catalogs": [{
+                "url": "https://different.example.org/v1/projects/p/locations/global/agents",
+                "kind": "gcp_agents_list", "auth_type": "bearer",
+                "token": "private", "publish": True,
+            }],
+        }, private_fetch=dangerous, github=lambda *_: ([], []))
+        self.assertEqual(result["count"], 0)
+        self.assertEqual(calls, [])
+        self.assertEqual(result["warnings"], ["Authorized catalog unavailable"])
+
     def test_private_error_never_exposes_source_hostname_or_credentials(self):
         source = {"url": "https://private-team.example.org/secret-feed.json",
                   "auth_type": "bearer", "token": "private-password", "publish": True}
