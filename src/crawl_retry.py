@@ -184,7 +184,9 @@ def record_outcomes(state, outcomes, today):
                     continue
         wait_days = min(30, 2 ** (failures - 1))
         previous[url] = {
-            "url": url, "source": old["source"] if old else origin,
+            "url": url, "source": (origin if old is None or
+                SOURCE_PRIORITY[origin] > SOURCE_PRIORITY[old["source"]]
+                else old["source"]),
             "failures": failures, "retry_day": min(MAX_DAY, today + wait_days),
         }
     state["pending"] = sorted(previous.values(), key=lambda x: x["url"])
