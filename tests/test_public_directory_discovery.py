@@ -61,7 +61,7 @@ class PublicDirectoryDiscoveryTests(unittest.TestCase):
         self.assertEqual(urls, [CARD_URL])
         self.assertEqual(warnings, [])
 
-    def test_embedded_a2a_card_is_unverified_and_has_no_raw_metadata(self):
+    def test_embedded_directory_card_requires_publisher_origin_fetch(self):
         def search(_url, _topic):
             return {"matches": [
                 {"card": CARD},
@@ -72,11 +72,28 @@ class PublicDirectoryDiscoveryTests(unittest.TestCase):
             "rotation_index": 0,
             "public_directory_apis": [{"endpoint": ENDPOINT, "enabled": True}]},
             post=search)
-        self.assertEqual(len(cards), 3)
-        self.assertTrue(all(card["name"] == "Forecast Agent" for card in cards))
-        self.assertTrue(all(card["verification"] == "card_read_only" for card in cards))
-        self.assertTrue(all("raw_card" not in card for card in cards))
-        self.assertEqual(urls, [])
+        self.assertEqual(cards, [])
+        self.assertEqual(urls, [CARD_URL])
+        self.assertEqual(warnings, [])
+
+    def test_declared_a2a_endpoint_probes_canonical_card_not_execution(self):
+        def search(_url, _topic):
+            return {"results": [
+                {"endpoints": {"a2a": "https://other.example.org/a2a"}},
+                {"reach": {"type": "a2a", "door": "https://third.example.org/gateway"}},
+                {"reach": {"type": "mcp", "door": "https://mcp.example.org/gateway"}},
+                {"endpoints": {"a2a": "http://localhost:8080/a2a"}},
+                {"endpoints": {"a2a": "https://user:password@example.org/a2a"}},
+            ]}
+        cards, urls, warnings = discover.public_directory_sources({
+            "rotation_index": 0,
+            "public_directory_apis": [{"endpoint": ENDPOINT, "enabled": True}]},
+            post=search)
+        self.assertEqual(cards, [])
+        self.assertEqual(urls, [
+            "https://other.example.org/.well-known/agent-card.json",
+            "https://third.example.org/.well-known/agent-card.json",
+        ])
         self.assertEqual(warnings, [])
 
     def test_candidates_are_crawled_by_existing_public_https_get_only(self):
