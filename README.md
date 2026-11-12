@@ -16,6 +16,15 @@ Scheduled [GitHub Actions indexing](.github/workflows/pages.yml) reads the curat
 
 GitHub Actions runs when the source changes, on the daily crawl schedule, or when an operator manually starts indexing. **A user's search never consumes a workflow slot.**
 
+## ANS names
+
+Publisher Agent Cards may supply `ansName` and `agentHost`, e.g.
+`ans://release-2026.11.weather.example.com`. Versions are preserved as
+provided, without SemVer rules or an inserted `v`.
+`GET /api/v1/ans/resolve?name=...` looks up stored name claims, never
+confusing them with proof of identity. DNA, certificates and signed
+transparency evidence require a separate verifier.
+
 ## Interfaces
 
 - [Search API and agent details](docs/API.md): `GET https://searcha2a-api.hereliesaz.workers.dev/api/v1/agents?query=weather`.
