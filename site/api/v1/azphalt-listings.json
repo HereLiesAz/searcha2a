@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "source": "searcha2a",
-  "generated_at": "2026-11-12T16:01:13.075634+00:00",
+  "generated_at": "2026-11-12T16:07:31.186024+00:00",
   "count": 150,
   "listings": [
     {
@@ -344,6 +344,41 @@
         "JSONRPC"
       ],
       "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
+      "id": "external.a2a.cca894a662a0397ac91e",
+      "kind": "a2a-agent",
+      "name": "Agent Contract Proof",
+      "description": "Verify that a public agent or API endpoint matches its advertised payment and schema contract.",
+      "endpoint": "https://agent-contract-proof.mattskowronis.workers.dev/a2a",
+      "source_url": "https://agent-contract-proof.mattskowronis.workers.dev/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/cca894a662a0397ac91e.json",
+      "skills": [
+        {
+          "name": "Verify Agent Contract",
+          "description": "Compare an agent's advertised contract with its live x402 challenge and return deterministic proof.",
+          "tags": [
+            "x402",
+            "agent-contract",
+            "payment-proof",
+            "schema-verification",
+            "dependency-monitoring"
+          ]
+        }
+      ],
+      "protocols": [
+        "JSONRPC"
+      ],
+      "security_schemes": [
+        "x402"
+      ],
       "capabilities": {
         "streaming": false,
         "pushNotifications": false
@@ -1367,6 +1402,48 @@
       "security_schemes": [],
       "capabilities": {
         "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
+      "id": "external.a2a.46920344a316771e4fca",
+      "kind": "a2a-agent",
+      "name": "AGENTUM Business",
+      "description": "Agente comercial/orquestrador da AGENTUM: recebe um trabalho e entrega o resultado pronto, via protocolo Agent2Agent (A2A). Não é um modelo de IA novo — é uma camada de execução sobre skills reais.",
+      "endpoint": "https://business.agentum.lat/",
+      "source_url": "https://business.agentum.lat/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/46920344a316771e4fca.json",
+      "skills": [
+        {
+          "name": "Company Intelligence",
+          "description": "Recebe um CNPJ brasileiro (14 dígitos, com ou sem máscara) e devolve inteligência empresarial estruturada: razão social, situação cadastral, natureza jurídica, CNAE principal, endereço e indicação de Simples Nacional — agregada de fontes públicas oficiais (brasilapi.com.br, com fallback em receitaws.com.br).",
+          "tags": [
+            "brasil",
+            "cnpj",
+            "business-intelligence",
+            "kyb"
+          ]
+        },
+        {
+          "name": "Repo Intelligence",
+          "description": "Recebe um repositório público do GitHub (owner/repo) e uma pergunta, e devolve uma resposta contextualizada sobre a documentação/código desse repositório — via MCP (DeepWiki, mcp.deepwiki.com), servidor externo real. Grátis nesta rodada de laboratório (sem cobrança x402 ainda).",
+          "tags": [
+            "mcp",
+            "github",
+            "documentation",
+            "technical-intelligence"
+          ]
+        }
+      ],
+      "protocols": [
+        "JSONRPC"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": true,
         "pushNotifications": false
       },
       "verification": "card_read_only",
@@ -7000,6 +7077,35 @@
       "source": "searcha2a"
     },
     {
+      "id": "external.a2a.415ec19b0ce3f07a3bb4",
+      "kind": "a2a-agent",
+      "name": "Hello World Agent",
+      "description": "A simple A2A agent that responds with 'Hello World' to any request",
+      "endpoint": "https://hello.a2aregistry.org",
+      "source_url": "https://hello.a2aregistry.org/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/415ec19b0ce3f07a3bb4.json",
+      "skills": [
+        {
+          "name": "Say Hello",
+          "description": "Responds with a friendly 'Hello World' message",
+          "tags": [
+            "greeting",
+            "hello",
+            "simple"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
       "id": "external.a2a.25203447c4acaf7d455e",
       "kind": "a2a-agent",
       "name": "HORIZON SHIELD KIRA",
@@ -8727,6 +8833,83 @@
       "source": "searcha2a"
     },
     {
+      "id": "external.a2a.5744218833acfbddcaf1",
+      "kind": "a2a-agent",
+      "name": "MyDankTank Public Information Agent",
+      "description": "Read-only public agent for MyDankTank educational catalog metadata, taxonomy, Journal content, public policies, and machine discovery. No purchase, ordering, payment, recommendation, account, or administrative authority.",
+      "endpoint": "https://mydanktank.com/a2a",
+      "source_url": "https://mydanktank.com/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/5744218833acfbddcaf1.json",
+      "skills": [
+        {
+          "name": "Get Machine Capabilities",
+          "description": "Return MyDankTank public machine-discovery surfaces, evidence boundaries, and explicit authority exclusions.",
+          "tags": [
+            "cannabis-education",
+            "catalog-metadata",
+            "journal",
+            "public-information",
+            "adult-21-plus"
+          ]
+        },
+        {
+          "name": "Search Catalog Education",
+          "description": "Search published MyDankTank catalog descriptions for educational product-format, flavor, lineage, and descriptive metadata. No price, stock, purchase URL, cart, or ordering data is returned.",
+          "tags": [
+            "cannabis-education",
+            "catalog-metadata",
+            "journal",
+            "public-information",
+            "adult-21-plus"
+          ]
+        },
+        {
+          "name": "List Catalog Taxonomy",
+          "description": "List public product-category taxonomy names and descriptions for machine classification. No transactional fields are returned.",
+          "tags": [
+            "cannabis-education",
+            "catalog-metadata",
+            "journal",
+            "public-information",
+            "adult-21-plus"
+          ]
+        },
+        {
+          "name": "Search Journal",
+          "description": "Search published MyDankTank Journal/editorial content and return titles, excerpts, dates, and canonical editorial URLs.",
+          "tags": [
+            "cannabis-education",
+            "catalog-metadata",
+            "journal",
+            "public-information",
+            "adult-21-plus"
+          ]
+        },
+        {
+          "name": "Get Public Policies",
+          "description": "Return canonical public informational and policy resources, including Start Here, About, Contact, Privacy, Journal, and llms.txt.",
+          "tags": [
+            "cannabis-education",
+            "catalog-metadata",
+            "journal",
+            "public-information",
+            "adult-21-plus"
+          ]
+        }
+      ],
+      "protocols": [
+        "JSONRPC"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
       "id": "external.a2a.23477b62442679c0034f",
       "kind": "a2a-agent",
       "name": "Name Whisper",
@@ -10146,6 +10329,44 @@
       "source": "searcha2a"
     },
     {
+      "id": "external.a2a.1b7c958583ca1443b4bd",
+      "kind": "a2a-agent",
+      "name": "PrivateWellnessRooms",
+      "description": "Find home sauna, steam room and cold plunge installers. Ask a question in plain text and get the matching wellness room builders, each with its page URL. For tool access, use the MCP server at https://privatewellnessrooms.fyi/mcp.",
+      "endpoint": "https://privatewellnessrooms.fyi/a2a",
+      "source_url": "https://privatewellnessrooms.fyi/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/1b7c958583ca1443b4bd.json",
+      "skills": [
+        {
+          "name": "Find wellness room builders",
+          "description": "Answer a plain-text question with the published wellness room builders that match its place, category or words: the number of matches and up to 5 of them with their page URL.",
+          "tags": [
+            "directory",
+            "wellness room builders",
+            "search"
+          ]
+        },
+        {
+          "name": "About PrivateWellnessRooms",
+          "description": "Say what PrivateWellnessRooms covers: how many wellness room builders it lists and which categories it has.",
+          "tags": [
+            "directory",
+            "wellness room builders",
+            "overview"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
       "id": "external.a2a.371fcd042468ad7f41fd",
       "kind": "a2a-agent",
       "name": "Proofline Evidence Router",
@@ -10420,6 +10641,38 @@
       "protocols": [
         "JSONRPC"
       ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
+      "id": "external.a2a.af5083a94b67adcab6b3",
+      "kind": "a2a-agent",
+      "name": "readr",
+      "description": "Paid web-content extraction API for AI agents. POST a URL to /read and receive the page's cleaned readable text as JSON. Costs $0.005 USDC per call on Base via x402 (unpaid calls get HTTP 402 with payment details). No account, no API key. Interacts over HTTPS REST, not A2A JSON-RPC; this card is published for registry discovery only.",
+      "endpoint": "https://readr.hatchagent.workers.dev",
+      "source_url": "https://readr.hatchagent.workers.dev/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/af5083a94b67adcab6b3.json",
+      "skills": [
+        {
+          "name": "Extract web content",
+          "description": "POST {\"url\": \"https://example.com\"} to /read; returns the page's cleaned title, text, and markdown as JSON. $0.005 USDC per call on Base via x402.",
+          "tags": [
+            "web",
+            "extraction",
+            "readability",
+            "text",
+            "x402",
+            "base"
+          ]
+        }
+      ],
+      "protocols": [],
       "security_schemes": [],
       "capabilities": {
         "streaming": false,
@@ -11193,401 +11446,6 @@
         "x402"
       ],
       "capabilities": {},
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a"
-    },
-    {
-      "id": "external.a2a.f40fad82af5f66ec54ae",
-      "kind": "a2a-agent",
-      "name": "Solvela",
-      "description": "Solana-native AI agent payment gateway — pay for LLM API calls with USDC-SPL via x402",
-      "endpoint": "https://api.solvela.ai/a2a",
-      "source_url": "https://api.solvela.ai/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/f40fad82af5f66ec54ae.json",
-      "skills": [
-        {
-          "name": "Chat Completion",
-          "description": "Proxy AI chat completions to 25 paid models across 5 providers (OpenAI, Anthropic, Google, xAI, DeepSeek), settled per request in USDC-SPL via x402",
-          "tags": [
-            "llm",
-            "chat",
-            "completions",
-            "ai",
-            "x402"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a"
-    },
-    {
-      "id": "external.a2a.f77a6b1b20dce0c331fa",
-      "kind": "a2a-agent",
-      "name": "Source Claim Proof",
-      "description": "Verify whether a supplied public source page currently supports one atomic factual claim. Returns supported, contradicted, or insufficient-evidence plus source snippets, or explicit blocked/unreachable/unsupported states. Not a general fact checker or web search.",
-      "endpoint": "https://source-claim-proof.mattskowronis.workers.dev/a2a",
-      "source_url": "https://source-claim-proof.mattskowronis.workers.dev/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/f77a6b1b20dce0c331fa.json",
-      "skills": [
-        {
-          "name": "Verify Source Claim",
-          "description": "Check whether a supplied public source currently supports one atomic factual claim. Returns supported, contradicted, or insufficient-evidence plus source snippets.",
-          "tags": [
-            "claim-verification",
-            "source-evidence",
-            "citation-check",
-            "research-preflight"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [
-        "x402"
-      ],
-      "capabilities": {},
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a"
-    },
-    {
-      "id": "external.a2a.06108869ca2cea00e7fe",
-      "kind": "a2a-agent",
-      "name": "SwarmSync Commerce Demo Agent",
-      "description": "Public demo agent showing how AI agents become commerce-ready: create paid tasks, hold funds in escrow, verify delivery, build portable trust with SwarmScore, and release or refund payment safely.",
-      "endpoint": "https://swarmsync-agents.onrender.com/a2a",
-      "source_url": "https://swarmsync-agents.onrender.com/.well-known/agent.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/06108869ca2cea00e7fe.json",
-      "skills": [
-        {
-          "name": "Escrow-Protected Payment Demo",
-          "description": "Simulates an escrow-protected agent-to-agent payment flow.",
-          "tags": [
-            "escrow",
-            "ap2",
-            "commerce",
-            "demo",
-            "agent payments"
-          ]
-        },
-        {
-          "name": "SwarmScore Trust Badge Demo",
-          "description": "Returns a sample portable trust badge for an AI agent.",
-          "tags": [
-            "swarmscore",
-            "trust",
-            "badge",
-            "demo",
-            "portable trust"
-          ]
-        },
-        {
-          "name": "Task Verification Demo",
-          "description": "Simulates task verification and payment release.",
-          "tags": [
-            "verification",
-            "task",
-            "commerce",
-            "demo",
-            "payment release"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a"
-    },
-    {
-      "id": "external.a2a.a1c90b59cf3e17e1bf86",
-      "kind": "a2a-agent",
-      "name": "Tailorwren by CyberMax",
-      "description": "Resume tailoring API: rewrites resume bullets to weave in a job ad's missing keywords using only the resume's own facts, and drafts cover letters (Workers AI). Resumes and job ads are never stored. Free: 2 AI bullet rewrites a day; a Pro key raises the caps and adds cover letters.",
-      "endpoint": "https://tailorwren.cybermaxtools.com",
-      "source_url": "https://tailorwren.cybermax-tools.workers.dev/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/a1c90b59cf3e17e1bf86.json",
-      "skills": [
-        {
-          "name": "Rewrite resume bullets for a job's keywords",
-          "description": "POST /api/rewrite with JSON {\"bullets\":[...],\"keywords\":[...],\"title\"} returns the bullets rewritten to include the missing keywords without inventing facts. Free: 2 a day per caller; Pro key: higher daily caps.",
-          "tags": [
-            "resume",
-            "ats",
-            "job application",
-            "cover letter",
-            "keywords"
-          ]
-        },
-        {
-          "name": "Draft a cover letter from a resume and job ad",
-          "description": "POST /api/cover with JSON {\"resume\",\"job\",\"title\",\"company\"} (resume 200+ characters, job ad 100+) returns a cover-letter draft. Pro key required.",
-          "tags": [
-            "resume",
-            "ats",
-            "job application",
-            "cover letter",
-            "keywords"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [
-        "licenceKey"
-      ],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a"
-    },
-    {
-      "id": "external.a2a.eea1002b28f75ab208bf",
-      "kind": "a2a-agent",
-      "name": "Tankfern by CyberMax",
-      "description": "Heating degree day and heating fuel price API for fuel-oil and propane delivery planning: daily heating degree days for US weather stations (NOAA Regional Climate Centers, ACIS) with any base temperature, station search by state, and the latest weekly residential heating oil and propane prices (U.S. Energy Information Administration). Free, no key. The Tankfern web app (K-factor delivery planner) keeps customer data in the browser.",
-      "endpoint": "https://tankfern.cybermaxtools.com",
-      "source_url": "https://tankfern.cybermax-tools.workers.dev/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/eea1002b28f75ab208bf.json",
-      "skills": [
-        {
-          "name": "Daily heating degree days for a station",
-          "description": "GET /api/hdd?sid=EWR&start=YYYY-MM-DD&end=YYYY-MM-DD&base=65 returns daily heating degree days from NOAA ACIS, cached 6 hours.",
-          "tags": [
-            "degree days",
-            "heating oil",
-            "propane",
-            "k-factor",
-            "fuel delivery"
-          ]
-        },
-        {
-          "name": "Weather stations with degree-day data by state",
-          "description": "GET /api/stations?state=NJ returns stations (name, ids, coordinates) that report heating degree days, cached 6 hours.",
-          "tags": [
-            "degree days",
-            "heating oil",
-            "propane",
-            "k-factor",
-            "fuel delivery"
-          ]
-        },
-        {
-          "name": "Weekly residential heating oil and propane prices",
-          "description": "GET /api/prices returns the latest weekly residential No. 2 heating oil and propane prices ($/gal) from EIA (survey runs October-March), cached 12 hours.",
-          "tags": [
-            "degree days",
-            "heating oil",
-            "propane",
-            "k-factor",
-            "fuel delivery"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a"
-    },
-    {
-      "id": "external.a2a.d9fec70c4dc97a05bfb1",
-      "kind": "a2a-agent",
-      "name": "Tellumen Data Management Agent",
-      "description": "Seventeen skills spanning small-business data and A2A agent security/trust: (1) scans a business's public website for data-tracking gaps, (2) audits a CSV export for data-quality issues and scores it, (3) computes period-over-period KPI changes from two sales exports, (4) turns those numbers into chart-ready data plus a short plain-English narrative, (5) remembers a source-tagged fact about any entity, (6) recalls what's known about an entity with age-decayed confidence, (7) ranks real business categories by their biggest measured data-readiness gap, (8) verifies another A2A agent's card for domain spoofing and hidden injected instructions, (9) checks any third-party page or text for hidden prompt-injection attempts or leaked secrets/PII before an agent acts on it, (10) records a spend policy for an entity, (11) checks a proposed payment against that policy before it happens, (12) aggregates an agent's full verify/safety history into a single reputation score, (13) checks whether a proposed action even relates to what an agent's own card says it's for, (14) logs what an agent was actually instructed to do before it transacts, (15) bundles that history into evidence for a real payme",
-      "endpoint": "https://tellumen-a2a-agent.onrender.com/a2a/jsonrpc",
-      "source_url": "https://tellumen-a2a-agent.onrender.com/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/d9fec70c4dc97a05bfb1.json",
-      "skills": [
-        {
-          "name": "Scan Business Site",
-          "description": "Use this when you need to know what a business's public website reveals about its internal data maturity — e.g. before pitching a data or analytics product to that business. Input: plain text \"url\" or \"url, category\". Returns a structured data-readiness finding for that business, plus a real benchmark against other businesses of the same type (ecommerce vs. service) scanned so far — e.g. \"62% of similar businesses have analytics installed\" — computed from an aggregate database of real scans, not",
-          "tags": [
-            "data",
-            "audit",
-            "small-business",
-            "website",
-            "benchmark"
-          ]
-        },
-        {
-          "name": "Audit CSV Data",
-          "description": "Use this when you have a CSV export and need to know whether it can be trusted before analyzing or reporting on it. Input: JSON text {\"business\": \"name\", \"csv\": \"raw csv text\"}. Returns a data-quality score, column profile, duplicates, outliers, and date-coverage gaps computed from the real values in the file.",
-          "tags": [
-            "data",
-            "audit",
-            "csv",
-            "data-quality"
-          ]
-        },
-        {
-          "name": "Analyze KPI Trend",
-          "description": "Use this when you need real computed KPIs and period-over-period change from sales data, not a rough estimate. Input: JSON text {\"client\": \"name\", \"currentCsv\": \"raw csv\", \"priorCsv\": \"raw csv (optional)\"}. CSV schema: Date, Customer, Product, Quantity, Amount. Returns computed KPIs (revenue, orders, avg order value, repeat-customer rate, top product) and, if priorCsv is given, the period-over-period percent change in each.",
-          "tags": [
-            "data",
-            "kpi",
-            "analytics",
-            "csv"
-          ]
-        },
-        {
-          "name": "Tell Data Story",
-          "description": "Use this when you need to explain what changed in the numbers, in plain English, not just report the numbers themselves. Input: JSON text {\"skill\": \"tell-data-story\", \"client\": \"name\", \"currentCsv\": \"raw csv\", \"priorCsv\": \"raw csv (optional)\"} — the \"skill\" field is required to disambiguate from analyze-kpi-trend, which takes the same CSV fields. Returns chart-ready data (labels/series/suggested type — not a rendered image) plus a short plain-English narrative. The narrative uses an AI call and ",
-          "tags": [
-            "data",
-            "visualization",
-            "storytelling",
-            "kpi"
-          ]
-        },
-        {
-          "name": "Remember Fact",
-          "description": "Use this whenever you learn something worth persisting about any entity, so a later call — by you or another agent — can retrieve it with proper provenance instead of re-deriving it or forgetting it. Input: JSON text {\"entity\": \"any identifier\", \"key\": \"fact name\", \"value\": \"...\", \"source\": \"how this was verified\", \"halfLifeDays\": 90 (optional)}. Records a source-tagged, timestamped observation about an entity. Never overwrites — prior observations are kept so contradictions stay visible instead",
-          "tags": [
-            "memory",
-            "ground-truth",
-            "persistence"
-          ]
-        },
-        {
-          "name": "Recall Facts",
-          "description": "Use this before trusting or acting on any claim about an entity — check what has already been recorded first, including whether observations have ever conflicted. Input: JSON text {\"entity\": \"any identifier\", \"key\": \"fact name (optional — omit for all known facts)\"}. Returns what's known about an entity: latest value, source, age-decayed confidence (a fact halves in confidence every halfLifeDays), and whether observations have conflicted over time.",
-          "tags": [
-            "memory",
-            "ground-truth",
-            "persistence"
-          ]
-        },
-        {
-          "name": "Market Gap Report",
-          "description": "Use this when you need to know which real, measured data gap is most common in a business category, not a guess or a web-scraped assumption. Input: JSON text {\"skill\": \"market-gap-report\", \"minSampleSize\": 8 (optional)}. Ranks real business categories we've actually scanned by their biggest measured data-readiness gap (e.g. \"73% of scanned land surveyors have no email marketing, n=45\"). Backed by real accumulated scan data, not web-scraped guesses — a category only appears once enough real busin",
-          "tags": [
-            "market-research",
-            "benchmark",
-            "opportunity"
-          ]
-        },
-        {
-          "name": "Verify Agent Card",
-          "description": "Use this before invoking or trusting another A2A agent for the first time. Input: JSON text {\"skill\": \"verify-agent-card\", \"url\": \"...\"} — url is either an A2A agent's base URL or its direct agent-card.json URL. Fetches the target's real agent card and checks it for A2A-specific security red flags a general prompt-injection scanner would miss: domain spoofing (does the card's declared endpoint actually match where it was served from), and injection-shaped phrasing hidden inside the name/descript",
-          "tags": [
-            "security",
-            "a2a",
-            "agent-verification"
-          ]
-        },
-        {
-          "name": "Check Content Safety",
-          "description": "Use this before reading, summarizing, or acting on any third-party page or text. Input: JSON text {\"skill\": \"check-content-safety\", \"url\": \"...\"} or {\"skill\": \"check-content-safety\", \"content\": \"raw html or text\", \"entity\": \"optional key for propagation tracking\"} — give url or content. Checks any page or blob of text an agent is about to read/act on for a hidden-instruction prompt-injection attempt aimed at an AI reader specifically: elements styled invisible to a human (font-size:0, display:no",
-          "tags": [
-            "security",
-            "prompt-injection",
-            "content-safety",
-            "pii",
-            "secrets"
-          ]
-        },
-        {
-          "name": "Set Spend Policy",
-          "description": "Use this to set a spending guardrail for yourself or another entity before payments start flowing. Input: JSON text {\"skill\": \"set-spend-policy\", \"entity\": \"your agent/wallet identifier\", \"maxPerPaymentUsd\": 0.50, \"maxCumulativeUsd\": 10.00, \"windowHours\": 24}. Records a spending policy for an entity. This is an opt-in advisory ledger, not a wallet-level enforcement mechanism — we are not in the payment path, so an agent must proactively call check-spend before each payment for this to have any e",
-          "tags": [
-            "payments",
-            "guardrails",
-            "spend-controls"
-          ]
-        },
-        {
-          "name": "Check Spend",
-          "description": "Use this immediately before making a payment, to confirm it does not violate a previously set spend policy. Input: JSON text {\"skill\": \"check-spend\", \"entity\": \"same identifier used in set-spend-policy\", \"amountUsd\": 0.15}. Checks a proposed payment amount against that entity's policy and its recorded spend within the configured rolling window. If allowed, the amount is recorded so subsequent checks account for it — one call per payment attempt. Returns {allowed: true/false, reason, currentCumul",
-          "tags": [
-            "payments",
-            "guardrails",
-            "spend-controls"
-          ]
-        },
-        {
-          "name": "Get Agent Reputation",
-          "description": "Use this when deciding whether to trust an agent you have not personally checked yet — read its accumulated track record instead of starting from zero. Input: JSON text {\"skill\": \"get-agent-reputation\", \"url\": \"an agent's base URL\"}. Aggregates every verify-agent-card and check-content-safety verdict ever logged against that domain (via the same remember-fact propagation those two skills already write to) into a single 0-100 score and a reputation label (trusted / neutral / flagged), weighted by",
-          "tags": [
-            "reputation",
-            "trust",
-            "a2a",
-            "memory"
-          ]
-        },
-        {
-          "name": "Check Scope Boundary",
-          "description": "Use this before letting an agent take an action, to sanity-check whether that action even relates to what the agent claims it exists to do. Input: JSON text {\"skill\": \"check-scope-boundary\", \"agentCardUrl\": \"...\", \"proposedAction\": \"free-text description of what the agent is about to do\"}. Fetches the target agent's card and checks whether the proposed action even relates to what the card declares that agent is for — a keyword-overlap heuristic, not semantic understanding, explicitly reported as",
-          "tags": [
-            "security",
-            "scope",
-            "anomaly-detection",
-            "a2a"
-          ]
-        },
-        {
-          "name": "Log Transaction Intent",
-          "description": "Use this immediately before an agent pays for something, to create a real record of what it was actually told to do. Input: JSON text {\"skill\": \"log-transaction-intent\", \"entity\": \"a transaction or trace id you control\", \"instruction\": \"what the agent was actually told to do, e.g. 'reorder my usual coffee subscription if under $20'\", \"actor\": \"optional — who/what issued the instruction\"}. Records a timestamped attestation of intent before a payment happens, so there is a real record of what was ",
-          "tags": [
-            "payments",
-            "disputes",
-            "attestation",
-            "memory"
-          ]
-        },
-        {
-          "name": "Get Dispute Evidence",
-          "description": "Use this when a payment dispute or chargeback needs real evidence of what was authorized, not just a memory of what happened. Input: JSON text {\"skill\": \"get-dispute-evidence\", \"entity\": \"the same transaction/trace id used with log-transaction-intent\"}. Bundles every fact ever logged for that id into a single chronological evidence packet with a plain-English summary — built for handing to a merchant or payment processor fighting a chargeback, not just another agent. Aimed at the real, currently",
-          "tags": [
-            "payments",
-            "disputes",
-            "evidence",
-            "liability"
-          ]
-        },
-        {
-          "name": "Register Agent Monitor",
-          "description": "Use this to start tracking another agent's uptime and latency over time, rather than only ever checking it once. Input: JSON text {\"skill\": \"register-agent-monitor\", \"url\": \"an agent's base URL\"}. Adds an agent to a recurring uptime/latency poll (every 15 minutes) run by this server. One-time registration; use get-agent-uptime afterward to read the accumulated history.",
-          "tags": [
-            "monitoring",
-            "uptime",
-            "reliability",
-            "a2a"
-          ]
-        },
-        {
-          "name": "Get Agent Uptime",
-          "description": "Use this when deciding whether an agent is reliable enough to depend on — read its measured track record, not just the result of a single successful ping. Input: JSON text {\"skill\": \"get-agent-uptime\", \"url\": \"an agent's base URL\"}. Reports measured uptime percentage and average latency from the recurring poll history (register-agent-monitor first, then check back after at least one 15-minute cycle). Honestly caveated: this monitoring process can itself sleep during idle periods on its hosting p",
-          "tags": [
-            "monitoring",
-            "uptime",
-            "reliability",
-            "a2a"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "pushNotifications": false
-      },
       "verification": "card_read_only",
       "installable": false,
       "source": "searcha2a"
