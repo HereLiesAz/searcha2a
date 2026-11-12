@@ -1003,7 +1003,7 @@ def post_public_directory_discover(url: str, need: str):
             if len(data) > MAX_PUBLIC_DISCOVERY_BYTES:
                 raise DiscoveryError("Oversized directory metadata")
             return json.loads(data)
-    except (ValueError, urllib.error.URLError, TimeoutError, OSError) as exc:
+    except (ValueError, RecursionError, urllib.error.URLError, TimeoutError, OSError) as exc:
         raise DiscoveryError("Directory metadata unavailable") from exc
 
 
@@ -1072,7 +1072,7 @@ def public_directory_sources(config, post=post_public_directory_discover):
                         continue
                     if derived:
                         local_links.append(derived)
-            except (DiscoveryError, ValueError, TypeError):
+            except (DiscoveryError, ValueError, TypeError, RecursionError):
                 warnings.append("Public directory metadata unavailable")
         links.extend(local_links)
     return cards, list(dict.fromkeys(links))[:MAX_FOLLOWUP_CARD_URLS], warnings
