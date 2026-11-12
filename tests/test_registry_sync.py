@@ -102,15 +102,11 @@ class RegistrySyncTests(unittest.TestCase):
             registry_sync.ingest(
                 {'query': 'weather', 'results': [GOOD_CARD]},
                 'https://api.example', 'private', opener=opener)
-        with self.assertRaisesRegex(ValueError, '150'):
-            registry_sync.ingest(
-                {'query': '', 'results': [GOOD_CARD] * 151},
-                'https://api.example', 'private', opener=opener)
 
 
-    def test_150_card_catalog_splits_by_count_and_union_suppression(self):
+    def test_more_than_150_cards_split_by_count_and_union_suppression(self):
         cards = [{**GOOD_CARD, 'id': format(i, '020x'),
-                  'name': 'Agent ' + str(i)} for i in range(150)]
+                  'name': 'Agent ' + str(i)} for i in range(205)]
         requests = []
         def opener(request, timeout):
             payload = json.loads(request.data)
@@ -118,18 +114,18 @@ class RegistrySyncTests(unittest.TestCase):
             ids = [item["id"] for item in payload["results"]]
             excluded = [i for i in ids if i in ("00000000000000000001", "00000000000000000063")]
             return Response(json.dumps({"status": "stored", "ingested": len(ids),
-                "total": 150, "suppressed_ids": excluded}).encode())
+                "total": 205, "suppressed_ids": excluded}).encode())
 
-        result = registry_sync.ingest({"query": "", "count": 150, "results": cards},
+        result = registry_sync.ingest({"query": "", "count": 205, "results": cards},
             "https://api.example", "private", opener=opener,
             sleep=lambda _: self.fail("unexpected retry"))
         self.assertEqual(len(requests), 3)
-        self.assertEqual([len(req["results"]) for req in requests], [70, 70, 10])
-        self.assertEqual(result["ingested"], 150)
+        self.assertEqual([len(req["results"]) for req in requests], [70, 70, 65])
+        self.assertEqual(result["ingested"], 205)
         self.assertEqual(result["suppressed_ids"], [
             "00000000000000000001", "00000000000000000063"])
         self.assertEqual(registry_sync.filter_export_catalog(
-            {"query": "", "results": cards}, result)["count"], 148)
+            {"query": "", "results": cards}, result)["count"], 203)
 
     def test_large_valid_catalog_is_split_by_encoded_byte_length(self):
         cards = [{**GOOD_CARD, "id": format(i, "020x"),

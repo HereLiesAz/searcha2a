@@ -155,13 +155,19 @@ export class AgentRegistry {
     }
 
     if (request.method === 'GET' && path === '/candidates') {
+      const offsetText = url.searchParams.get('offset') || '0';
+      if (!/^(0|[1-9]\d*)$/.test(offsetText) || !Number.isSafeInteger(Number(offsetText))) {
+        return respond({ error: 'Invalid candidate offset' }, 400);
+      }
+      const offset = Number(offsetText);
       const rows = this.sql.exec(`SELECT record FROM agents
         WHERE listing_state='active' AND review_status != 'rejected'
-        ORDER BY updated_at DESC, name_search ASC LIMIT 151`).toArray();
+        ORDER BY updated_at DESC, name_search ASC, id ASC LIMIT 101 OFFSET ?`, offset).toArray();
       const meta = this.sql.exec(
         "SELECT value FROM registry_meta WHERE key='last_ingested_at'").toArray()[0];
-      return respond({ entries: rows.slice(0, 150).map(row => JSON.parse(row.record)),
-        truncated: rows.length > 150, generated_at: meta?.value || null });
+      return respond({ entries: rows.slice(0, 100).map(row => JSON.parse(row.record)),
+        next_offset: rows.length > 100 ? offset + 100 : null,
+        truncated: false, generated_at: meta?.value || null });
     }
     if (request.method === 'GET' && path === '/search') {
       const query = (url.searchParams.get('query') || '').trim().replace(/\s+/g, ' ');
@@ -343,16 +349,30 @@ async function handle(request, env) {
     } catch { return directoryReply({ error: 'Search unavailable' }, 503); }
     if (!env.REGISTRY) return directoryReply({ error: 'Registry not configured' }, 503);
     try {
-      const candidates = await registryStub(env).fetch(
-        new Request('https://registry.internal/candidates'));
-      if (!candidates.ok) throw new Error('Registry unavailable');
-      const data = await candidates.json();
-      const entries = data.entries.map(agent => ({
-        ...agent, kind: 'a2a-agent', installable: false,
-      }));
-      const ranked = await rankAgentCandidates(query, env, entries, data.generated_at);
+      const entries = [];
+      let offset = 0;
+      let generatedAt = null;
+      const registry = registryStub(env);
+      while (true) {
+        const candidates = await registry.fetch(
+          new Request('https://registry.internal/candidates?offset=' + offset));
+        if (!candidates.ok) throw new Error('Registry unavailable');
+        const data = await candidates.json();
+        if (!Array.isArray(data.entries)) throw new Error('Invalid registry candidates');
+        generatedAt = data.generated_at ?? generatedAt;
+        entries.push(...data.entries.map(agent => ({
+          ...agent, kind: 'a2a-agent', installable: false,
+        })));
+        if (data.next_offset == null) break;
+        if (!Number.isSafeInteger(data.next_offset) ||
+            data.next_offset <= offset || data.entries.length !== 100) {
+          throw new Error('Invalid registry pagination');
+        }
+        offset = data.next_offset;
+      }
+      const ranked = await rankAgentCandidates(query, env, entries, generatedAt);
       return directoryReply({ ...ranked, candidate_scope: 'persistent-registry',
-        truncated: data.truncated });
+        truncated: false });
     } catch { return directoryReply({ error: 'Indexed directory temporarily unavailable' }, 502); }
   }
   // Read-only registry endpoints are public APIs, including to other web apps.

@@ -347,6 +347,40 @@ test('ANS resolution exposes duplicate publisher claims without selecting an ide
   } finally { state.close(); }
 });
 
+test('semantic directory paginates every persisted card and honors moderation beyond 150', async () => {
+  const state = registryEnvironment();
+  state.env.SEARCH_RATE_LIMITER = { limit: async () => ({ success: true }) };
+  try {
+    const records = Array.from({ length: 205 }, (_, i) => card(
+      i.toString(16).padStart(20, '0'),
+      'Agent ' + i.toString().padStart(3, '0'),
+      i === 204 ? 'starlingcapability' : 'Routine',
+    ));
+    for (let i = 0; i < records.length; i += 70) {
+      assert.equal((await ingest(state.env, records.slice(i, i + 70))).status, 200);
+    }
+    assert.equal((await (await lookup(state.env)).json()).total, 205);
+    let response = await handle(request('/api/v1/directory?q=starlingcapability'), state.env);
+    assert.equal(response.status, 200);
+    let data = await response.json();
+    assert.equal(data.truncated, false);
+    assert.deepEqual(data.results.map(agent => agent.id), [records[204].id]);
+    assert.equal((await manage(state.env, records[204].id, 'reject', 'Unsafe listing')).status, 200);
+    response = await handle(request('/api/v1/directory?q=starlingcapability'), state.env);
+    data = await response.json();
+    assert.equal(data.results.length, 0);
+    await ingest(state.env, [records[204]]);
+    assert.equal((await (await handle(request('/api/v1/directory?q=starlingcapability'),
+      state.env)).json()).results.length, 0);
+    assert.equal((await manage(state.env, records[203].id, 'deactivate', 'Unavailable')).status, 200);
+    const candidates = await state.env.REGISTRY.get().fetch(request('/candidates?offset=100'));
+    assert.equal(candidates.status, 200);
+    const page = await candidates.json();
+    assert.equal(page.entries.length, 100);
+    assert.equal(page.next_offset, 200);
+  } finally { state.close(); }
+});
+
 test('partial A2A cards are indexed with empty skills without accepting generic JSON', async () => {
   const state = registryEnvironment();
   try {

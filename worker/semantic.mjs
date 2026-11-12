@@ -7,7 +7,6 @@
 const CATALOG_URL = 'https://raw.githubusercontent.com/HereLiesAz/searcha2a/agent-feed/site/api/v1/azphalt-listings.json';
 const EMBEDDING_MODEL = '@cf/baai/bge-small-en-v1.5';
 const MAX_CATALOG_BYTES = 16_777_216;
-const MAX_CANDIDATES = 150;
 const MAX_RESULTS = 20;
 const STOP_WORDS = new Set(['a', 'an', 'and', 'at', 'by', 'can', 'find', 'for', 'from', 'in', 'me', 'of', 'on', 'or', 'the', 'to', 'who', 'with']);
 
@@ -110,7 +109,7 @@ export async function readPublishedAgents(fetcher = fetch) {
     agent.installable === false && agent.verification === 'card_read_only' &&
     typeof agent.name === 'string' && publicCardUrl(agent.source_url));
   return { generated_at: typeof feed.generated_at === 'string' ? feed.generated_at : null,
-    entries: entries.slice(0, MAX_CANDIDATES) };
+    entries };
 }
 
 function validEmbeddings(data, count) {

@@ -22,11 +22,10 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_DOCUMENT = 524288
-# The aggregate Azphalt listings feed can contain up to 150 bounded Agent Cards.
+# Aggregate feeds retain a byte ceiling; the scheduled result count is not capped.
 MAX_CATALOG_DOCUMENT = 16_777_216
 MAX_PUBLIC_REGISTRY_JSON = 8_388_608
 MAX_CANDIDATES = 350
-MAX_RESULTS = 150
 MAX_GITHUB_CANDIDATES = 50
 MAX_DOMAIN_SEEDS = 12
 MAX_MANIFEST_ITEMS = 150
@@ -1564,8 +1563,8 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     return {
         "query": query,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "count": min(len(ordered), MAX_RESULTS),
-        "results": ordered[:MAX_RESULTS],
+        "count": len(ordered),
+        "results": ordered,
         "warnings": warnings[:10],
         "verified": "Agent Card metadata only; endpoints are not actively probed",
     }
