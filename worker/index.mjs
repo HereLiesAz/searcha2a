@@ -156,7 +156,7 @@ export class AgentRegistry {
 
     if (request.method === 'GET' && path === '/candidates') {
       const offsetText = url.searchParams.get('offset') || '0';
-      if (!/^(0|[1-9]\\d*)$/.test(offsetText) || !Number.isSafeInteger(Number(offsetText))) {
+      if (!/^(0|[1-9]\d*)$/.test(offsetText) || !Number.isSafeInteger(Number(offsetText))) {
         return respond({ error: 'Invalid candidate offset' }, 400);
       }
       const offset = Number(offsetText);
