@@ -122,6 +122,22 @@ class CheckpointPersistenceTests(unittest.TestCase):
              patch.object(checkpoints, "github_api", side_effect=AssertionError):
             checkpoints.save_state(DOC)
 
+    def test_workflow_commits_only_after_authenticated_ingest(self):
+        workflow = (Path(__file__).resolve().parents[1] /
+                    ".github/workflows/pages.yml").read_text(encoding="utf-8")
+        steps = [
+            "- name: Load durable ERC-8004 checkpoint",
+            "- name: Build public catalog",
+            "- name: Ingest scheduled crawl into persistent registry",
+            "- name: Commit durable ERC-8004 checkpoint",
+            "- name: Export Azphalt external-agent listings",
+        ]
+        locations = [workflow.index(step) for step in steps]
+        self.assertEqual(locations, sorted(locations))
+        self.assertIn("python3 src/crawl_checkpoint.py save .crawl-state/staged.json", workflow)
+        self.assertIn("REGISTRY_SYNC_SECRET: ${{ secrets.RESULT_CALLBACK_SECRET }}", workflow)
+        self.assertIn("contents: write", workflow)
+
     def test_github_token_and_repo_required_before_network_request(self):
         with patch.dict("os.environ", {"GITHUB_REPOSITORY": "bad/path/extra",
                                        "GH_TOKEN": "secret-value"}), \
