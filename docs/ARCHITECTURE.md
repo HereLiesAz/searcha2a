@@ -36,6 +36,29 @@ In parallel, the Pages job publishes the latest **bounded crawl snapshot** as `/
 - **Why the semantic directory is retained:** The independently introduced `/api/v1/directory` interface supports existing clients and optional Workers AI over the published snapshot. It remains read-only and cannot invoke Actions. The persistent SQL registry is canonical for cumulative keyword searches; semantic search can migrate to that index separately without restoring dispatch.
 - **Why metadata stays non-installable:** Discovering an Agent Card does not establish runtime health, ownership, conformance, or authorization. The export cannot be represented as a signed `.azp` package.
 
+## Unified ANS name layer
+
+The naming, capability search, and verified-identity concepts share one
+SearchA2A registry. Publishers control their version format, encoded as
+`ans://<version>.<agentHost>`, with no inferred SemVer or `v` prefix.
+The Agent Card declares `ansName` and `agentHost` explicitly so the
+version-to-domain boundary is never guessed.
+
+`worker/ans.mjs` checks only DNS-name syntax and that the claimed host
+matches the explicit host. `AgentRegistry` retains the untrusted claim
+beside its stable record ID, indexes it, and exposes read-only
+`GET /api/v1/ans/resolve`. Curation and suppression apply identically
+to keyword search and name lookup. No read makes external network calls;
+claims never become `verified` by ingest or moderation.
+
+The separately deployed identity verifier will eventually check the
+Linux Foundation ANS DNS discovery profile, certificate binding, signed
+transparency evidence, freshness and revocation. Its current ANS v2 wire
+syntax mandates `ans://v{numeric-semver}.{agentHost}`; broader opaque
+publisher versions can be locally indexed but must not be misrepresented
+as conforming to that external standard without actual verification.
+Azphalt package signing remains a separate authority.
+
 ## Components
 
 | Component | Source |
