@@ -1,56 +1,41 @@
 # SearchA2A operations
 
-Implementation details: [ARCHITECTURE.md](ARCHITECTURE.md). Public API: [API.md](API.md). User instructions: [README.md](../README.md).
+[User guide](../README.md) · [API](API.md) · [Architecture](ARCHITECTURE.md)
 
-## Deployment inventory
+## Production
 
-| Component | Code or job | Deployed location |
-| --- | --- | --- |
-| Public web site and static JSON | `.github/workflows/pages.yml` | https://searcha2a.azphalt.store |
-| Live dispatch and callback gateway | `.github/workflows/gateway.yml` and `worker/` | https://searcha2a-api.hereliesaz.workers.dev |
-| Search executor | `.github/workflows/search.yml` | GitHub Actions on demand |
-| Result mailbox | `SearchResult` in `worker/index.mjs` | SQLite-backed Cloudflare Durable Object, one per UUID |
-| Store discovery feed | `src/azphalt_listings.py` and `pages.yml` | Pages JSON and mirrored `agent-feed` branch |
-
-### Repository settings and secrets
-
-**Repository Actions variables:**
-
-| Name | Value |
+| Service | Location |
 | --- | --- |
-| `SEARCHA2A_API_URL` | `https://searcha2a-api.hereliesaz.workers.dev` |
-| `TURNSTILE_SITE_KEY` | The **public** site key for a Cloudflare Turnstile widget authorized for `searcha2a.azphalt.store` |
+| Browser | https://searcha2a.azphalt.store |
+| Persistent registry | https://searcha2a-api.hereliesaz.workers.dev/api/v1/agents |
+| Compatibility directory | https://searcha2a-api.hereliesaz.workers.dev/api/v1/directory?q=weather |
+| Latest crawl snapshot | https://searcha2a.azphalt.store/api/v1/catalog.json |
+| Azphalt external-agent directory | https://azphalt.store/agents |
 
-**Repository Actions secrets:** `CLOUDFLARE_API_TOKEN` (Worker deploy rights), `CLOUDFLARE_ACCOUNT_ID`, and `RESULT_CALLBACK_SECRET` (identical to the Worker secret). Domain automation additionally needs `PAGES_ADMIN_TOKEN`, `CLOUDFLARE_ZONE_ID` and an appropriately DNS-scoped Cloudflare token.
+## Automation
 
-**Worker-only secrets:** `GITHUB_DISPATCH_TOKEN` (fine-grained token scoped to `HereLiesAz/searcha2a` with Actions: write), `TURNSTILE_SECRET` (private site secret), `RESULT_CALLBACK_SECRET` (same value as repository callback secret). Do not put these secrets in `site/config.json`, Pages artifacts, commits, test output or browser code.
+- [Reindex and publish Pages](../.github/workflows/pages.yml): on pushes to main, daily at **03:29 UTC**, or manually. Crawls, syncs normalized cards into the persistent registry, exports the bounded Pages snapshot and Azphalt directory.
+- [Deploy API Gateway](../.github/workflows/gateway.yml): on Worker or gateway workflow changes to main, or manually. Deploys `AgentRegistry` with `v2` SQLite migration and checks `GET /api/v1/agents?limit=1`. It also retains the legacy `SearchResult` `v1` class for pending seven-day mailboxes.
+- **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410.
 
-## Configure domain and Cloudflare
+## Settings and credentials
 
-GitHub Pages must use **GitHub Actions** as its build source and register the custom domain `searcha2a.azphalt.store`. Cloudflare DNS must have a **DNS-only CNAME** `searcha2a` → `hereliesaz.github.io`. The repo's manual [Configure searcha2a.azphalt.store](../.github/workflows/domain.yml) workflow can register Pages before creating the CNAME when its three domain-management credentials are configured. It refuses to overwrite conflicting DNS records. GitHub Actions Pages deployment does not rely on a committed `CNAME` file.
+**Repository Actions variable:** `SEARCHA2A_API_URL=https://searcha2a-api.hereliesaz.workers.dev`.
 
-Create a Cloudflare **Managed** Turnstile widget allowing `searcha2a.azphalt.store`. Its site key is public; its secret is Worker-only. A browser challenge passing does not prove that GitHub dispatch or the result callback has completed.
+**Repository Actions secrets:** `CLOUDFLARE_API_TOKEN` (Worker deployment), `CLOUDFLARE_ACCOUNT_ID`, and `RESULT_CALLBACK_SECRET` (reused as the authenticated registry ingestion secret). The last value must match the **Worker secret** `RESULT_CALLBACK_SECRET`. The existing `GITHUB_DISPATCH_TOKEN`, `TURNSTILE_SECRET` and `TURNSTILE_SITE_KEY` are no longer required for public searches; do not delete or rotate them during a deployment without accounting for legacy requests and other consumers.
 
-## Publish and deploy
+GitHub Pages uses GitHub Actions for build/deploy and `searcha2a.azphalt.store` with a DNS-only CNAME `searcha2a` → `hereliesaz.github.io`. The manual `.github/workflows/domain.yml` can configure domain records with `PAGES_ADMIN_TOKEN`, `CLOUDFLARE_ZONE_ID` and Cloudflare DNS credentials. This is independent of search.
 
-1. [Reindex and publish Pages](../.github/workflows/pages.yml) runs on pushes to `main`, daily at **03:29 UTC**, and manually. It builds the catalog, per-agent records, Azphalt listings, mirrors the store feed to `agent-feed` and writes the public `config.json` from Actions variables. Deployment requires GitHub Pages to be enabled.
-2. [Deploy API Gateway](../.github/workflows/gateway.yml) runs on changes under `worker/**` or the gateway workflow on `main`, or manually. It deploys the `searcha2a-api` Worker through Wrangler and verifies the results route. It checks whether Cloudflare secrets are supplied; absent credentials cause deployment steps to be skipped, not an actual deployment.
-3. [On-demand A2A search](../.github/workflows/search.yml) starts only through `workflow_dispatch`. A normal browser search uses this path; the job runs `src/discover.py` and then `src/report.py` to send a callback. The callback step uses `if: always()` to report failures as an empty result with warnings when possible.
+## Rollout
 
-Wrangler configuration in `worker/wrangler.toml` binds `RESULTS` to `SearchResult` and uses the `v1` SQLite Durable Object class migration. **No Workers KV namespace is required.** An existing unrelated `searcha2a-results` KV namespace is not used; its historical requests were not migrated. Pending requests from before the cutover must be retried.
+1. Merge the Worker and Pages changes to main. Gateway deployment adds `AgentRegistry` in the `v2` SQLite migration, preserving the legacy result object.
+2. The Pages indexing job runs automatically on merge. Its `Ingest scheduled crawl into persistent registry` step retries temporary gateway errors and fails on auth/validation errors. If the gateway was not ready during the initial run, rerun Pages after the gateway workflow succeeds.
+3. Check `GET /api/v1/agents?limit=1` returns HTTP 200 and a numeric `total` above zero after ingest. Search for a published card and check that the result appears without any new `On-demand A2A search` workflow.
+4. Confirm the Pages snapshot and Azphalt `agent-feed` mirror still publish normally.
 
-For a manual local deployment with credentials available to Wrangler:
+Existing `src/report.py` and historical result callbacks are for legacy in-flight requests only. They are not called by the website after migration.
 
-```sh
-cd worker
-npx --yes wrangler@4 deploy
-```
-
-If deploying from a different environment, configure the same Worker-only secrets using Wrangler's secret-management commands. Don't replace an existing production secret with a placeholder.
-
-## Verification
-
-**Automated checks** (also run by [Checks](../.github/workflows/ci.yml)):
+## Automated verification
 
 ```sh
 python3 -m unittest discover -s tests -p 'test_*.py'
@@ -59,42 +44,23 @@ node --check site/app.js
 node --check worker/index.mjs
 ```
 
-**Indexed matching verification:** `GET https://searcha2a-api.hereliesaz.workers.dev/api/v1/directory?q=weather` requires no Turnstile and must return `schema: 1`, `source: searcha2a` and `match_mode` equal to `semantic` or `keyword-fallback`. A `semantic` result means Workers AI supplied usable embedding vectors; `keyword-fallback` means it did not. The route is limited to five requests per minute per IP and must not be used as a paid inference load test. The SearchA2A Worker must have `[ai] binding = "AI"` for embedding inference. The Aive client falls back to the read-only published snapshot when the route fails.
-
-**Deployment smoke test:** `gateway.yml` also calls the public `GET /api/v1/directory?q=weather` route and requires HTTP 200, `schema: 1`, `source: searcha2a` and an explicit `semantic` or `keyword-fallback` mode. This probes the actual read-only catalog path after the Worker deployment, without a Turnstile token or Actions workflow. It cannot prove semantic model availability when the service legitimately falls back to keywords. The same workflow queries `GET /api/v1/results/{random_uuid}` and expects **404** with `{"error":"Search expired or unknown"}`. This verifies the public gateway route can reach the new mailbox binding. It does **not** create a request or test the callback.
-
-**End-to-end test:** From [the website](https://searcha2a.azphalt.store), submit `weather` and complete Turnstile. Confirm the page says a search was queued, then inspect the newest `On-demand A2A search` run in [Actions](https://github.com/HereLiesAz/searcha2a/actions/workflows/search.yml). Verify both **Discover Agent Cards** and **Return results to request gateway** succeeded, and that the page changes from queued to completed results (including a legitimate zero-match result). This is the evidence for live dispatch, callback and polling. Older workflow success, the indexed card list or the smoke test alone are insufficient.
-
-## Crawler coverage
-
-The crawler uses `src/discover.py` and the explicit inputs in `sources.json`: `card_urls` for single published cards, `registry_urls` for known compatible JSON registries, and `paginated_registry_urls` for list APIs such as `https://a2aregistry.org/api/agents`. A paginated source is queried with `limit=30&offset=0` and at most one more page for scheduled snapshots; live searches use one page and also supply `search=<query>`. The records are **discovery leads**, not proof. Only the original `wellKnownURI` is fetched as a candidate card, with redirects disabled and public HTTPS/DNS restrictions. The crawler never calls the advertised agent execution endpoint.
-
-The daily full-catalog build requests an empty query and the live workflow passes the browser's search term. A registry being unreachable is nonfatal and reported in `warnings`; it does not invalidate healthy seeds or other sources. The first 90 deduplicated candidates are read and at most 70 normalized records are published. These bounds can exclude valid agents, and the public index is a snapshot rather than a full directory.
-
-Review the latest [Reindex and publish Pages](../.github/workflows/pages.yml) job for the discovered count and warnings, and inspect `/api/v1/catalog.json` for the actual `warnings` array. A source must be a public HTTPS JSON API, not an HTML directory. Add new adapters only after inspecting real API shapes; avoid scraping unsupported formats or bypassing safety validation.
+New tests cover SQL persistence, atomic rejection of bad ingest batches, authorization, pagination, query matching, no workflow dispatch and HTTP sync retries. The gateway smoke test verifies the registry binding responds but not the number of cards; a Pages ingest run and subsequent public GET prove data actually reached storage.
 
 ## Troubleshooting
 
 | Symptom | Check |
 | --- | --- |
-| Site says live search awaits gateway configuration | Pages artifact `config.json`; repository variables `SEARCHA2A_API_URL` and `TURNSTILE_SITE_KEY`; republish Pages |
-| Cloudflare verification cannot complete | Widget hostname, correct public site key, private Worker secret, browser challenge blockers |
-| `403 Origin not allowed` | Browser website must originate from `https://searcha2a.azphalt.store` |
-| `403 Challenge verification failed` | Invalid, expired or mismatched Turnstile response; verify site/secret pairing |
-| `429 Search rate limit exceeded` | Per-client Cloudflare limiter is configured for five requests per minute |
-| `503 Gateway not configured` | Worker secrets or required bindings missing |
-| `502 GitHub Actions rejected dispatch` | Fine-grained `GITHUB_DISPATCH_TOKEN` scope and Actions write permission |
-| Run succeeds, site still displays queued results | Check `Return results to request gateway` step, callback secret parity, request UUID, and new result GET; old KV requests cannot be read after migration |
-| Search returns no results | May be genuine; review workflow warnings and source coverage |
-| Indexed search returns keyword fallback | Verify `AI` binding, model entitlement/quota, and Worker inference logs; metadata remains searchable without embeddings |
-| Indexed search returns 502 | Inspect mirrored `agent-feed` catalog and Cloudflare-to-GitHub raw fetch; this does not mean the live Actions service is broken |
-| Public catalog seems stale | Run Pages reindex and inspect its logs, source availability and published `generated_at` |
-| Azphalt Store agents page returns 502 | Investigate Azphalt's `/api/a2a/agents` proxy and mirrored `agent-feed` data separately; it is not the live search Worker |
-
-The browser checks status every three seconds for up to 48 attempts. Results are not streamed. Seven-day mailbox expiry is implemented in `SearchResult` via a storage alarm, independent of the browser timer.
+| Website says registry API unavailable | `site/config.json` output; `SEARCHA2A_API_URL` repository variable; Pages deployment |
+| `503 Registry not configured` | Gateway deploy and Wrangler `REGISTRY` Durable Object binding / `v2` migration |
+| Index ingest returns `401` | `RESULT_CALLBACK_SECRET` Actions/Worker secret parity |
+| Ingest fails during simultaneous deployment | Deploy API Gateway, then rerun Pages |
+| Search finds no agents | Check `/api/v1/agents?limit=1` and last Pages ingest; the requested terms may be absent |
+| Search does not include a known card | Check it exists in the accumulated registry, not just an older snapshot; examine crawler warnings |
+| Azphalt feed is stale | Inspect Pages export and raw GitHub `agent-feed` mirror; its snapshot is separate from persistent registry |
+| Search starts GitHub Actions | Regression: the website should only GET `/api/v1/agents`, and `POST /api/v1/search` must return 410 |
 
 ## Security and limitations
 
-Turnstile and the per-IP limiter protect dispatch, but do not enforce a global GitHub Actions budget. Rate limiting is approximate and workflows consume account resources. Search metadata is public and result URLs are readable to anyone holding the UUID; avoid sensitive search content.
+The public API is intentionally read-only; browsers cannot submit or execute agents. Only the private authenticated crawler upload writes the registry. Agent Cards are untrusted descriptive metadata, not verified agent endpoints. Public result IDs and card URLs must not be treated as authorization tokens.
 
-The collector reads curated public HTTPS URLs only. Advertised agent endpoints are not called or health-checked, and any card shown should be treated as third-party metadata, not verified software.
+Current per-crawl bounds: 90 source candidates, 70 normalized cards, 512 KiB per JSON document, seven seconds per source, and eight concurrent card reads. These bounds do not limit the persistent registry's cumulative record count, but discovery remains incomplete. Indexed records are retained until a deliberate future removal policy is implemented.
