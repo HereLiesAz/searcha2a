@@ -76,7 +76,7 @@ existing reviewed revocation mechanism.
 Scheduled crawling reads up to **five pages of 30** from each configured
 paginated registry (max two registries), with **210 distinct candidate URLs**
 and a reserve of up to **50 GitHub-derived leads**. Each scheduled snapshot
-publishes up to **150 normalized Agent Cards**. Queries deliberately keep
+publishes **all normalized Agent Cards found in that crawl**. Queries deliberately keep
 shorter live-source retrieval; the persistent SQL registry retains previously
 discovered cards across crawls and may hold more than one snapshot.
 
