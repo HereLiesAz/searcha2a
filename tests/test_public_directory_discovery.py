@@ -119,6 +119,46 @@ class PublicDirectoryDiscoveryTests(unittest.TestCase):
                                   (ENDPOINT, "legal")])
         self.assertNotIn("identity_verified", result["results"][0])
 
+    def test_publisher_origin_card_wins_over_stale_directory_embed(self):
+        posted = []
+        fetched = []
+        stale = {**CARD, "name": "Stale Directory Entry"}
+        def post(_url, topic):
+            posted.append(topic)
+            return {"results": [{"card": stale}]}
+        def get(url):
+            fetched.append(url)
+            if url == CARD_URL:
+                return CARD
+            raise discover.DiscoveryError("No proof")
+        result = discover.discover("", {
+            "rotation_index": 0,
+            "card_urls": [CARD_URL],
+            "public_directory_apis": [{"endpoint": ENDPOINT, "enabled": True}],
+        }, public_discover=post, fetch=get, github=lambda *_: ([], []))
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["results"][0]["name"], "Forecast Agent")
+        self.assertEqual(result["results"][0]["source_url"], CARD_URL)
+        self.assertEqual(result["results"][0]["source"], "seed")
+        self.assertEqual(fetched, [CARD_URL])
+        self.assertEqual(posted, ["research", "coding", "legal"])
+
+    def test_nested_directory_json_isolated_from_remaining_sources(self):
+        nested = {}
+        for _ in range(1200):
+            nested = {"data": nested}
+        def post(_url, topic):
+            if topic == "research":
+                return nested
+            return {"agents": [{"card_url": CARD_URL}]}
+        cards, links, warnings = discover.public_directory_sources({
+            "rotation_index": 0,
+            "public_directory_apis": [{"endpoint": ENDPOINT, "enabled": True}],
+        }, post=post)
+        self.assertEqual(cards, [])
+        self.assertEqual(links, [CARD_URL])
+        self.assertEqual(warnings, ["Public directory metadata unavailable"])
+
     def test_live_search_never_starts_external_directory_search(self):
         def never(*_):
             raise AssertionError("Live query must not POST to directory")
