@@ -116,7 +116,7 @@ class RegistrySyncTests(unittest.TestCase):
             payload = json.loads(request.data)
             requests.append(payload)
             ids = [item["id"] for item in payload["results"]]
-            excluded = [i for i in ids if i in ("00000000000000000001", "00000000000000000099")]
+            excluded = [i for i in ids if i in ("00000000000000000001", "00000000000000000063")]
             return Response(json.dumps({"status": "stored", "ingested": len(ids),
                 "total": 150, "suppressed_ids": excluded}).encode())
 
@@ -127,7 +127,7 @@ class RegistrySyncTests(unittest.TestCase):
         self.assertEqual([len(req["results"]) for req in requests], [70, 70, 10])
         self.assertEqual(result["ingested"], 150)
         self.assertEqual(result["suppressed_ids"], [
-            "00000000000000000001", "00000000000000000099"])
+            "00000000000000000001", "00000000000000000063"])
         self.assertEqual(registry_sync.filter_export_catalog(
             {"query": "", "results": cards}, result)["count"], 148)
 
