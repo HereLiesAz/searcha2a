@@ -80,5 +80,6 @@
       "lookback_blocks": 512
     }
   ],
-  "agntcy_oci_sources": []
+  "agntcy_oci_sources": [],
+  "mcp_sources": []
 }
