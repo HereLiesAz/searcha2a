@@ -20,7 +20,7 @@ The latest scheduled/published discovery snapshot. Fields: `query` (string; empt
 
 Catalog generation returns up to 70 agent records and ten warnings. A record has a 20-character lowercase hexadecimal `id`, `name`, `description`, `endpoint` (an optional advertised HTTPS URL), `source_url`, `source`, `skills`, `protocols`, `capabilities`, `security_schemes`, `version` and `verification: "card_read_only"`. Skills contain `name`, `description` and `tags`. Security schemes are names, **not credentials**.
 
-The catalog is periodically rebuilt. It is not a real-time agent status endpoint.
+The catalog is periodically rebuilt. It is not a real-time agent status endpoint. The website preloads these records and displays query-matching cards immediately while waiting for an on-demand GitHub Actions search. Indexed matches are an initial snapshot, not a fresh registry request.
 
 ### `GET /api/v1/agents/{id}.json`
 
@@ -102,7 +102,7 @@ Empty results are valid. Results are limited to 70 cards; warnings to ten messag
 
 **400** denotes malformed UUID; **404** denotes an unknown, expired or deleted mailbox; **500** denotes unexpected Worker failure. Completed results are retained for up to **seven days** from request creation, then removed by a Durable Object alarm. The same Durable Object serves callback updates and GET requests, so there is no Workers KV cross-region propagation delay.
 
-The public page polls every **3 seconds**, at most **48 times** (approximately 144 seconds excluding network time). It does not provide a streaming API.
+The public page first displays locally filtered matches from the published catalog, with a “More results are coming” status. After the authenticated search is dispatched, it polls every **3 seconds**, at most **48 times** (approximately 144 seconds excluding network time). Completed live cards merge with initial indexed matches by card ID or source URL, and duplicates are replaced. Failed or timed-out searches leave the indexed cards visible. This staged rendering does not change the HTTP API or provide streaming.
 
 ### `OPTIONS`
 

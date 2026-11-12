@@ -1,3 +1,5 @@
+import { indexedMatches, mergeResults } from './search-results.mjs';
+
 const form = document.querySelector('#search-form');
 const queryInput = document.querySelector('#query');
 const button = document.querySelector('#search-button');
@@ -7,6 +9,7 @@ const heading = document.querySelector('#result-heading');
 const count = document.querySelector('#result-count');
 let config = {};
 let widgetId;
+let indexedCatalog = [];
 
 function textNode(tag, value, className = '') {
   const element = document.createElement(tag);
@@ -27,12 +30,12 @@ function addLink(container, label, url) {
   } catch { /* Ignore malformed URLs from external agent cards. */ }
 }
 
-function display(records) {
+function display(records, emptyMessage = 'No matching Agent Cards found. Discovery coverage depends on public registries and indexed GitHub cards.') {
   results.replaceChildren();
   const items = Array.isArray(records) ? records : [];
   count.textContent = `${items.length} agents`;
   if (!items.length) {
-    results.append(textNode('div', 'No matching Agent Cards found. Discovery coverage depends on public registries and indexed GitHub cards.', 'empty'));
+    results.append(textNode('div', emptyMessage, 'empty'));
     return;
   }
   for (const agent of items) {
@@ -60,7 +63,8 @@ async function initialize() {
   try { config = await jsonRequest('./config.json'); } catch { config = {}; }
   try {
     const catalog = await jsonRequest('./api/v1/catalog.json');
-    display(catalog.results);
+    indexedCatalog = Array.isArray(catalog.results) ? catalog.results : [];
+    display(indexedCatalog);
     status.textContent = catalog.generated_at ? `Index refreshed ${new Date(catalog.generated_at).toLocaleString()}. Live searches start new Actions runs.` : 'Public index is not built yet.';
   } catch { status.textContent = 'Public index unavailable.'; }
   if (!config.apiBaseUrl || !config.turnstileSiteKey) {
@@ -81,30 +85,38 @@ form.addEventListener('submit', async event => {
   event.preventDefault();
   if (button.disabled) return;
   const query = queryInput.value.trim();
-  const turnstile = window.turnstile?.getResponse(widgetId);
-  if (!turnstile) { status.textContent = 'Complete the verification challenge to start a search.'; return; }
-  button.disabled = true;
-  status.textContent = 'Dispatching GitHub Actions search…';
+  if (query.length < 2 || query.length > 120) return;
+  const immediate = indexedMatches(indexedCatalog, query);
   heading.textContent = `Results for “${query}”`;
+  display(immediate, 'No indexed matches yet. A live search may find more.');
+  const indexedCount = `${immediate.length} indexed ${immediate.length === 1 ? 'agent' : 'agents'}`;
+  const turnstile = window.turnstile?.getResponse(widgetId);
+  if (!turnstile) {
+    status.textContent = `Showing ${indexedCount}. Complete verification to search GitHub for more.`;
+    return;
+  }
+  button.disabled = true;
+  status.textContent = `Showing ${indexedCount}. More results are coming when GitHub Actions finishes. Dispatching search…`;
   try {
     const base = config.apiBaseUrl.replace(/\/$/, '');
     const request = await jsonRequest(`${base}/api/v1/search`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query, turnstile }),
     });
-    status.textContent = 'Search queued in GitHub Actions. Waiting for results…';
+    status.textContent = `Showing ${indexedCount}. More results are coming when GitHub Actions finishes.`;
     for (let attempt = 0; attempt < 48; attempt++) {
       await sleep(3000);
       const data = await jsonRequest(`${base}/api/v1/results/${encodeURIComponent(request.id)}`);
       if (data.status === 'complete') {
-        display(data.results);
-        status.textContent = `GitHub Actions search complete. ${data.count} cards matched.${data.warnings?.length ? ' Some sources were unavailable.' : ''}`;
+        const combined = mergeResults(immediate, data.results);
+        display(combined);
+        status.textContent = `Search complete. ${combined.length} agents found (indexed and live).${data.warnings?.length ? ' Some sources were unavailable.' : ''}`;
         return;
       }
     }
-    status.textContent = 'Search is still running. Check the workflow or retry shortly.';
+    status.textContent = `Showing ${indexedCount}. Live search is still running; additional results have not arrived.`;
   } catch (error) {
-    status.textContent = `Search failed: ${error.message}`;
+    status.textContent = `Showing ${indexedCount}. Live search failed: ${error.message}`;
   } finally {
     button.disabled = false;
     if (widgetId !== undefined) window.turnstile?.reset(widgetId);

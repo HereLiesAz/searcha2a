@@ -8,9 +8,9 @@ Find AI agents by what they do. SearchA2A discovers publicly listed A2A Agent Ca
 
 1. Enter a skill, capability or agent name, such as **weather**, **code review** or **translation**.
 2. Complete the Cloudflare verification when prompted and select **Search agents**.
-3. The page starts a fresh search. Once it finishes, the results below the search box update automatically.
+3. Matching agents from the latest published registry catalog appear immediately. The page shows **More results are coming when GitHub Actions finishes** while a fresh discovery run completes. Newly found agents are added automatically without removing the initial matches.
 
-A live search takes time to run. The page shows its progress and checks for results automatically. Until the new results arrive, cards from the recently indexed catalog may remain on screen. A search can also return no matches.
+The indexed matches are a cached snapshot, not a live query of the entire registry. GitHub discovery may add agents or return no further matches. If Turnstile verification is incomplete, indexed matches still appear, but no GitHub workflow is dispatched until verification succeeds.
 
 ## Read the results
 

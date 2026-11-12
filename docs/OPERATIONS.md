@@ -61,7 +61,7 @@ node --check worker/index.mjs
 
 **Deployment smoke test:** `gateway.yml` queries `GET /api/v1/results/{random_uuid}` and expects **404** with `{"error":"Search expired or unknown"}`. This verifies the public gateway route can reach the new mailbox binding. It does **not** create a request or test the callback.
 
-**End-to-end test:** From [the website](https://searcha2a.azphalt.store), submit `weather` and complete Turnstile. Confirm the page says a search was queued, then inspect the newest `On-demand A2A search` run in [Actions](https://github.com/HereLiesAz/searcha2a/actions/workflows/search.yml). Verify both **Discover Agent Cards** and **Return results to request gateway** succeeded, and that the page changes from queued to completed results (including a legitimate zero-match result). This is the evidence for live dispatch, callback and polling. Older workflow success, the indexed card list or the smoke test alone are insufficient.
+**End-to-end test:** From [the website](https://searcha2a.azphalt.store), submit a term matching the published catalog (for example one in its `/api/v1/catalog.json`). Indexed matching cards should appear **before** the GitHub Actions request completes, alongside “More results are coming when GitHub Actions finishes.” Then inspect the newest `On-demand A2A search` run in [Actions](https://github.com/HereLiesAz/searcha2a/actions/workflows/search.yml). Verify both **Discover Agent Cards** and **Return results to request gateway** succeeded. When polling receives `status: "complete"`, the indexed cards must remain visible and any new live cards should be added without duplicates; the progress message must change to “Search complete.” An empty live result is allowed and must not remove indexed matches. Test a missing/invalid Turnstile challenge separately: cached matches should still appear, but no workflow may dispatch. Workflow success or static matches alone do not prove this full browser flow.
 
 ## Crawler coverage
 
@@ -87,7 +87,7 @@ Review the latest [Reindex and publish Pages](../.github/workflows/pages.yml) jo
 | Public catalog seems stale | Run Pages reindex and inspect its logs, source availability and published `generated_at` |
 | Azphalt Store agents page returns 502 | Investigate Azphalt's `/api/a2a/agents` proxy and mirrored `agent-feed` data separately; it is not the live search Worker |
 
-The browser checks status every three seconds for up to 48 attempts. Results are not streamed. Seven-day mailbox expiry is implemented in `SearchResult` via a storage alarm, independent of the browser timer.
+The browser checks status every three seconds for up to 48 attempts. The first set of cards is filtered locally from the previously published catalog and requires no live API; after Turnstile verification the queued GitHub Action supplies any additional cards. Results are not streamed. Seven-day mailbox expiry is implemented in `SearchResult` via a storage alarm, independent of the browser timer.
 
 ## Security and limitations
 

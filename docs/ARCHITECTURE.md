@@ -28,7 +28,7 @@ pages.yml -> discover.py (empty query)
                          -> Azphalt Store /api/a2a/agents and /agents
 ```
 
-The live search does not rewrite the static catalog. The Azphalt Store feed is a non-installable metadata export, not an agent registry that executes code.
+The live search does not rewrite the static catalog. The browser preloads that snapshot, filters the already-published cards locally as soon as a user searches, and keeps those indexed results visible while its Turnstile-authorized GitHub Actions search runs. The completed callback results are merged by card ID (with source URL fallback) so duplicate cards are updated instead of repeated. If the live search fails or times out, the indexed matches remain visible. This immediate stage cannot see agents outside the last published catalog. The Azphalt Store feed is a non-installable metadata export, not an agent registry that executes code.
 
 ## Decisions and reasons
 
