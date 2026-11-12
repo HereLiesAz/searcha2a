@@ -124,8 +124,7 @@ function validEmbeddings(data, count) {
  * A read-only capability lookup. Registry claims are never promoted to verified
  * identities, connection approvals, or permissions.
  */
-export async function searchIndexedAgents(query, env, fetcher = fetch) {
-  const { generated_at, entries } = await readPublishedAgents(fetcher);
+export async function rankAgentCandidates(query, env, entries, generated_at = null) {
   let embeddings = null;
   if (entries.length && env.AI && typeof env.AI.run === 'function') {
     try {
@@ -156,4 +155,10 @@ export async function searchIndexedAgents(query, env, fetcher = fetch) {
     count: ranked.length,
     verification: 'card_read_only',
   };
+}
+
+/** Compatibility path for standalone feed readers without a registry binding. */
+export async function searchIndexedAgents(query, env, fetcher = fetch) {
+  const { generated_at, entries } = await readPublishedAgents(fetcher);
+  return rankAgentCandidates(query, env, entries, generated_at);
 }

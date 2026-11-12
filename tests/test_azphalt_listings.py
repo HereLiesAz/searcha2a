@@ -35,6 +35,19 @@ class ListingsTests(unittest.TestCase):
         result = module.build_listings({"results": [valid, valid, {}, {**valid, "id": "bad"}, {**valid, "source_url": "http://internal"}]})
         self.assertEqual(result["count"], 1)
 
+    def test_ans_claim_is_exported_without_upgrading_verification(self):
+        card = {"id": "0123456789abcdefabcd", "name": "Forecast Agent",
+                "source_url": "https://forecast.example/card.json",
+                "ans_name": "ans://release-2026.11.forecast.example",
+                "ans_host": "forecast.example"}
+        entry = module.build_listings({"results": [card]})["listings"][0]
+        self.assertEqual(entry["ans_claim"], {
+            "name": "ans://release-2026.11.forecast.example",
+            "agent_host": "forecast.example", "verification": "unverified",
+        })
+        self.assertIs(entry["installable"], False)
+        self.assertEqual(entry["verification"], "card_read_only")
+
     def test_missing_results_yields_empty_feed(self):
         self.assertEqual(module.build_listings({})["listings"], [])
 

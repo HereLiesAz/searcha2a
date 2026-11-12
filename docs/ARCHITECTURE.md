@@ -19,7 +19,7 @@ Browser / public client
 
 Aive / semantic client
   -> GET /api/v1/directory?q=...
-  -> published raw-CDN snapshot + optional Workers AI embedding
+  -> persistent registry visible candidates + optional Workers AI embedding
   -> semantic or keyword-fallback metadata results, without Actions
 ```
 
@@ -33,15 +33,38 @@ In parallel, the Pages job publishes the latest **bounded crawl snapshot** as `/
 - **Why registry review is independent of crawler ingest:** A discovered Agent Card is untrusted input; giving the indexing credential permission to approve or reactivate agents would erase the approval boundary. Separate administrator authorization, durable review state and audit history keep curator decisions intact across crawls.
 - **Why the registry also uses SQLite Durable Objects:** `AgentRegistry` stores normalized cards durably and atomically upserts scheduled batches without wiping unseen records. Its SQL interface provides immediate public reads with no GitHub dependency. `v2` in `worker/wrangler.toml` introduces this class without destroying the `v1` result class.
 - **Why the Azphalt feed is mirrored to GitHub raw CDN:** A same-zone Cloudflare Worker subrequest to the SearchA2A Pages hostname previously returned 502. Keeping the existing `agent-feed` mirror avoids changing that working integration.
-- **Why the semantic directory is retained:** The independently introduced `/api/v1/directory` interface supports existing clients and optional Workers AI over the published snapshot. It remains read-only and cannot invoke Actions. The persistent SQL registry is canonical for cumulative keyword searches; semantic search can migrate to that index separately without restoring dispatch.
+- **Why the semantic directory is retained and moved to SQL:** It was introduced independently for clients such as Aive using the published snapshot to avoid per-search GitHub Actions. Now it ranks visible persisted registry candidates to share moderation, naming and freshness with keyword search; it still does not invoke Actions or external agents.
 - **Why metadata stays non-installable:** Discovering an Agent Card does not establish runtime health, ownership, conformance, or authorization. The export cannot be represented as a signed `.azp` package.
+
+## Unified ANS name layer
+
+The naming, capability search, and verified-identity concepts share one
+SearchA2A registry. Publishers control their version format, encoded as
+`ans://<version>.<agentHost>`, with no inferred SemVer or `v` prefix.
+The Agent Card declares `ansName` and `agentHost` explicitly so the
+version-to-domain boundary is never guessed.
+
+`worker/ans.mjs` checks only DNS-name syntax and that the claimed host
+matches the explicit host. `AgentRegistry` retains the untrusted claim
+beside its stable record ID, indexes it, and exposes read-only
+`GET /api/v1/ans/resolve`, with bounded results and explicit ambiguity reporting. Curation and suppression apply identically
+to keyword search and name lookup. No read makes external network calls;
+claims never become `verified` by ingest or moderation.
+
+The separately deployed identity verifier will eventually check the
+Linux Foundation ANS DNS discovery profile, certificate binding, signed
+transparency evidence, freshness and revocation. Its current ANS v2 wire
+syntax mandates `ans://v{numeric-semver}.{agentHost}`; broader opaque
+publisher versions can be locally indexed but must not be misrepresented
+as conforming to that external standard without actual verification.
+Azphalt package signing remains a separate authority.
 
 ## Components
 
 | Component | Source |
 | --- | --- |
 | Browser search | `site/app.js`, `site/index.html` |
-| Snapshot semantic discovery | `worker/semantic.mjs`, `GET /api/v1/directory` |
+| Persistent semantic discovery | `worker/semantic.mjs`, `GET /api/v1/directory` |
 | Registry SQL and HTTP routes | `worker/index.mjs` (`AgentRegistry`, `handle`) |
 | Durable Object migration | `worker/wrangler.toml` (`v2`) |
 | Scheduled discovery | `src/discover.py`, `sources.json`, `.github/workflows/pages.yml` |
@@ -69,7 +92,7 @@ In parallel, the Pages job publishes the latest **bounded crawl snapshot** as `/
 
 The current scheduled collector reads up to 90 card candidates and publishes up to 70 normalized cards per run. It also reads up to two pages of 30 agents from each explicitly configured paginated registry, including a2aregistry.org. Those are **per-crawl** limits, not a cap on accumulated registry records. The persistent registry retains IDs across runs. A new crawl does not invalidate a card it fails to rediscover, so stale entries are possible; curator hide/reject/deactivate decisions persist across crawls. Publishing filters the static Pages catalog and Azphalt export using the signed-in crawler's authenticated suppression manifest (and fails closed if it is missing); statuses propagate to the snapshots on the next index run, not immediately; there is no health probe, verified ownership, explicit self-registration, global search-engine crawl, or automatic removal policy yet.
 
-SQL keyword search scans stored normalized name/skill/description/endpoint text and ranks by name, skill and description hits. It is not semantic embedding search. A single Durable Object coordinates the registry; future high-traffic growth may require sharding or migrating to Cloudflare D1.
+SQL keyword search scans stored normalized name/skill/description/endpoint text and ranks by name, skill and description hits. The separate semantic endpoint ranks up to 100 visible persisted candidates with optional Workers AI; a `truncated` response signals incomplete coverage when the registry has more than 100 visible entries. It does not fetch static feeds or third-party sites. A single Durable Object coordinates the registry; future high-traffic growth may require sharding or migrating to Cloudflare D1.
 
 The crawler's DNS safety checks happen before HTTP connection, so DNS rebinding remains a known limitation. Query output is third-party metadata only.
 

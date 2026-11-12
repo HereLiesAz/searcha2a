@@ -263,3 +263,86 @@ test('invalid moderation requests cannot modify records or audit history', async
     assert.equal((await (await lookup(state.env)).json()).total, 1);
   } finally { state.close(); }
 });
+
+test('ANS names with opaque publisher-defined versions resolve only curated claims', async () => {
+  const state = registryEnvironment();
+  try {
+    const named = { ...weather, ans_name: 'ans://release-2026.11.weather.example.com',
+      ans_host: 'weather.example.com' };
+    assert.equal((await ingest(state.env, [named])).status, 200);
+    const url = '/api/v1/ans/resolve?name=' + encodeURIComponent(named.ans_name);
+    let response = await handle(request(url), state.env);
+    assert.equal(response.status, 200);
+    let body = await response.json();
+    assert.equal(body.count, 1);
+    assert.equal(body.identity_verified, false);
+    assert.equal(body.results[0].ans.version, 'release-2026.11');
+    assert.equal(body.results[0].ans.verification, 'unverified');
+    assert.equal((await handle(request('/api/v1/ans/resolve?name=bogus'), state.env)).status, 400);
+    assert.equal((await manage(state.env, weather.id, 'hide', 'Claim withdrawn')).status, 200);
+    assert.equal((await handle(request(url), state.env)).status, 404);
+    assert.equal((await ingest(state.env, [{ ...named, ans_name: 'ans://new.weather.example.com',
+      ans_host: 'attacker.example.com' }])).status, 200);
+    assert.equal((await handle(request(url), state.env)).status, 404);
+  } finally { state.close(); }
+});
+
+test('invalid ANS claim cannot pollute indexed agent record', async () => {
+  const state = registryEnvironment();
+  try {
+    await ingest(state.env, [{ ...weather, ans_name: 'ans://1.0.0.other.example',
+      ans_host: 'weather.example.com', ans: { verification: 'verified' } }]);
+    const result = (await (await lookup(state.env, 'weather')).json()).results[0];
+    assert.equal(Object.hasOwn(result, 'ans'), false);
+    assert.equal((await handle(request('/api/v1/ans/resolve?name=ans%3A%2F%2F1.0.0.other.example'),
+      state.env)).status, 404);
+  } finally { state.close(); }
+});
+
+test('unified ANS capability directory ranks durable curated records without fetching a feed', async () => {
+  const state = registryEnvironment();
+  const savedFetch = globalThis.fetch;
+  globalThis.fetch = () => { throw new Error('Semantic discovery must not fetch the public snapshot'); };
+  try {
+    const named = { ...weather, ans_name: 'ans://spring.2026.weather.example.com',
+      ans_host: 'weather.example.com' };
+    await ingest(state.env, [named, calendar]);
+    state.env.SEARCH_RATE_LIMITER = { limit: async () => ({ success: true }) };
+    let response = await handle(request('/api/v1/directory?q=forecast'), state.env);
+    assert.equal(response.status, 200);
+    let result = await response.json();
+    assert.equal(result.candidate_scope, 'persistent-registry');
+    assert.equal(result.truncated, false);
+    assert.equal(result.match_mode, 'keyword-fallback');
+    assert.deepEqual(result.results.map(agent => agent.name), ['Weather Expert']);
+    assert.equal(result.results[0].ans.version, 'spring.2026');
+    assert.equal(result.results[0].installable, false);
+    await manage(state.env, weather.id, 'deactivate', 'No longer offered');
+    response = await handle(request('/api/v1/directory?q=forecast'), state.env);
+    result = await response.json();
+    assert.deepEqual(result.results, []);
+  } finally {
+    globalThis.fetch = savedFetch;
+    state.close();
+  }
+});
+
+test('ANS resolution exposes duplicate publisher claims without selecting an identity', async () => {
+  const state = registryEnvironment();
+  try {
+    const name = 'ans://2026-Q4.agents.example.com';
+    await ingest(state.env, [
+      { ...weather, ans_name: name, ans_host: 'agents.example.com' },
+      { ...calendar, ans_name: name, ans_host: 'agents.example.com' },
+    ]);
+    const response = await handle(request('/api/v1/ans/resolve?name=' +
+      encodeURIComponent(name)), state.env);
+    assert.equal(response.status, 200);
+    const data = await response.json();
+    assert.equal(data.count, 2);
+    assert.equal(data.ambiguous, true);
+    assert.equal(data.truncated, false);
+    assert.equal(data.identity_verified, false);
+    assert.deepEqual(data.results.map(item => item.name), ['Calendar Helper', 'Weather Expert']);
+  } finally { state.close(); }
+});

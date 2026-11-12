@@ -8,7 +8,7 @@
 | --- | --- |
 | Browser | https://searcha2a.azphalt.store |
 | Persistent registry | https://searcha2a-api.hereliesaz.workers.dev/api/v1/agents |
-| Snapshot semantic directory | https://searcha2a-api.hereliesaz.workers.dev/api/v1/directory?q=weather |
+| Registry semantic directory | https://searcha2a-api.hereliesaz.workers.dev/api/v1/directory?q=weather |
 | Latest crawl snapshot | https://searcha2a.azphalt.store/api/v1/catalog.json |
 | Azphalt external-agent directory | https://azphalt.store/agents |
 
@@ -16,7 +16,7 @@
 
 - [Reindex and publish Pages](../.github/workflows/pages.yml): on pushes to main, daily at **03:29 UTC**, or manually. Crawls, syncs normalized cards into the persistent registry, exports the bounded Pages snapshot and Azphalt directory.
 - [Deploy API Gateway](../.github/workflows/gateway.yml): on Worker or gateway workflow changes to main, or manually. Deploys `AgentRegistry` with `v2` SQLite migration and checks `GET /api/v1/agents?limit=1`. It also retains the legacy `SearchResult` `v1` class for pending seven-day mailboxes.
-- **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410. The separate semantic `/api/v1/directory` endpoint remains read-only and uses the published snapshot with optional Workers AI, not Actions.
+- **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410. The separate semantic `/api/v1/directory` endpoint ranks up to 100 visible records from the persistent registry with optional Workers AI, not Actions. It fails closed if the registry binding is absent and flags truncated candidate sets.
 
 ## Settings and credentials
 
@@ -34,6 +34,16 @@ GitHub Pages uses GitHub Actions for build/deploy and `searcha2a.azphalt.store` 
 4. Confirm the Pages snapshot and Azphalt `agent-feed` mirror still publish normally.
 
 Existing `src/report.py` and historical result callbacks are for legacy in-flight requests only. They are not called by the website after migration.
+
+## ANS name claims
+
+`GET /api/v1/ans/resolve?name=ans%3A%2F%2Frelease-2026.agent.example.com`
+is a public, read-only query against the persistent, curated registry.
+The crawler stores publisher-supplied `ansName` + `agentHost` claims,
+which are neither signed attestations nor verified DNS identities.
+The response reports `identity_verified:false`; moderated or rejected
+entries remain hidden. No DNS lookup, task invocation, or GitHub workflow
+happens at query time. This change does not provision a verifier or its keys.
 
 ## Registry administration
 

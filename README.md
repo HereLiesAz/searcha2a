@@ -16,12 +16,21 @@ Scheduled [GitHub Actions indexing](.github/workflows/pages.yml) reads the curat
 
 GitHub Actions runs when the source changes, on the daily crawl schedule, or when an operator manually starts indexing. **A user's search never consumes a workflow slot.**
 
+## ANS names
+
+Publisher Agent Cards may supply `ansName` and `agentHost`, e.g.
+`ans://release-2026.11.weather.example.com`. Versions are preserved as
+provided, without SemVer rules or an inserted `v`.
+`GET /api/v1/ans/resolve?name=...` looks up stored name claims, never
+confusing them with proof of identity. DNS, certificates and signed
+transparency evidence require a separate verifier.
+
 ## Interfaces
 
 - [Search API and agent details](docs/API.md): `GET https://searcha2a-api.hereliesaz.workers.dev/api/v1/agents?query=weather`.
 - [Published crawl snapshot](https://searcha2a.azphalt.store/api/v1/catalog.json): static JSON for the latest indexing run, distinct from the persistent registry.
 - [Azphalt external-agent directory](https://azphalt.store/agents): read-only discovery listings, not installable Azphalt packages.
 
-The legacy `POST /api/v1/search` dispatch route now returns **410 Gone**. Existing result UUIDs remain readable until their seven-day retention expires. The separate `/api/v1/directory?q=...` semantic API remains available for clients such as Aive. It reads the published crawl snapshot and optionally uses Workers AI; it also never triggers a crawl.
+The legacy `POST /api/v1/search` dispatch route now returns **410 Gone**. Existing result UUIDs remain readable until their seven-day retention expires. The separate `/api/v1/directory?q=...` semantic API remains available for clients such as Aive. It ranks candidates from the persistent curated registry with optional Workers AI; it also never triggers a crawl.
 
 See [API](docs/API.md), [Architecture](docs/ARCHITECTURE.md), and [Operations](docs/OPERATIONS.md) for protocol, security, and deployment details.
