@@ -703,11 +703,19 @@ def erc8004_checkpointed_sources(config, state: dict, post=post_chain_rpc):
                    and attempts < MAX_ERC8004_ATTEMPTS_PER_RUN):
                 to_block = min(end, cursor + window - 1)
                 attempts += 1
-                reply = post(rpc, "eth_getLogs", [{
-                    "address": address, "fromBlock": hex(cursor),
-                    "toBlock": hex(to_block),
-                    "topics": [[REGISTERED_TOPIC, URI_UPDATED_TOPIC]],
-                }])
+                try:
+                    reply = post(rpc, "eth_getLogs", [{
+                        "address": address, "fromBlock": hex(cursor),
+                        "toBlock": hex(to_block),
+                        "topics": [[REGISTERED_TOPIC, URI_UPDATED_TOPIC]],
+                    }])
+                except DiscoveryError:
+                    # Overloaded/size-limited providers may reject wide ranges.
+                    # Retry at most five narrower windows before failing closed.
+                    if window > 1 and attempts <= 5:
+                        window = max(1, window // 2)
+                        continue
+                    raise
                 logs = reply.get("result") if isinstance(reply, dict) else None
                 if not isinstance(logs, list):
                     # Provider overload/errors may be block-range limits.
@@ -716,7 +724,7 @@ def erc8004_checkpointed_sources(config, state: dict, post=post_chain_rpc):
                         window = max(1, window // 2)
                         continue
                     raise DiscoveryError("Invalid chain log response")
-                if len(logs) > MAX_ERC8004_LOGS:
+                if len(logs) >= MAX_ERC8004_LOGS:
                     if window > 1:
                         window = max(1, window // 2)
                         continue
