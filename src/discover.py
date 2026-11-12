@@ -696,7 +696,12 @@ def erc8004_checkpointed_sources(config, state: dict, post=post_chain_rpc):
             cursor = (prior_block if prior_block is not None else
                       first if first is not None else max(0, end - lookback + 1))
             window = prior_span if prior_span is not None else configured_window
-            adaptive_ceiling = window
+            # Keep the exact bootstrap height even if the very first log
+            # request fails. It is staged, not persisted until ingest succeeds.
+            checkpoints[key] = {"next_block": cursor, "window": window}
+            # Shrink for provider limits in this run only. A previously small
+            # persisted span must be allowed to grow after a quiet interval.
+            adaptive_ceiling = configured_window
             completed = 0
             attempts = 0
             per_agent = {}
