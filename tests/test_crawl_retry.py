@@ -127,6 +127,78 @@ class CrawlRetryTests(unittest.TestCase):
         self.assertEqual(metrics["queue_full"], 1)
         self.assertEqual(len(state["pending"]), retry.MAX_PENDING)
 
+    def test_due_retries_prioritize_onchain_and_registry_over_github(self):
+        state = {"version": 1, "run_day": 1000, "pending": [
+            {"url": f"https://github{i:02d}.example.org/card.json",
+             "source": "github", "failures": 1, "retry_day": 1001}
+            for i in range(18)
+        ] + [
+            {"url": CARD, "source": "erc8004-registration",
+             "failures": 1, "retry_day": 1001},
+            {"url": OTHER, "source": "registry",
+             "failures": 1, "retry_day": 1001},
+        ]}
+        due, deferred = retry.due_retries(state, 1001)
+        self.assertEqual(due[0], (CARD, "erc8004-registration"))
+        self.assertEqual(due[1], (OTHER, "registry"))
+        self.assertEqual(len(due), 16)
+        self.assertEqual(len(deferred), 4)
+
+    def test_old_queue_full_of_github_is_compacted_without_leaking_urls(self):
+        state = {"version": 1, "run_day": 1000, "pending": [
+            {"url": f"https://github{i:02d}.example.org/card.json",
+             "source": "github", "failures": 1, "retry_day": 1001}
+            for i in range(39)
+        ] + [{"url": CARD, "source": "registry",
+              "failures": 1, "retry_day": 1001}]}
+        metrics = retry.record_outcomes(state, [], 1001)
+        self.assertEqual(metrics["queue_full"], 29)
+        self.assertEqual(metrics["pending"], 11)
+        self.assertEqual(len([e for e in state["pending"]
+                              if e["source"] == "github"]), 10)
+        self.assertTrue(any(e["url"] == CARD for e in state["pending"]))
+        self.assertEqual(state["run_day"], 1001)
+
+    def test_chain_registration_displaces_lower_priority_at_capacity(self):
+        state = {"version": 1, "run_day": 1000, "pending": [
+            {"url": f"https://registry{i:02d}.example.org/card.json",
+             "source": "registry", "failures": 1, "retry_day": 1001}
+            for i in range(40)
+        ]}
+        metrics = retry.record_outcomes(
+            state, [(CARD, "erc8004-registration", "unavailable")], 1001)
+        self.assertEqual(len(state["pending"]), 40)
+        self.assertEqual(metrics["queue_full"], 1)
+        self.assertTrue(any(e["url"] == CARD and
+                            e["source"] == "erc8004-registration"
+                            for e in state["pending"]))
+        self.assertFalse(any(e["url"] ==
+                             "https://registry39.example.org/card.json"
+                             for e in state["pending"]))
+
+    def test_github_can_never_consume_all_public_retry_slots(self):
+        state = empty()
+        for i in range(40):
+            retry.record_outcomes(state, [(
+                f"https://github{i:02d}.example.org/card.json",
+                "github", "unavailable")], 1000)
+        self.assertEqual(len(state["pending"]), 10)
+        retry.record_outcomes(state, [(CARD, "registry", "unavailable")], 1000)
+        self.assertEqual(len(state["pending"]), 11)
+        self.assertEqual(state["pending"][0]["url"], CARD)
+
+    def test_no_lower_priority_entry_means_unpersistable_chain_fails_closed(self):
+        state = {"version": 1, "run_day": 1000, "pending": [
+            {"url": f"https://chain{i:02d}.example.org/card.json",
+             "source": "erc8004-registration", "failures": 1, "retry_day": 1001}
+            for i in range(40)
+        ]}
+        original = json.loads(json.dumps(state))
+        with self.assertRaisesRegex(retry.RetryStateError, "Unpersisted chain"):
+            retry.record_outcomes(state, [(CARD, "erc8004-registration",
+                                           "unavailable")], 1001)
+        self.assertEqual(state, original)
+
     def test_monotonic_date_and_backoff_bounds(self):
         state = empty()
         for day in range(1000, 1010):
