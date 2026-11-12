@@ -32,6 +32,45 @@ A read-only directory export. A response has `schema: 1`, `source: "searcha2a"`,
 
 The generated feed is mirrored to the `agent-feed` Git branch at `site/api/v1/azphalt-listings.json` for the Azphalt Store proxy. The Store exposes `GET https://azphalt.store/api/a2a/agents`; this is an **Azphalt Store route**, not a route on the SearchA2A gateway. Azphalt's UI is at [azphalt.store/agents](https://azphalt.store/agents). Do not treat these listings as signed `.azp` packages or trusted executables.
 
+## Indexed capability search (public, read-only)
+
+### `GET /api/v1/directory?q={query}`
+
+Base URL: `https://searcha2a-api.hereliesaz.workers.dev`.
+
+Searches the latest **published SearchA2A Agent Card catalog** (mirrored to the read-only `agent-feed` branch). This endpoint never invokes an agent, fetches a new Agent Card, starts GitHub Actions, or connects a provider. Other applications, including Aive, can call it directly without Turnstile. It accepts **2–120 characters** and requires the `q` parameter. CORS is `Access-Control-Allow-Origin: *` for this public metadata-only GET/OPTIONS route, unlike the protected live dispatch endpoint.
+
+Results are capped at 20 from a maximum of 70 indexed cards. The Worker applies the existing **5-per-minute per-client IP rate limit**, with a separate `directory:` namespace key from live searches. It reads the fixed HTTPS GitHub raw-CDN snapshot (not an arbitrary user-specified URL). The metadata must have `source: "searcha2a"`, schema 1, `kind: "a2a-agent"`, `installable: false` and `verification: "card_read_only"`; invalid, private or credential-bearing source URLs are discarded.
+
+When Workers AI inference is available, SearchA2A embeds the query plus indexed names, descriptions and skills with `@cf/baai/bge-small-en-v1.5` (CLS pooling), then ranks by cosine similarity blended with keyword relevance. Otherwise it **explicitly returns `"match_mode": "keyword-fallback"`**. Inference charges/quotas depend on the Cloudflare account; the rate limit reduces abuse but does not impose an account-wide spend cap.
+
+Example (illustrative names and scores, not a claim of current agent availability):
+
+```json
+{
+  "schema": 1,
+  "source": "searcha2a",
+  "generated_at": "2026-11-12T11:12:20Z",
+  "query": "rain forecast",
+  "match_mode": "semantic",
+  "count": 1,
+  "verification": "card_read_only",
+  "results": [{
+    "name": "Weather Agent",
+    "source_url": "https://weather.example.org/.well-known/agent-card.json",
+    "kind": "a2a-agent",
+    "verification": "card_read_only",
+    "installable": false,
+    "skills": [{"name": "Meteorology"}],
+    "match_score": 0.8
+  }]
+}
+```
+
+`match_score` is a relative ranking value, **not** a probability of reliability, trustworthiness, or successful invocation. The result retains the feed's card source URL. A client must independently re-fetch and validate the Agent Card and explicitly connect a provider before use.
+
+Errors: `400` invalid query, `405` unsupported method, `429` rate limit, `502` published feed unavailable/invalid, `503` limiter unavailable. No private upstream error details are returned.
+
 ## Live search (Cloudflare Worker)
 
 ### `POST /api/v1/search`
