@@ -151,18 +151,18 @@ test('catalog read has a hard byte limit even without a Content-Length header', 
   await assert.rejects(readPublishedAgents(factory), /Catalog too large/);
 });
 
-test('all 150 scheduled catalog entries remain eligible for semantic ranking', async () => {
-  const entries = Array.from({ length: 150 }, (_, i) => ({
+test('feed candidates beyond the former 150-card boundary remain searchable', async () => {
+  const entries = Array.from({ length: 205 }, (_, i) => ({
     ...weather,
     name: 'Agent ' + i,
-    description: i === 149 ? 'starlingcapability' : 'routine description',
+    description: i === 204 ? 'starlingcapability' : 'routine description',
     source_url: 'https://agent' + i + '.example.org/card',
   }));
   const raw = JSON.stringify({ schema: 1, source: 'searcha2a', listings: entries });
   const indexed = await readPublishedAgents(async () => new Response(raw));
-  assert.equal(indexed.entries.length, 150);
+  assert.equal(indexed.entries.length, 205);
   const found = await searchIndexedAgents('starlingcapability', {}, async () => new Response(raw));
-  assert.deepEqual(found.results.map(x => x.name), ['Agent 149']);
+  assert.deepEqual(found.results.map(x => x.name), ['Agent 204']);
 });
 
 test('semantic ranking batches 150 candidates within the model input limit', async () => {
