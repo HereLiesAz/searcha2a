@@ -614,11 +614,16 @@ def erc8004_event_sources(config, post=post_chain_rpc):
 
 
 def fetch_oci_bytes(url: str, auth: str = "") -> bytes:
-    """GET a bounded OCI JSON artifact without redirects or credential leakage."""
+    """GET an OCI manifest or digest-verified blob without redirects or leaks."""
     require_public_https(url)
     if not isinstance(auth, str) or len(auth) > 4096 or "\n" in auth or "\r" in auth:
         raise DiscoveryError("Invalid OCI credential")
-    headers = {"User-Agent": USER_AGENT, "Accept": "application/json, application/*+json"}
+    is_blob = "/blobs/sha256:" in urllib.parse.urlsplit(url).path
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": ("application/octet-stream" if is_blob else
+                   "application/vnd.oci.image.manifest.v1+json, application/json"),
+    }
     if auth:
         headers["Authorization"] = "Bearer " + auth
     try:
@@ -627,9 +632,10 @@ def fetch_oci_bytes(url: str, auth: str = "") -> bytes:
             if response.status != 200:
                 raise DiscoveryError("OCI source unavailable")
             media = response.headers.get("Content-Type", "").split(";", 1)[0].lower()
-            if media != "application/json" and not (
-                    media.startswith("application/") and media.endswith("+json")):
-                raise DiscoveryError("OCI response not JSON")
+            if (media != "application/json" and
+                    not (media.startswith("application/") and media.endswith("+json")) and
+                    not (is_blob and media == "application/octet-stream")):
+                raise DiscoveryError("Unexpected OCI response media type")
             data = response.read(MAX_OCI_DOCUMENT + 1)
             if len(data) > MAX_OCI_DOCUMENT:
                 raise DiscoveryError("Oversized OCI artifact")
@@ -666,16 +672,30 @@ def oasf_a2a_cards(record, source_url: str):
             if card:
                 card.pop("raw_card", None)
                 cards.append(card)
-            link = public_card_link(artifact.get("url"), source_url, explicit_card=True)
-            if link:
-                links.append(link)
-        # Backward-compatibility for deprecated OASF inline a2a_card_data.
-        data = module.get("data")
-        if isinstance(data, dict) and isinstance(data.get("a2a_card_data"), dict):
-            card = normalize_card(data["a2a_card_data"], source_url, "agntcy-oci")
-            if card:
-                card.pop("raw_card", None)
-                cards.append(card)
+            # OASF descriptor.json uses `urls`, not a singular `url`.
+            candidates = artifact.get("urls")
+            if not isinstance(candidates, list):
+                candidates = []
+            # Tolerate earlier singular exports without allowing arbitrary
+            # recursive requests or leaking configured registry credentials.
+            if isinstance(artifact.get("url"), str):
+                candidates = [artifact["url"], *candidates]
+            for candidate in candidates[:MAX_OCI_LAYERS * 2]:
+                if isinstance(candidate, str) and candidate.startswith("https://"):
+                    link = public_card_link(candidate, source_url, explicit_card=True)
+                    if link:
+                        links.append(link)
+        # Deprecated OASF a2a_data.card_data is the serialized field name.
+        data = module.get("data") or meta.get("data")
+        if isinstance(data, dict):
+            old_card = data.get("card_data")
+            if not isinstance(old_card, dict):
+                old_card = data.get("a2a_card_data")
+            if isinstance(old_card, dict):
+                card = normalize_card(old_card, source_url, "agntcy-oci")
+                if card:
+                    card.pop("raw_card", None)
+                    cards.append(card)
     return cards, list(dict.fromkeys(links))
 
 
@@ -724,14 +744,22 @@ def agntcy_oci_sources(config, read=fetch_oci_bytes):
                     or not isinstance(manifest.get("layers"), list)):
                 raise DiscoveryError("Not an AGNTCY Directory artifact")
             source_cards, source_links = [], []
-            for layer in manifest["layers"][:MAX_OCI_LAYERS]:
+            reconstructed = None
+            for index, layer in enumerate(manifest["layers"][:MAX_OCI_LAYERS]):
                 if not isinstance(layer, dict):
                     continue
                 media = layer.get("mediaType")
-                if (not isinstance(media, str) or not
-                        media.startswith("application/vnd.agntcy.oasf.types.")
-                        or not media.endswith(".Record+json")):
+                if not isinstance(media, str) or not media.startswith(
+                        "application/vnd.agntcy.oasf.types."):
                     continue
+                # The first layer is the base Record. Component Module layers
+                # hold the actual A2A artifacts in normal OCI exports.
+                is_record = media.endswith(".Record+json")
+                is_module = media.endswith(".Module+json")
+                if not (is_record or is_module):
+                    continue
+                if index == 0 and not is_record:
+                    raise DiscoveryError("OCI base layer must be Record")
                 layer_digest = layer.get("digest")
                 if not isinstance(layer_digest, str) or not re.fullmatch(
                         r"sha256:[0-9a-f]{64}", layer_digest):
@@ -750,9 +778,35 @@ def agntcy_oci_sources(config, read=fetch_oci_bytes):
                     raise DiscoveryError("Invalid OCI layer")
                 if hashlib.sha256(body).hexdigest() != layer_digest[7:]:
                     raise DiscoveryError("OCI layer digest mismatch")
-                embedded, refs = oasf_a2a_cards(json.loads(body), manifest_url)
-                source_cards.extend(embedded)
-                source_links.extend(refs)
+                component = json.loads(body)
+                if not isinstance(component, dict):
+                    raise DiscoveryError("Invalid OASF component data")
+                if is_record:
+                    if index != 0 or reconstructed is not None:
+                        raise DiscoveryError("Duplicate base OASF Record")
+                    reconstructed = component
+                    if not isinstance(reconstructed.get("modules", []), list):
+                        raise DiscoveryError("Invalid base Record modules")
+                    reconstructed["modules"] = reconstructed.get("modules", [])[:MAX_OCI_LAYERS * 4]
+                elif is_module:
+                    if reconstructed is None:
+                        raise DiscoveryError("OASF module without base Record")
+                    annotations = layer.get("annotations")
+                    if not isinstance(annotations, dict):
+                        annotations = {}
+                    # OCI layer descriptors carry the module name/id, unlike
+                    # the small JSON Module blob. Only typed integration/a2a
+                    # contributes Agent Cards; metadata remains untrusted.
+                    name = annotations.get("agntcy.oasf.module/name")
+                    if isinstance(name, str):
+                        component["name"] = name
+                    module_id = annotations.get("agntcy.oasf.module/id")
+                    if isinstance(module_id, str):
+                        component["id"] = module_id
+                    reconstructed["modules"].append(component)
+            if reconstructed is None:
+                raise DiscoveryError("OASF base Record missing")
+            source_cards, source_links = oasf_a2a_cards(reconstructed, manifest_url)
             cards.extend(source_cards)
             links.extend(source_links)
         except (DiscoveryError, ValueError, TypeError, OverflowError, UnicodeError):
