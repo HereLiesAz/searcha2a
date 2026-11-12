@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "source": "searcha2a",
-  "generated_at": "2026-11-12T17:21:24.144569+00:00",
-  "count": 102,
+  "generated_at": "2026-11-12T17:53:45.358838+00:00",
+  "count": 103,
   "listings": [
     {
       "id": "external.a2a.e57cd4828b68f211192e",
@@ -5888,6 +5888,83 @@
         }
       ],
       "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
+      "id": "external.a2a.5744218833acfbddcaf1",
+      "kind": "a2a-agent",
+      "name": "MyDankTank Public Information Agent",
+      "description": "Read-only public agent for MyDankTank educational catalog metadata, taxonomy, Journal content, public policies, and machine discovery. No purchase, ordering, payment, recommendation, account, or administrative authority.",
+      "endpoint": "https://mydanktank.com/a2a",
+      "source_url": "https://mydanktank.com/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/5744218833acfbddcaf1.json",
+      "skills": [
+        {
+          "name": "Get Machine Capabilities",
+          "description": "Return MyDankTank public machine-discovery surfaces, evidence boundaries, and explicit authority exclusions.",
+          "tags": [
+            "cannabis-education",
+            "catalog-metadata",
+            "journal",
+            "public-information",
+            "adult-21-plus"
+          ]
+        },
+        {
+          "name": "Search Catalog Education",
+          "description": "Search published MyDankTank catalog descriptions for educational product-format, flavor, lineage, and descriptive metadata. No price, stock, purchase URL, cart, or ordering data is returned.",
+          "tags": [
+            "cannabis-education",
+            "catalog-metadata",
+            "journal",
+            "public-information",
+            "adult-21-plus"
+          ]
+        },
+        {
+          "name": "List Catalog Taxonomy",
+          "description": "List public product-category taxonomy names and descriptions for machine classification. No transactional fields are returned.",
+          "tags": [
+            "cannabis-education",
+            "catalog-metadata",
+            "journal",
+            "public-information",
+            "adult-21-plus"
+          ]
+        },
+        {
+          "name": "Search Journal",
+          "description": "Search published MyDankTank Journal/editorial content and return titles, excerpts, dates, and canonical editorial URLs.",
+          "tags": [
+            "cannabis-education",
+            "catalog-metadata",
+            "journal",
+            "public-information",
+            "adult-21-plus"
+          ]
+        },
+        {
+          "name": "Get Public Policies",
+          "description": "Return canonical public informational and policy resources, including Start Here, About, Contact, Privacy, Journal, and llms.txt.",
+          "tags": [
+            "cannabis-education",
+            "catalog-metadata",
+            "journal",
+            "public-information",
+            "adult-21-plus"
+          ]
+        }
+      ],
+      "protocols": [
+        "JSONRPC"
+      ],
       "security_schemes": [],
       "capabilities": {
         "streaming": false,
