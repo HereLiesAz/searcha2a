@@ -459,11 +459,23 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
         except (DiscoveryError, ValueError, TypeError, OverflowError, RecursionError):
             return [], []
 
+    def prefer_verified(card):
+        """Preserve a fresh publisher proof over an unverified registry copy.
+
+        An embedded registry record can advertise the same endpoint as the
+        original card, but has no authority to suppress the card's proof.
+        """
+        previous = results.get(card["id"])
+        if previous is None or (
+                card.get("publisher_verification") and
+                not previous.get("publisher_verification")):
+            results[card["id"]] = card
+
     discovered = []
     with ThreadPoolExecutor(max_workers=10) as pool:
         for cards, links in pool.map(pull, unique):
             for record in cards:
-                results.setdefault(record["id"], record)
+                prefer_verified(record)
             discovered.extend(links)
 
     # At most one further GET hop. Do not spider arbitrary links, invoke A2A
@@ -479,7 +491,7 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     with ThreadPoolExecutor(max_workers=10) as pool:
         for cards, _links in pool.map(pull, followups):
             for record in cards:
-                results.setdefault(record["id"], record)
+                prefer_verified(record)
     ordered = sorted(results.values(), key=lambda r: (-rank(r, query), r["name"].lower()))
     if query:
         ordered = [r for r in ordered if rank(r, query) > 0]
