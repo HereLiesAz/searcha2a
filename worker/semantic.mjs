@@ -5,7 +5,7 @@
  * No Agent Card, task endpoint, credential, or GitHub Actions dispatch is touched.
  */
 const CATALOG_URL = 'https://raw.githubusercontent.com/HereLiesAz/searcha2a/agent-feed/site/api/v1/azphalt-listings.json';
-const EMBEDDING_MODEL = '@cf/baai/bge-small-en-v1.5';
+export const EMBEDDING_MODEL = '@cf/baai/bge-small-en-v1.5';
 const MAX_CATALOG_BYTES = 16_777_216;
 const MAX_RESULTS = 20;
 const STOP_WORDS = new Set(['a', 'an', 'and', 'at', 'by', 'can', 'find', 'for', 'from', 'in', 'me', 'of', 'on', 'or', 'the', 'to', 'who', 'with']);
@@ -14,7 +14,7 @@ function words(text) {
   return (String(text).toLowerCase().match(/[a-z0-9]+/g) || []).filter(word => word.length > 1 && !STOP_WORDS.has(word));
 }
 
-function descriptionOf(agent) {
+export function descriptionOf(agent) {
   const skillText = (Array.isArray(agent.skills) ? agent.skills : []).slice(0, 8).flatMap(skill => [
     skill?.name || '', skill?.description || '',
     ...(Array.isArray(skill?.tags) ? skill.tags.slice(0, 5) : []),
@@ -112,7 +112,7 @@ export async function readPublishedAgents(fetcher = fetch) {
     entries };
 }
 
-function validEmbeddings(data, count) {
+export function validEmbeddings(data, count) {
   if (!Array.isArray(data) || data.length !== count || !Array.isArray(data[0])) return false;
   const dimensions = data[0].length;
   return dimensions >= 2 && data.every(vector => Array.isArray(vector) &&
@@ -123,28 +123,40 @@ function validEmbeddings(data, count) {
  * A read-only capability lookup. Registry claims are never promoted to verified
  * identities, connection approvals, or permissions.
  */
-export async function rankAgentCandidates(query, env, entries, generated_at = null) {
+export async function rankAgentCandidates(query, env, entries, generated_at = null, candidateVectors = null) {
   let embeddings = null;
   if (entries.length && env.AI && typeof env.AI.run === 'function') {
     try {
-      // bge-small-en-v1.5 accepts at most 100 inputs per call. Include the same
-      // query in each bounded batch, then reunite the candidate vectors.
       const queryText = 'Represent this sentence for searching relevant passages: ' + query;
-      const vectors = [];
-      for (let start = 0; start < entries.length; start += 99) {
-        const descriptions = entries.slice(start, start + 99).map(descriptionOf);
-        const response = await env.AI.run(EMBEDDING_MODEL, {
-          text: [queryText, ...descriptions],
-          pooling: 'cls',
-        });
-        if (!validEmbeddings(response?.data, descriptions.length + 1) ||
-            (vectors.length && response.data[0].length !== vectors[0].length)) {
-          throw new Error('Invalid embedding batch');
+      if (candidateVectors !== null) {
+        // Indexed candidates use persisted vectors. Only the query is embedded per search.
+        if (validEmbeddings(candidateVectors, entries.length)) {
+          const response = await env.AI.run(EMBEDDING_MODEL, {
+            text: [queryText], pooling: 'cls',
+          });
+          if (validEmbeddings(response?.data, 1) &&
+              response.data[0].length === candidateVectors[0].length) {
+            embeddings = [response.data[0], ...candidateVectors];
+          }
         }
-        if (!vectors.length) vectors.push(response.data[0]);
-        vectors.push(...response.data.slice(1));
+      } else {
+        // Standalone feed compatibility still embeds in <=100-input model batches.
+        const vectors = [];
+        for (let start = 0; start < entries.length; start += 99) {
+          const descriptions = entries.slice(start, start + 99).map(descriptionOf);
+          const response = await env.AI.run(EMBEDDING_MODEL, {
+            text: [queryText, ...descriptions],
+            pooling: 'cls',
+          });
+          if (!validEmbeddings(response?.data, descriptions.length + 1) ||
+              (vectors.length && response.data[0].length !== vectors[0].length)) {
+            throw new Error('Invalid embedding batch');
+          }
+          if (!vectors.length) vectors.push(response.data[0]);
+          vectors.push(...response.data.slice(1));
+        }
+        if (validEmbeddings(vectors, entries.length + 1)) embeddings = vectors;
       }
-      if (validEmbeddings(vectors, entries.length + 1)) embeddings = vectors;
     } catch {
       // A failed batch must not leave partially semantic results masquerading as valid.
       embeddings = null;

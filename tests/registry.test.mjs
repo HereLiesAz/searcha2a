@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { AgentRegistry, handle } from '../worker/index.mjs';
 
-function registryEnvironment({ legacySchema = false } = {}) {
+function registryEnvironment({ legacySchema = false, ai = undefined } = {}) {
   // Use a real SQLite engine; expected results below are authored independently.
   const database = new DatabaseSync(':memory:');
   if (legacySchema) {
@@ -43,14 +43,16 @@ function registryEnvironment({ legacySchema = false } = {}) {
       }
     },
   };
-  const object = new AgentRegistry({ storage });
+  const object = new AgentRegistry({ storage }, { AI: ai });
   return {
     env: {
       ALLOWED_ORIGIN: 'https://searcha2a.azphalt.store',
       RESULT_CALLBACK_SECRET: 'pipeline-secret',
       REGISTRY_ADMIN_SECRET: 'admin-only-secret',
+      ...(ai ? { AI: ai } : {}),
       REGISTRY: { idFromName: name => name, get: () => object },
     },
+    sql: storage.sql,
     close: () => database.close(),
   };
 }
@@ -348,7 +350,14 @@ test('ANS resolution exposes duplicate publisher claims without selecting an ide
 });
 
 test('semantic directory paginates every persisted card and honors moderation beyond 150', async () => {
-  const state = registryEnvironment();
+  const calls = [];
+  const ai = { run: async (_, input) => {
+    calls.push(input.text.length);
+    assert.ok(input.text.length <= 100);
+    return { data: input.text.map(text =>
+      text.includes('starlingcapability') ? [1, 0] : [0, 1]) };
+  } };
+  const state = registryEnvironment({ ai });
   state.env.SEARCH_RATE_LIMITER = { limit: async () => ({ success: true }) };
   try {
     const records = Array.from({ length: 205 }, (_, i) => card(
@@ -365,6 +374,13 @@ test('semantic directory paginates every persisted card and honors moderation be
     let data = await response.json();
     assert.equal(data.truncated, false);
     assert.deepEqual(data.results.map(agent => agent.id), [records[204].id]);
+    assert.equal(data.match_mode, 'semantic');
+    assert.deepEqual(calls, [100, 100, 5, 1]);
+    calls.length = 0;
+    const cached = await (await handle(
+      request('/api/v1/directory?q=starlingcapability'), state.env)).json();
+    assert.equal(cached.match_mode, 'semantic');
+    assert.deepEqual(calls, [1]); // Reuse all 205 persisted vectors across pages.
     assert.equal((await manage(state.env, records[204].id, 'reject', 'Unsafe listing')).status, 200);
     response = await handle(request('/api/v1/directory?q=starlingcapability'), state.env);
     data = await response.json();
@@ -378,6 +394,80 @@ test('semantic directory paginates every persisted card and honors moderation be
     const page = await candidates.json();
     assert.equal(page.entries.length, 100);
     assert.equal(page.next_offset, 200);
+  } finally { state.close(); }
+});
+
+test('incremental embeddings reuse persisted vectors and invalidate only changed metadata', async () => {
+  const calls = [];
+  const ai = { run: async (_, input) => {
+    calls.push(input.text.slice());
+    assert.ok(input.text.length <= 100);
+    return { data: input.text.map(text =>
+      text.includes('starlingcapability') ? [1, 0] : [0, 1]) };
+  } };
+  const state = registryEnvironment({ ai });
+  state.env.SEARCH_RATE_LIMITER = { limit: async () => ({ success: true }) };
+  const find = () => handle(request('/api/v1/directory?q=starlingcapability'), state.env);
+  try {
+    const target = { ...weather, description: 'starlingcapability' };
+    await ingest(state.env, [target, calendar]);
+    const first = await (await find()).json();
+    assert.equal(first.match_mode, 'semantic');
+    assert.deepEqual(first.results.map(row => row.id), [weather.id]);
+    assert.deepEqual(calls.map(batch => batch.length), [2, 1]);
+    calls.length = 0;
+    const again = await (await find()).json();
+    assert.equal(again.match_mode, 'semantic');
+    assert.deepEqual(calls.map(batch => batch.length), [1]);
+
+    // Invalid cached JSON is treated as a missing vector, never a 502 or an
+    // opportunity to serve unmoderated records.
+    state.sql.exec('UPDATE agent_embeddings SET vector=? WHERE id=?', '{invalid', weather.id);
+    calls.length = 0;
+    assert.equal((await (await find()).json()).match_mode, 'semantic');
+    assert.deepEqual(calls.map(batch => batch.length), [1, 1]);
+
+    // Re-ingesting identical semantic input must not trigger candidate inference.
+    await ingest(state.env, [{ ...target, version: '2' }]);
+    calls.length = 0;
+    assert.equal((await (await find()).json()).match_mode, 'semantic');
+    assert.deepEqual(calls.map(batch => batch.length), [1]);
+
+    // A changed description invalidates only that agent's cached vector.
+    await ingest(state.env, [{ ...target, description: 'Renamed starlingcapability' }]);
+    calls.length = 0;
+    assert.equal((await (await find()).json()).match_mode, 'semantic');
+    assert.deepEqual(calls.map(batch => batch.length), [1, 1]);
+    assert.equal(calls[0][0].includes('Renamed'), true);
+
+    // Curator rejection always overrides a previously cached semantic vector.
+    assert.equal((await manage(state.env, weather.id, 'reject', 'Unsafe')).status, 200);
+    calls.length = 0;
+    assert.deepEqual((await (await find()).json()).results, []);
+    assert.deepEqual(calls.map(batch => batch.length), [1]);
+    await ingest(state.env, [target]);
+    assert.deepEqual((await (await find()).json()).results, []);
+  } finally { state.close(); }
+});
+
+test('embedding failure leaves persistent metadata searchable and retries on next read', async () => {
+  let fail = true;
+  const ai = { run: async (_, input) => {
+    if (fail) throw new Error('Temporary AI outage');
+    return { data: input.text.map(() => [1, 0]) };
+  } };
+  const state = registryEnvironment({ ai });
+  state.env.SEARCH_RATE_LIMITER = { limit: async () => ({ success: true }) };
+  try {
+    await ingest(state.env, [weather]);
+    const url = request('/api/v1/directory?q=forecast');
+    let body = await (await handle(url, state.env)).json();
+    assert.equal(body.match_mode, 'keyword-fallback');
+    assert.deepEqual(body.results.map(row => row.name), ['Weather Expert']);
+    fail = false;
+    body = await (await handle(url, state.env)).json();
+    assert.equal(body.match_mode, 'semantic');
+    assert.deepEqual(body.results.map(row => row.name), ['Weather Expert']);
   } finally { state.close(); }
 });
 
