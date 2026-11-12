@@ -30,6 +30,13 @@ class CatalogConnectorTests(unittest.TestCase):
         self.assertEqual([c["name"] for c in cards], ["Weather Agent"])
         self.assertEqual(urls, ["https://catalog.example.org/other-agent"])
 
+    def test_legacy_registry_entries_still_parse_without_media_types(self):
+        feed = {"entries": [{"card": CARD}]}
+        cards, urls = discover.unpack_cards(feed, "https://registry.example.org/feed.json",
+                                            "registry")
+        self.assertEqual([card["name"] for card in cards], ["Weather Agent"])
+        self.assertEqual(urls, [])
+
     def test_inline_ai_catalog_nesting_is_bounded_and_ignores_untyped_branches(self):
         nested = {"specVersion": "1.0", "entries": [
             {"mediaType": AI, "data": CARD},
