@@ -298,3 +298,31 @@ test('invalid ANS claim cannot pollute indexed agent record', async () => {
       state.env)).status, 404);
   } finally { state.close(); }
 });
+
+test('unified ANS capability directory ranks durable curated records without fetching a feed', async () => {
+  const state = registryEnvironment();
+  const savedFetch = globalThis.fetch;
+  globalThis.fetch = () => { throw new Error('Semantic discovery must not fetch the public snapshot'); };
+  try {
+    const named = { ...weather, ans_name: 'ans://spring.2026.weather.example.com',
+      ans_host: 'weather.example.com' };
+    await ingest(state.env, [named, calendar]);
+    state.env.SEARCH_RATE_LIMITER = { limit: async () => ({ success: true }) };
+    let response = await handle(request('/api/v1/directory?q=forecast'), state.env);
+    assert.equal(response.status, 200);
+    let result = await response.json();
+    assert.equal(result.candidate_scope, 'persistent-registry');
+    assert.equal(result.truncated, false);
+    assert.equal(result.match_mode, 'keyword-fallback');
+    assert.deepEqual(result.results.map(agent => agent.name), ['Weather Expert']);
+    assert.equal(result.results[0].ans.version, 'spring.2026');
+    assert.equal(result.results[0].installable, false);
+    await manage(state.env, weather.id, 'deactivate', 'No longer offered');
+    response = await handle(request('/api/v1/directory?q=forecast'), state.env);
+    result = await response.json();
+    assert.deepEqual(result.results, []);
+  } finally {
+    globalThis.fetch = savedFetch;
+    state.close();
+  }
+});
