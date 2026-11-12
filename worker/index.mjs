@@ -158,7 +158,13 @@ export class AgentRegistry {
       // Background index updates are best-effort. Failed embeddings remain missing
       // and are retried by the next directory read without failing ingestion.
       if (pendingEmbeddings.length && this.ctx.waitUntil && this.ai) {
-        this.ctx.waitUntil(this.indexMissingEmbeddings(pendingEmbeddings));
+        // Never send suppressed records to the embedding model, even for
+        // background work scheduled by a later crawl.
+        const eligible = pendingEmbeddings.filter(item => this.sql.exec(
+          `SELECT id FROM agents WHERE id=?
+            AND listing_state='active' AND review_status != 'rejected'`, item.id
+        ).toArray().length);
+        if (eligible.length) this.ctx.waitUntil(this.indexMissingEmbeddings(eligible));
       }
       const count = this.sql.exec('SELECT COUNT(*) AS total FROM agents').one().total;
       const marks = entries.map(() => '?').join(', ');
