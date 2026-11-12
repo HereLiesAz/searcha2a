@@ -39,7 +39,7 @@ Read one persisted normalized Agent Card. Returns 404 if the ID is unknown.
 
 ### `GET /api/v1/directory?q=weather`
 
-The existing semantic capability discovery endpoint remains available to clients such as Aive. It searches the **published static** `agent-feed` snapshot, not the accumulated SQL registry. It uses Workers AI embeddings when available and otherwise reports `match_mode: "keyword-fallback"`; its result cap is 20. Requires `q` of 2–120 characters and uses the existing approximate five-requests-per-minute IP limiter. It never dispatches GitHub Actions or invokes an agent. For all stored agents, including those absent from the latest snapshot, use `GET /api/v1/agents`.
+The existing semantic capability discovery endpoint remains available to clients such as Aive. It ranks up to 100 active, non-rejected candidates from the **persistent SQL registry** (newest indexed first) with Workers AI embeddings when available and otherwise reports `match_mode: "keyword-fallback"`. Its result cap is 20. The response carries `candidate_scope: "persistent-registry"` and `truncated` when more than 100 indexed agents exist. Requires `q` of 2–120 characters and uses the existing approximate five-requests-per-minute IP limiter. No remote Agent Cards, static feeds or GitHub Actions are contacted. A missing registry binding returns 503 instead of falling back to potentially suppressed static listings. For complete metadata keyword search, use `GET /api/v1/agents`.
 
 Errors for public endpoints: 400 invalid input, 404 unknown agent, 503 registry binding unavailable, 500 unexpected failure. GET responses do not allocate per-request result mailboxes.
 
