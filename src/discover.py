@@ -1027,7 +1027,7 @@ def public_directory_sources(config, post=post_public_directory_discover):
         if endpoint not in PUBLIC_DISCOVERY_ENDPOINTS:
             warnings.append("Public directory source unsupported")
             continue
-        local_cards, local_links = [], []
+        local_links = []
         for i in range(MAX_PUBLIC_DISCOVERY_TOPICS_PER_RUN):
             topic = PUBLIC_DISCOVERY_TOPICS[
                 (rotation * MAX_PUBLIC_DISCOVERY_TOPICS_PER_RUN + i)
@@ -1041,19 +1041,39 @@ def public_directory_sources(config, post=post_public_directory_discover):
                 for item in rows:
                     if not isinstance(item, dict):
                         continue
-                    local_links.extend(card_references(item, endpoint))
-                    embedded = item.get("card") or item.get("agentCard")
-                    if not isinstance(embedded, dict):
+                    refs = card_references(item, endpoint)
+                    if refs:
+                        local_links.extend(refs)
                         continue
-                    record = normalize_card(embedded, endpoint, "public-directory")
-                    if record and record["endpoint"]:
-                        # Publisher-hosted originals always have precedence.
-                        # Do not publish remote directory raw card snapshots.
-                        record.pop("raw_card", None)
-                        local_cards.append(record)
+                    # The directory's /discover URL is NOT an Agent Card URL.
+                    # Derive only a canonical HTTPS card probe from an explicitly
+                    # labeled A2A endpoint and let existing GET validation decide.
+                    embedded = item.get("card") or item.get("agentCard")
+                    services = item.get("endpoints")
+                    reach = item.get("reach")
+                    a2a = (embedded.get("url") if isinstance(embedded, dict) else None)
+                    if not a2a and isinstance(services, dict):
+                        a2a = services.get("a2a")
+                    if (not a2a and isinstance(reach, dict)
+                            and reach.get("type") == "a2a"):
+                        a2a = reach.get("door")
+                    if not isinstance(a2a, str):
+                        continue
+                    try:
+                        parsed = urllib.parse.urlsplit(a2a)
+                        if (parsed.scheme != "https" or not parsed.hostname
+                                or parsed.username or parsed.password
+                                or parsed.port not in (None, 443)):
+                            continue
+                        derived = public_card_link(
+                            "https://" + parsed.hostname + "/.well-known/agent-card.json",
+                            endpoint, explicit_card=True)
+                    except ValueError:
+                        continue
+                    if derived:
+                        local_links.append(derived)
             except (DiscoveryError, ValueError, TypeError):
                 warnings.append("Public directory metadata unavailable")
-        cards.extend(local_cards)
         links.extend(local_links)
     return cards, list(dict.fromkeys(links))[:MAX_FOLLOWUP_CARD_URLS], warnings
 
