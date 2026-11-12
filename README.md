@@ -18,7 +18,7 @@ Card results provide agent name, description, skills/tags, protocol bindings, en
 
 ## Azphalt Store integration
 
-The daily Pages workflow generates `api/v1/azphalt-listings.json` from the same crawl, one listing per valid deduplicated Agent Card. Azphalt Store consumes this via its read-only `/api/a2a/agents` proxy and `/agents` directory. Listings are explicitly `kind: "a2a-agent"`, `installable: false`, and `verification: "card_read_only"`. They are **not** signed `.azp` packages, LLMs, advertised free purchases, or first-party trusted agents. The Store never downloads or runs third-party agents.
+The daily Pages workflow generates `api/v1/azphalt-listings.json` from the same crawl, one listing per valid deduplicated Agent Card. It mirrors this snapshot to the `agent-feed` branch at `site/api/v1/azphalt-listings.json`, served via `raw.githubusercontent.com` so Azphalt's Cloudflare Worker need not fetch another hostname in its own zone. Azphalt Store consumes this via its read-only `/api/a2a/agents` proxy and `/agents` directory. Listings are explicitly `kind: "a2a-agent"`, `installable: false`, and `verification: "card_read_only"`. They are **not** signed `.azp` packages, LLMs, advertised free purchases, or first-party trusted agents. The Store never downloads or runs third-party agents.
 
 
 ## Domain
