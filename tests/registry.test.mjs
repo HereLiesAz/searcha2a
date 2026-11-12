@@ -78,6 +78,81 @@ const ingest = (env, records, authorization = 'Bearer pipeline-secret') =>
 const lookup = (env, query = '') =>
   handle(request('/api/v1/agents?limit=70&query=' + encodeURIComponent(query)), env);
 
+test('scheduled endpoint health is authenticated, moderated, and independent of verification', async () => {
+  const state = registryEnvironment();
+  const due = () => handle(request('/internal/registry/health/due', {
+    headers: { Authorization: 'Bearer pipeline-secret' },
+  }), state.env);
+  const report = (results, auth = 'Bearer pipeline-secret') =>
+    handle(request('/internal/registry/health', {
+      method: 'POST', headers: { Authorization: auth },
+      body: JSON.stringify({ results }),
+    }), state.env);
+  const health = id => handle(request('/api/v1/agents/' + id + '/health'), state.env);
+  try {
+    const privateCard = { ...calendar, source: 'authorized-catalog' };
+    await ingest(state.env, [weather, privateCard]);
+    assert.equal((await handle(request('/internal/registry/health/due'), state.env)).status, 401);
+    assert.equal((await report([], 'Bearer wrong')).status, 401);
+    assert.deepEqual((await (await due()).json()).entries,
+      [{ id: weather.id, endpoint: weather.endpoint }]);
+    assert.equal((await (await health(weather.id)).json()).status, 'unchecked');
+    assert.equal((await report([{ id: weather.id, endpoint: weather.endpoint,
+      status: 'responding', http_status: 405 }])).status, 200);
+    let body = await (await health(weather.id)).json();
+    assert.equal(body.status, 'responding');
+    assert.equal(body.http_status, 405);
+    assert.equal(body.protocol_verified, false);
+    assert.ok(body.checked_at);
+    assert.equal((await (await health(calendar.id)).json()).status, 'unchecked');
+    assert.equal((await (await report([{ id: calendar.id, endpoint: calendar.endpoint,
+      status: 'responding', http_status: 200 }])).json()).stored, 0);
+
+    const wrong = await report([{ id: weather.id, endpoint: 'https://other.example/a2a',
+      status: 'responding', http_status: 200 }]);
+    assert.equal((await wrong.json()).stored, 0);
+    assert.equal((await report([{ id: weather.id, endpoint: weather.endpoint,
+      status: 'responding', http_status: null }])).status, 400);
+    assert.equal((await report([{ id: weather.id, endpoint: weather.endpoint,
+      status: 'unreachable', http_status: 200 }])).status, 400);
+
+    // Metadata changes invalidate health immediately, without deleting old results.
+    await ingest(state.env, [{ ...weather, endpoint: 'https://new.example/a2a' }]);
+    assert.equal((await (await health(weather.id)).json()).status, 'unchecked');
+    assert.deepEqual((await (await due()).json()).entries,
+      [{ id: weather.id, endpoint: 'https://new.example/a2a' }]);
+
+    assert.equal((await manage(state.env, weather.id, 'reject', 'Unsafe')).status, 200);
+    assert.equal((await health(weather.id)).status, 404);
+    assert.deepEqual((await (await due()).json()).entries, []);
+    assert.equal((await (await report([{ id: weather.id,
+      endpoint: 'https://new.example/a2a',
+      status: 'responding', http_status: 200 }])).json()).stored, 0);
+  } finally { state.close(); }
+});
+
+test('health history becomes stale without ever asserting protocol compliance', async () => {
+  const state = registryEnvironment();
+  try {
+    await ingest(state.env, [weather]);
+    const report = request('/internal/registry/health', {
+      method: 'POST', headers: { Authorization: 'Bearer pipeline-secret' },
+      body: JSON.stringify({ results: [{
+        id: weather.id, endpoint: weather.endpoint,
+        status: 'unreachable', http_status: null,
+      }] }),
+    });
+    assert.equal((await handle(report, state.env)).status, 200);
+    state.sql.exec('UPDATE agent_health SET checked_at=? WHERE id=?',
+      '2020-01-01T00:00:00.000Z', weather.id);
+    const response = await handle(request('/api/v1/agents/' + weather.id + '/health'), state.env);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.status, 'stale');
+    assert.equal(body.protocol_verified, false);
+  } finally { state.close(); }
+});
+
 test('new registry responds instantly with zero records before first crawl', async () => {
   const state = registryEnvironment();
   try {
