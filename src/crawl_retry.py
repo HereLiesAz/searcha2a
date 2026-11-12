@@ -22,6 +22,11 @@ STATE_PATH = "state/public-card-retries.json"
 MAX_STATE_BYTES = 16000
 MAX_PENDING = 40
 MAX_RETRIES_PER_CRAWL = 16
+MAX_GITHUB_PENDING = 10
+SOURCE_PRIORITY = {
+    "erc8004-registration": 4, "registry": 3,
+    "public-directory": 2, "manifest": 1, "github": 0,
+}
 MAX_URL_LENGTH = 280
 MAX_FAILURES = 8
 MAX_DAY = 3000000
@@ -103,7 +108,8 @@ def due_retries(state, today):
         raise RetryStateError("Invalid retry date")
     ready = sorted((entry for entry in state["pending"]
                     if entry["retry_day"] <= today),
-                   key=lambda x: (x["retry_day"], x["url"]))
+                   key=lambda x: (-SOURCE_PRIORITY[x["source"]],
+                                  x["retry_day"], x["url"]))
     chosen = ready[:MAX_RETRIES_PER_CRAWL]
     deferred = {entry["url"] for entry in state["pending"]} - {
         entry["url"] for entry in chosen}
@@ -125,6 +131,14 @@ def record_outcomes(state, outcomes, today):
     by_source = {}
     total = {"attempted": 0, "accepted": 0, "invalid": 0,
              "unavailable": 0, "queue_full": 0}
+    # Old versions admitted GitHub leads until the queue was full. Keep the
+    # earliest ten and free slots for ephemeral registry/on-chain pointers.
+    github_entries = sorted(
+        (entry for entry in previous.values() if entry["source"] == "github"),
+        key=lambda e: (e["retry_day"], e["url"]))
+    for entry in github_entries[MAX_GITHUB_PENDING:]:
+        del previous[entry["url"]]
+        total["queue_full"] += 1
     for url, origin, status in outcomes:
         if origin not in PUBLIC_ORIGINS or not safe_public_card_url(url):
             continue
@@ -145,13 +159,29 @@ def record_outcomes(state, outcomes, today):
             continue
         old = previous.get(url)
         failures = min(MAX_FAILURES, 1 + (old["failures"] if old else 0))
-        if old is None and len(previous) >= MAX_PENDING:
-            if origin == "erc8004-registration":
-                # Keep a confirmed block window retriable if chain URLs cannot
-                # be saved. This error aborts the build before cursor commit.
-                raise RetryStateError("Unpersisted chain registration URLs")
-            total["queue_full"] += 1
-            continue
+        if old is None:
+            if (origin == "github" and sum(
+                    1 for item in previous.values()
+                    if item["source"] == "github") >= MAX_GITHUB_PENDING):
+                total["queue_full"] += 1
+                continue
+            if len(previous) >= MAX_PENDING:
+                lower = [item for item in previous.values()
+                         if SOURCE_PRIORITY[item["source"]] < SOURCE_PRIORITY[origin]]
+                if lower:
+                    # Evict the furthest-deferred, lowest-priority lead.
+                    victim = max(lower, key=lambda item: (
+                        -SOURCE_PRIORITY[item["source"]],
+                        item["retry_day"], item["url"]))
+                    del previous[victim["url"]]
+                    total["queue_full"] += 1
+                else:
+                    if origin == "erc8004-registration":
+                        # Never advance a chain window whose off-chain URL
+                        # cannot be saved in the durable retry queue.
+                        raise RetryStateError("Unpersisted chain registration URLs")
+                    total["queue_full"] += 1
+                    continue
         wait_days = min(30, 2 ** (failures - 1))
         previous[url] = {
             "url": url, "source": old["source"] if old else origin,
