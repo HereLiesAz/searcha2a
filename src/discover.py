@@ -696,6 +696,7 @@ def erc8004_checkpointed_sources(config, state: dict, post=post_chain_rpc):
             cursor = (prior_block if prior_block is not None else
                       first if first is not None else max(0, end - lookback + 1))
             window = prior_span if prior_span is not None else configured_window
+            adaptive_ceiling = window
             completed = 0
             attempts = 0
             per_agent = {}
@@ -710,10 +711,11 @@ def erc8004_checkpointed_sources(config, state: dict, post=post_chain_rpc):
                         "topics": [[REGISTERED_TOPIC, URI_UPDATED_TOPIC]],
                     }])
                 except DiscoveryError:
-                    # Overloaded/size-limited providers may reject wide ranges.
-                    # Retry at most five narrower windows before failing closed.
-                    if window > 1 and attempts <= 5:
+                    # Provider range limits apply to every window, not just
+                    # early attempts. Keep the narrower cap for this run.
+                    if window > 1:
                         window = max(1, window // 2)
+                        adaptive_ceiling = min(adaptive_ceiling, window)
                         continue
                     raise
                 logs = reply.get("result") if isinstance(reply, dict) else None
@@ -722,11 +724,13 @@ def erc8004_checkpointed_sources(config, state: dict, post=post_chain_rpc):
                     # Narrow and retry; never mark unseen blocks complete.
                     if window > 1:
                         window = max(1, window // 2)
+                        adaptive_ceiling = min(adaptive_ceiling, window)
                         continue
                     raise DiscoveryError("Invalid chain log response")
                 if len(logs) >= MAX_ERC8004_LOGS:
                     if window > 1:
                         window = max(1, window // 2)
+                        adaptive_ceiling = min(adaptive_ceiling, window)
                         continue
                     warnings.append("ERC-8004 single block exceeds bounded log budget")
                     break
@@ -740,6 +744,7 @@ def erc8004_checkpointed_sources(config, state: dict, post=post_chain_rpc):
                 if len(tentative) > MAX_ERC8004_CHECKPOINT_URLS_PER_SOURCE:
                     if window > 1:
                         window = max(1, window // 2)
+                        adaptive_ceiling = min(adaptive_ceiling, window)
                         continue
                     warnings.append("ERC-8004 URL budget reached; cursor retained")
                     break
@@ -748,7 +753,7 @@ def erc8004_checkpointed_sources(config, state: dict, post=post_chain_rpc):
                 completed += 1
                 # Grow conservatively after a successful sparse window.
                 if len(logs) < MAX_ERC8004_LOGS // 4:
-                    window = min(configured_window, window * 2)
+                    window = min(adaptive_ceiling, window * 2)
             checkpoints[key] = {"next_block": cursor, "window": window}
             candidates.extend((url, "erc8004-registration")
                               for url in per_agent.values())
