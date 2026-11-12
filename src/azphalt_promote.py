@@ -16,7 +16,7 @@ from pathlib import Path
 import re
 from urllib.parse import urlsplit
 
-from discover import DiscoveryError, fetch_json, normalize_card
+from discover import DiscoveryError, MAX_CATALOG_DOCUMENT, fetch_json, normalize_card
 from verify_agent import verify_publisher
 
 CATALOG_URL = "https://raw.githubusercontent.com/HereLiesAz/searcha2a/agent-feed/site/api/v1/azphalt-listings.json"
@@ -287,7 +287,7 @@ def main():
     parser.add_argument("--submissions", type=Path, required=True)
     parser.add_argument("--max-new", type=int, default=MAX_NEW)
     args = parser.parse_args()
-    report = promote(fetch_json(CATALOG_URL), args.submissions, max_new=args.max_new)
+    report = promote(fetch_json(CATALOG_URL, max_bytes=MAX_CATALOG_DOCUMENT), args.submissions, max_new=args.max_new)
     print(json.dumps(report, indent=2))
 
 

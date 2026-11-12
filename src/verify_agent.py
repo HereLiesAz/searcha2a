@@ -23,9 +23,15 @@ def _utc_date(value):
         return None
     try:
         date = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
+    except (ValueError, OverflowError):
         return None
-    return date.astimezone(timezone.utc) if date.tzinfo is not None else None
+    if date.tzinfo is None:
+        return None
+    try:
+        return date.astimezone(timezone.utc)
+    except (ValueError, OverflowError):
+        # Extreme publisher timestamps can overflow when offset-converted.
+        return None
 
 
 def _public_origin(value: str):

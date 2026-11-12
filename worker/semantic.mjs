@@ -6,8 +6,8 @@
  */
 const CATALOG_URL = 'https://raw.githubusercontent.com/HereLiesAz/searcha2a/agent-feed/site/api/v1/azphalt-listings.json';
 const EMBEDDING_MODEL = '@cf/baai/bge-small-en-v1.5';
-const MAX_CATALOG_BYTES = 900_000;
-const MAX_CANDIDATES = 70;
+const MAX_CATALOG_BYTES = 16_777_216;
+const MAX_CANDIDATES = 150;
 const MAX_RESULTS = 20;
 const STOP_WORDS = new Set(['a', 'an', 'and', 'at', 'by', 'can', 'find', 'for', 'from', 'in', 'me', 'of', 'on', 'or', 'the', 'to', 'who', 'with']);
 
@@ -124,8 +124,7 @@ function validEmbeddings(data, count) {
  * A read-only capability lookup. Registry claims are never promoted to verified
  * identities, connection approvals, or permissions.
  */
-export async function searchIndexedAgents(query, env, fetcher = fetch) {
-  const { generated_at, entries } = await readPublishedAgents(fetcher);
+export async function rankAgentCandidates(query, env, entries, generated_at = null) {
   let embeddings = null;
   if (entries.length && env.AI && typeof env.AI.run === 'function') {
     try {
@@ -156,4 +155,10 @@ export async function searchIndexedAgents(query, env, fetcher = fetch) {
     count: ranked.length,
     verification: 'card_read_only',
   };
+}
+
+/** Compatibility path for standalone feed readers without a registry binding. */
+export async function searchIndexedAgents(query, env, fetcher = fetch) {
+  const { generated_at, entries } = await readPublishedAgents(fetcher);
+  return rankAgentCandidates(query, env, entries, generated_at);
 }

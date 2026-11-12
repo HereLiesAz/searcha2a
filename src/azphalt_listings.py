@@ -49,12 +49,15 @@ def build_listings(catalog: dict) -> dict:
             "protocols": card.get("protocols", []) if isinstance(card.get("protocols"), list) else [],
             "security_schemes": card.get("security_schemes", []) if isinstance(card.get("security_schemes"), list) else [],
             "capabilities": card.get("capabilities", {}) if isinstance(card.get("capabilities"), dict) else {},
-            "verification": "card_read_only",
-            # Discovery hint only. The promoter re-fetches the card and proof.
+            # Same-origin opt-in is only a discovery hint, not ANS or signing proof.
             **({"publisher_verification": card["publisher_verification"]}
                if isinstance(card.get("publisher_verification"), dict) and
                   card["publisher_verification"].get("method") == "https-origin-opt-in"
                else {}),
+            "verification": "card_read_only",
+            **({"ans_claim": {"name": card["ans_name"], "agent_host": card["ans_host"],
+                              "verification": "unverified"}}
+               if isinstance(card.get("ans_name"), str) and isinstance(card.get("ans_host"), str) else {}),
             "installable": False,
             "source": "searcha2a",
         })

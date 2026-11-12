@@ -16,17 +16,14 @@
     <section class="hero">
       <div class="eyebrow">PUBLIC A2A DISCOVERY</div>
       <h1>Find the agent.<br>Not another directory.</h1>
-      <p>Search the latest indexed agents by meaning, or run a fresh discovery across public Agent Cards, registries and GitHub.</p>
+      <p>Search our persistent A2A agent registry instantly. Independent crawlers refresh public Agent Cards on a schedule.</p>
       <form id="search-form">
         <div class="search-row">
           <input id="query" name="query" type="search" minlength="2" maxlength="120" placeholder="Try: weather forecasts, code review, finance…" aria-label="Agent skills to search" required>
-          <button type="button" id="indexed-search-button" class="secondary-button">Search indexed</button>
-          <button type="submit" id="search-button">Search live</button>
+          <button type="submit" id="search-button">Search agents</button>
         </div>
-        <p class="search-explain">Indexed search uses semantic matching when available. Live discovery refreshes results through GitHub Actions and requires the verification below.</p>
-        <div id="challenge" aria-label="Spam protection"></div>
       </form>
-      <p id="status" role="status" aria-live="polite">Loading public index…</p>
+      <p id="status" role="status" aria-live="polite">Connecting to registry…</p>
     </section>
     <section aria-label="Agent search results">
       <div class="section-header"><h2 id="result-heading">Recently indexed</h2><span id="result-count"></span></div>

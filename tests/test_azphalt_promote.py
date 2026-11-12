@@ -1,5 +1,7 @@
 """Publisher verification and safe generation of reviewed, signed-llm-ready sources."""
 import importlib
+import io
+from unittest.mock import patch
 from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
@@ -155,6 +157,30 @@ class PromotionTests(unittest.TestCase):
         bad["license"] = "NONE"
         self.proof = bad
         self.assertIsNone(verify_publisher(record, CARD, fetch=self.fetch, now=self.now))
+
+
+    def test_timestamp_underflow_fails_verification_without_aborting_crawl(self):
+        record = {"verification": "card_read_only", "source_url": CARD_URL, "endpoint": API_URL}
+        self.proof["issued_at"] = "0001-01-01T00:00:00+01:00"
+        self.assertIsNone(verify_publisher(record, CARD, fetch=self.fetch, now=self.now))
+
+    def test_fixed_promotion_catalog_can_exceed_individual_card_limit(self):
+        import discover
+        document = {"schema": 1, "source": "searcha2a", "listings": [],
+                    "padding": "x" * 620_000}
+        encoded = json.dumps(document).encode("utf-8")
+        class FakeResponse(io.BytesIO):
+            status = 200
+        with patch.object(discover, "require_public_https", return_value=CATALOG_URL), \
+                patch.object(discover.OPENER, "open", return_value=FakeResponse(encoded)):
+            with self.assertRaisesRegex(discover.DiscoveryError, "Oversized"):
+                discover.fetch_json(CATALOG_URL)
+        with patch.object(discover, "require_public_https", return_value=CATALOG_URL), \
+                patch.object(discover.OPENER, "open", return_value=FakeResponse(encoded)):
+            result = discover.fetch_json(CATALOG_URL, max_bytes=16_777_216)
+        self.assertEqual(result["schema"], 1)
+        self.assertEqual(result["source"], "searcha2a")
+
 
 if __name__ == "__main__":
     unittest.main()

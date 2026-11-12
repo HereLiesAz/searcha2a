@@ -35,6 +35,11 @@ jobs:
           mkdir -p dist
           cp -R site/. dist/
           python3 src/discover.py --output dist/api/v1/catalog.json
+      - name: Ingest scheduled crawl into persistent registry
+        env:
+          REGISTRY_API_URL: ${{ vars.SEARCHA2A_API_URL }}
+          REGISTRY_SYNC_SECRET: ${{ secrets.RESULT_CALLBACK_SECRET }}
+        run: python3 src/registry_sync.py --catalog dist/api/v1/catalog.json
       - name: Export Azphalt external-agent listings
         run: python3 src/azphalt_listings.py --catalog dist/api/v1/catalog.json --output dist/api/v1/azphalt-listings.json
       - name: Mirror published Azphalt feed to GitHub raw CDN
@@ -97,13 +102,11 @@ jobs:
       - name: Configure public client
         env:
           API_URL: ${{ vars.SEARCHA2A_API_URL }}
-          TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
         run: |
           python3 - <<'PY'
           import json, os
           with open('dist/config.json', 'w', encoding='utf-8') as f:
-              json.dump({'apiBaseUrl': os.getenv('API_URL', ''),
-                         'turnstileSiteKey': os.getenv('TURNSTILE_SITE_KEY', '')}, f)
+              json.dump({'apiBaseUrl': os.getenv('API_URL', '')}, f)
           PY
       - name: Check Pages is enabled
         id: pages-enabled

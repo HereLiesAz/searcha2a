@@ -10,15 +10,17 @@ import ipaddress
 import json
 import os
 from pathlib import Path
-from verify_agent import verify_publisher
 import re
 import socket
+from verify_agent import verify_publisher
 import urllib.error
 import urllib.parse
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_DOCUMENT = 524288
+# The aggregate Azphalt listings feed can contain up to 150 bounded Agent Cards.
+MAX_CATALOG_DOCUMENT = 16_777_216
 MAX_CANDIDATES = 210
 MAX_RESULTS = 150
 MAX_GITHUB_CANDIDATES = 50
@@ -69,7 +71,10 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 OPENER = urllib.request.build_opener(NoRedirect(), urllib.request.ProxyHandler({}))
 
 
-def fetch_json(url: str, token: str = ""):
+def fetch_json(url: str, token: str = "", *, max_bytes: int = MAX_DOCUMENT):
+    """Fetch a bounded JSON document. Larger limits are only for fixed aggregate feeds."""
+    if max_bytes < 1 or max_bytes > MAX_CATALOG_DOCUMENT:
+        raise DiscoveryError("Invalid document size bound")
     require_public_https(url)
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
     if token and urllib.parse.urlsplit(url).hostname == "api.github.com":
@@ -79,8 +84,8 @@ def fetch_json(url: str, token: str = ""):
         with OPENER.open(urllib.request.Request(url, headers=headers), timeout=7) as response:
             if response.status != 200:
                 raise DiscoveryError(f"HTTP {response.status}")
-            data = response.read(MAX_DOCUMENT + 1)
-            if len(data) > MAX_DOCUMENT:
+            data = response.read(max_bytes + 1)
+            if len(data) > max_bytes:
                 raise DiscoveryError("Oversized JSON")
             return json.loads(data)
     except (ValueError, urllib.error.URLError, TimeoutError, OSError) as exc:
@@ -130,6 +135,11 @@ def normalize_card(card, source_url: str, source: str):
     security = sorted(security.keys())[:15] if isinstance(security, dict) else []
     stable = endpoint or source_url
     identity = hashlib.sha256(stable.encode("utf-8")).hexdigest()[:20]
+    # Preserve complete publisher-defined names; truncation would silently change identity.
+    raw_name = card.get("ansName") or card.get("ans_name")
+    raw_host = card.get("agentHost") or card.get("ansHost") or card.get("ans_host")
+    ans_name = raw_name if isinstance(raw_name, str) and len(raw_name) <= 259 else ""
+    ans_host = raw_host if isinstance(raw_host, str) and len(raw_host) <= 251 else ""
     return {
         "id": identity,
         "name": name,
@@ -142,6 +152,7 @@ def normalize_card(card, source_url: str, source: str):
         "capabilities": {k: bool(capabilities.get(k)) for k in ("streaming", "pushNotifications") if isinstance(capabilities.get(k), bool)},
         "security_schemes": security,
         "version": clean_text(card.get("version"), 80),
+        **({"ans_name": ans_name, "ans_host": ans_host} if ans_name and ans_host else {}),
         "verification": "card_read_only",  # No L2 protocol probe; don't claim the agent works.
     }
 
@@ -280,8 +291,8 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
                         break
             if len(records) < REGISTRY_PAGE_SIZE:
                 break
-    # Reserve capacity for GitHub even when a large registry fills many pages.
-    # Deduplicate by URL, not (URL, discovery-origin), before applying budgets.
+    # Preserve bounded GitHub discovery even when explicit registries are crowded.
+    # Dedupe by the actual card URL, independently of the originating registry.
     def distinct_url(items):
         seen = set()
         for url, origin in items:
@@ -290,13 +301,13 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
                 yield url, origin
 
     github_cards = list(distinct_url(code_urls))[:MAX_GITHUB_CANDIDATES]
-    reserved = min(len(github_cards), MAX_GITHUB_CANDIDATES)
+    reserved = len(github_cards)
     unique = list(distinct_url(candidates))[:MAX_CANDIDATES - reserved]
     existing_urls = {url for url, _ in unique}
     unique.extend((url, origin) for url, origin in github_cards if url not in existing_urls)
     unique = unique[:MAX_CANDIDATES]
-    # Cards are read only. Verify a publisher's explicit opt-in proof independently
-    # on the same HTTPS origin; no agent task endpoint is contacted.
+    # Fetch Agent Cards read-only. A publisher opt-in is independently checked
+    # against a same-origin HTTPS proof and is not a cryptographic ANS identity.
     def pull(pair):
         url, origin = pair
         try:
@@ -307,7 +318,7 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
                 if evidence:
                     record["publisher_verification"] = evidence
             return record
-        except (DiscoveryError, ValueError, TypeError):
+        except (DiscoveryError, ValueError, TypeError, OverflowError):
             return None
     with ThreadPoolExecutor(max_workers=10) as pool:
         for record in pool.map(pull, unique):

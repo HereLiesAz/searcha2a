@@ -26,27 +26,24 @@ function mockEnvironment() {
       },
     },
     alarms,
-    SEARCH_RATE_LIMITER: { limit: async () => ({ success: true }) },
-    GITHUB_DISPATCH_TOKEN: 'fake', TURNSTILE_SECRET: 'fake', RESULT_CALLBACK_SECRET: 'secret',
+    RESULT_CALLBACK_SECRET: 'secret',
   };
 }
 
 const req = (url, options = {}) => new Request('https://searcha2a-api.example.com' + url,
   { ...options, headers: { Origin: 'https://searcha2a.azphalt.store', ...(options.headers || {}) } });
 
-test('public search requires Turnstile and does not invoke Actions without it', async () => {
+test('retired per-query endpoint cannot dispatch GitHub Actions', async () => {
   const env = mockEnvironment();
-  const response = await handle(req('/api/v1/search', { method: 'POST',
-    headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: 'weather' }) }), env);
-  assert.equal(response.status, 403);
-  assert.equal((await response.json()).error, 'Challenge verification failed');
-});
-
-test('invalid query never dispatches', async () => {
-  const env = mockEnvironment();
-  const response = await handle(req('/api/v1/search', { method: 'POST',
-    headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: 'a' }) }), env);
-  assert.equal(response.status, 400);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = () => { throw new Error('Search must not call GitHub'); };
+  try {
+    const response = await handle(req('/api/v1/search', {
+      method: 'POST', body: JSON.stringify({ query: 'weather', turnstile: 'old' }),
+    }), env);
+    assert.equal(response.status, 410);
+    assert.match((await response.json()).error, /retired/);
+  } finally { globalThis.fetch = originalFetch; }
 });
 
 test('callback requires secret and matching pending request', async () => {
@@ -82,33 +79,6 @@ test('OPTIONS preflight returns empty 204 and CORS headers', async () => {
   assert.equal(response.headers.get('Access-Control-Allow-Origin'), 'https://searcha2a.azphalt.store');
 });
 
-test('validated search dispatches a workflow and returns an ID', async () => {
-  const originalFetch = globalThis.fetch;
-  const env = mockEnvironment();
-  const calls = [];
-  globalThis.fetch = async (url, options) => {
-    calls.push({ url, options });
-    if (url.includes('turnstile')) return new Response(JSON.stringify({ success: true }), { status: 200 });
-    if (url.includes('api.github.com')) return new Response(JSON.stringify({ workflow_run_id: 123 }), { status: 200 });
-    throw new Error('Unexpected network call');
-  };
-  try {
-    const response = await handle(req('/api/v1/search', { method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: 'weather forecast', turnstile: 'valid' }) }), env);
-    assert.equal(response.status, 202);
-    const result = await response.json();
-    assert.equal(result.workflow_run_id, 123);
-    assert.match(result.id, /^[0-9a-f-]{36}$/);
-    assert.equal(calls.length, 2);
-    const payload = JSON.parse(calls[1].options.body);
-    assert.equal(payload.inputs.query, 'weather forecast');
-    assert.equal(payload.inputs.request_id, result.id);
-    const status = await handle(req(`/api/v1/results/${result.id}`), env);
-    assert.equal((await status.json()).status, 'queued');
-  } finally { globalThis.fetch = originalFetch; }
-});
-
 test('a completed result cannot be overwritten by a duplicate callback', async () => {
   const env = mockEnvironment();
   const id = 'aab1cc22-1111-4111-8111-123456789abc';
@@ -123,56 +93,6 @@ test('a completed result cannot be overwritten by a duplicate callback', async (
   assert.equal((await callback([{ name: 'Overwrite' }])).status, 409);
   const result = await handle(req(`/api/v1/results/${id}`), env);
   assert.equal((await result.json()).results[0].name, 'Original');
-});
-
-test('fast callback completion survives late dispatch metadata', async () => {
-  const env = mockEnvironment();
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = async (url, options) => {
-    if (url.includes('turnstile')) return new Response('{"success":true}');
-    if (url.includes('api.github.com')) {
-      const { inputs } = JSON.parse(options.body);
-      const callback = await handle(req('/internal/results', {
-        method: 'POST', headers: { Authorization: 'Bearer secret' },
-        body: JSON.stringify({ request_id: inputs.request_id, query: inputs.query, results: [{ name: 'Fast agent' }] }),
-      }), env);
-      assert.equal(callback.status, 200);
-      return new Response('{"workflow_run_id":123}');
-    }
-    throw new Error('Unexpected network request');
-  };
-  try {
-    const response = await handle(req('/api/v1/search', {
-      method: 'POST', body: JSON.stringify({ query: 'weather', turnstile: 'valid' }),
-    }), env);
-    assert.equal(response.status, 202);
-    const queued = await response.json();
-    const result = await handle(req(`/api/v1/results/${queued.id}`), env);
-    assert.equal(result.status, 200);
-    const body = await result.json();
-    assert.equal(body.status, 'complete');
-    assert.equal(body.results[0].name, 'Fast agent');
-  } finally { globalThis.fetch = originalFetch; }
-});
-
-test('failed dispatch removes the mailbox instead of leaving an unfinishable search', async () => {
-  const env = mockEnvironment();
-  const originalFetch = globalThis.fetch;
-  let requestId;
-  globalThis.fetch = async (url, options) => {
-    if (url.includes('turnstile')) return new Response('{"success":true}');
-    requestId = JSON.parse(options.body).inputs.request_id;
-    return new Response('{"message":"Denied"}', { status: 403 });
-  };
-  try {
-    const response = await handle(req('/api/v1/search', {
-      method: 'POST', body: JSON.stringify({ query: 'weather', turnstile: 'valid' }),
-    }), env);
-    assert.equal(response.status, 502);
-    assert.match((await response.json()).error, /403/);
-    assert.equal((await handle(req(`/api/v1/results/${requestId}`), env)).status, 404);
-    assert.equal(env.alarms.has(requestId), false);
-  } finally { globalThis.fetch = originalFetch; }
 });
 
 test('mailbox expires after seven days, and the storage alarm deletes its record', async () => {
