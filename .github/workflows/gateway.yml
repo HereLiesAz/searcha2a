@@ -62,7 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$SEARCHA2A_API_URL"
-          code="$(curl --silent --show-error --retry 3 --retry-delay 2             -G --data-urlencode 'q=weather'             -o /tmp/searcha2a-directory.json -w '%{http_code}'             "${SEARCHA2A_API_URL%/}/api/v1/directory")"
+          code="$(curl --silent --show-error --retry 3 --retry-delay 2 --get --data-urlencode 'q=weather' -o /tmp/searcha2a-directory.json -w '%{http_code}' "${SEARCHA2A_API_URL%/}/api/v1/directory")"
           [[ "$code" = 200 ]] || {
             echo "::error::Indexed directory API returned HTTP $code"
             cat /tmp/searcha2a-directory.json
@@ -74,4 +74,4 @@ jobs:
             .verification == "card_read_only" and
             (.results | type == "array") and (.count | type == "number")
           ' /tmp/searcha2a-directory.json >/dev/null
-          jq -r '"Indexed directory verified: mode=\(.match_mode), results=\(.count)"'             /tmp/searcha2a-directory.json
+          jq -r '"Indexed directory verified: mode=\(.match_mode), results=\(.count)"' /tmp/searcha2a-directory.json
