@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_DOCUMENT = 524288
 # The aggregate Azphalt listings feed can contain up to 150 bounded Agent Cards.
 MAX_CATALOG_DOCUMENT = 16_777_216
+MAX_PUBLIC_REGISTRY_JSON = 8_388_608
 MAX_CANDIDATES = 350
 MAX_RESULTS = 150
 MAX_GITHUB_CANDIDATES = 50
@@ -178,19 +179,32 @@ def normalize_card(card, source_url: str, source: str):
     }
 
 
-def extract_registry_items(document):
+def extract_registry_items(document, *, offset: int = 0, limit: int = MAX_CANDIDATES):
+    """Take a bounded, rotating window from public JSON arrays.
+
+    Rotating only explicitly configured bulk feeds keeps older entries from
+    monopolizing the published snapshot; durable registry upserts accumulate
+    the windows across days without deleting previously seen agents.
+    """
     if isinstance(document, list):
-        return document[:MAX_CANDIDATES]
-    if not isinstance(document, dict):
+        records = document
+    elif isinstance(document, dict):
+        records = None
+        for key in ("agents", "items", "results", "entries", "data"):
+            if isinstance(document.get(key), list):
+                records = document[key]
+                break
+        if records is None and isinstance(document.get("data"), dict):
+            return extract_registry_items(document["data"], offset=offset, limit=limit)
+    else:
+        records = None
+    if not records:
         return []
-    for key in ("agents", "items", "results", "entries"):
-        if isinstance(document.get(key), list):
-            return document[key][:MAX_CANDIDATES]
-    if isinstance(document.get("data"), list):
-        return document["data"][:MAX_CANDIDATES]
-    if isinstance(document.get("data"), dict):
-        return extract_registry_items(document["data"])
-    return []
+    size = min(max(0, limit), len(records))
+    offset %= len(records)
+    if offset == 0:
+        return records[:size]
+    return [records[(offset + i) % len(records)] for i in range(size)]
 
 
 def public_card_link(value: str, base_url: str, *, explicit_card: bool = False) -> str:
@@ -233,13 +247,13 @@ def card_references(item, source_url: str):
     return list(dict.fromkeys(urls))
 
 
-def unpack_cards(document, source_url: str, source: str):
+def unpack_cards(document, source_url: str, source: str, *, offset: int = 0):
     """Read a single card or bounded multi-agent manifest; collect one-hop card links."""
     direct = normalize_card(document, source_url, source)
     if direct:
         return [direct], []
     cards, links = [], []
-    for item in extract_registry_items(document)[:MAX_MANIFEST_ITEMS]:
+    for item in extract_registry_items(document, offset=offset, limit=MAX_MANIFEST_ITEMS):
         if not isinstance(item, dict):
             continue
         embedded = item.get("card") or item.get("agentCard") or item
@@ -350,11 +364,17 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     candidates = candidate_sources(config)
     code_urls, search_warnings = github(query, token)
     warnings.extend(search_warnings)
+    rotation = config.get('rotation_index')
+    if type(rotation) is not int or rotation < 0:
+        rotation = datetime.now(timezone.utc).date().toordinal()
     # Registry URLs are explicit curated seeds, not arbitrary user-provided URLs.
     for url in config.get("registry_urls", [])[:10]:
         try:
-            document = fetch(url)
-            embedded, links = unpack_cards(document, url, "registry")
+            # Large JSON dumps are allowed only at explicitly configured feed URLs.
+            document = (fetch(url, max_bytes=MAX_PUBLIC_REGISTRY_JSON)
+                        if fetch is fetch_json else fetch(url))
+            offset = rotation * MAX_MANIFEST_ITEMS if not query and config.get("rotate_registry_feeds") else 0
+            embedded, links = unpack_cards(document, url, "registry", offset=offset)
             for record in embedded:
                 results.setdefault(record["id"], record)
             candidates.extend((link, "registry") for link in links)
@@ -368,16 +388,34 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
         if not isinstance(url, str):
             continue
         seen = 0
+        base_offset = 0
+        first_page = None
+        separator = "&" if urllib.parse.urlsplit(url).query else "?"
+        if not query and config.get("rotate_paginated_registry"):
+            # One bounded first-page GET establishes total for a safe rotation.
+            probe_url = url + separator + urllib.parse.urlencode(
+                {"limit": REGISTRY_PAGE_SIZE, "offset": 0})
+            try:
+                first_page = fetch(probe_url)
+                total = first_page.get("total") if isinstance(first_page, dict) else None
+                if isinstance(total, int) and not isinstance(total, bool) and 0 < total <= 50000:
+                    batches = (total + MAX_REGISTRY_CARD_URLS - 1) // MAX_REGISTRY_CARD_URLS
+                    base_offset = (rotation % batches) * MAX_REGISTRY_CARD_URLS
+            except (DiscoveryError, ValueError, TypeError):
+                warnings.append(f"Registry unavailable: {urllib.parse.urlsplit(url).hostname}")
+                continue
         for page in range(1 if query else MAX_REGISTRY_PAGES):
             if seen >= MAX_REGISTRY_CARD_URLS:
                 break
-            params = {"limit": REGISTRY_PAGE_SIZE, "offset": page * REGISTRY_PAGE_SIZE}
+            params = {"limit": REGISTRY_PAGE_SIZE,
+                      "offset": base_offset + page * REGISTRY_PAGE_SIZE}
             if query:
                 params["search"] = query
-            separator = "&" if urllib.parse.urlsplit(url).query else "?"
             page_url = url + separator + urllib.parse.urlencode(params)
             try:
-                records = extract_registry_items(fetch(page_url))
+                document = (first_page if page == 0 and base_offset == 0 and first_page is not None
+                            else fetch(page_url))
+                records = extract_registry_items(document)
             except (DiscoveryError, ValueError, TypeError):
                 warnings.append(f"Registry unavailable: {urllib.parse.urlsplit(url).hostname}")
                 break

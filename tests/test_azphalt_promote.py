@@ -171,6 +171,7 @@ class PromotionTests(unittest.TestCase):
         encoded = json.dumps(document).encode("utf-8")
         class FakeResponse(io.BytesIO):
             status = 200
+            headers = {"Content-Type": "application/json"}
         with patch.object(discover, "require_public_https", return_value=CATALOG_URL), \
                 patch.object(discover.OPENER, "open", return_value=FakeResponse(encoded)):
             with self.assertRaisesRegex(discover.DiscoveryError, "Oversized"):
