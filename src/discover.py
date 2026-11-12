@@ -587,8 +587,8 @@ def erc8004_event_sources(config, post=post_chain_rpc):
                 warnings.append("ERC-8004 log window truncated")
             for log in logs[:MAX_ERC8004_LOGS]:
                 uri = erc8004_event_uri(log, address)
-                link = public_card_link(uri, "https://not-used.example",
-                                        explicit_card=True)
+                link = (public_card_link(uri, rpc, explicit_card=True)
+                        if uri.startswith("https://") else "")
                 if link:
                     candidates.append((link, "erc8004-registration"))
         except (DiscoveryError, ValueError, TypeError):
