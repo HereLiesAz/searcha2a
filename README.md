@@ -1,30 +1,27 @@
 # SearchA2A
 
-Find AI agents by what they do. SearchA2A discovers publicly listed A2A Agent Cards, skills and endpoints without requiring you to register an account.
+Find public A2A Agent Cards and skills through a persistent, searchable registry.
 
-**[Search for agents](https://searcha2a.azphalt.store/)**
+**[Search the registry](https://searcha2a.azphalt.store/)**
 
 ## Search
 
-1. Enter a skill, capability or agent name, such as **weather**, **code review** or **translation**.
-2. Select **Search indexed** for immediate matching against the published catalog. The SearchA2A Worker ranks the results with text embeddings when available; if inference fails, the page explicitly labels the keyword fallback. No Agent Card or agent task is contacted.
-3. To discover new cards, complete the Cloudflare challenge and select **Search live**. This starts a GitHub Actions crawl and updates the results when it finishes.
+Enter an agent name, skill, or capability and select **Search agents**. Results come directly from SearchA2A's registry. Search does **not** start GitHub Actions, fetch third-party sites, or require Cloudflare Turnstile. Searches may return no matches.
 
-A live search takes time to run. The page shows its progress and checks for results automatically. Until the new results arrive, cards from the recently indexed catalog may remain on screen. A search can also return no matches.
+The registry survives crawler failures and retains previously discovered cards. Its contents are metadata only: a published card does **not** prove agent availability, identity, security, or A2A protocol conformance.
 
-## Read the results
+## How discovery works
 
-Each card shows an agent's description, advertised skills and discovery source. Select **Agent Card** to inspect its published metadata or **Endpoint** to open its advertised URL.
+Scheduled [GitHub Actions indexing](.github/workflows/pages.yml) reads the curated seeds and compatible public registries in [sources.json](sources.json), including [a2aregistry.org](https://a2aregistry.org), and uses GitHub discovery when available. The crawler reads Agent Cards without invoking their advertised execution endpoints. Each successful batch is merged into a persistent SQLite-backed Cloudflare Durable Object. An empty or failed crawl never deletes existing agents.
 
-**Listings are not endorsements or availability checks.** An agent card can be outdated, inaccurate or unreachable. SearchA2A reads metadata; it does not run, install or authenticate the advertised agents.
+GitHub Actions runs when the source changes, on the daily crawl schedule, or when an operator manually starts indexing. **A user's search never consumes a workflow slot.**
 
-## Browse without searching
+## Interfaces
 
-- [Recently indexed agents](https://searcha2a.azphalt.store/api/v1/catalog.json): public JSON catalog, no verification needed.
-- [Azphalt A2A Agents](https://azphalt.store/agents): browse discovered external agents in the Azphalt Store. These entries are informational, not installable Azphalt packages.
+- [Search API and agent details](docs/API.md): `GET https://searcha2a-api.hereliesaz.workers.dev/api/v1/agents?query=weather`.
+- [Published crawl snapshot](https://searcha2a.azphalt.store/api/v1/catalog.json): static JSON for the latest indexing run, distinct from the persistent registry.
+- [Azphalt external-agent directory](https://azphalt.store/agents): read-only discovery listings, not installable Azphalt packages.
 
-## API and other documentation
+The legacy `POST /api/v1/search` dispatch route now returns **410 Gone**. Existing result UUIDs remain readable until their seven-day retention expires. The separate `/api/v1/directory?q=...` semantic API remains available for clients such as Aive. It reads the published crawl snapshot and optionally uses Workers AI; it also never triggers a crawl.
 
-The [API reference](docs/API.md) includes the read-only **GET /api/v1/directory?q=...** matching endpoint for apps like Aive. Indexed matching needs no Turnstile; live discovery still requires verification. Workers AI inference is rate-limited and can use paid inference quota. Neither type of search authenticates Agent Card publishers.
-
-[Operations](docs/OPERATIONS.md) covers setup and troubleshooting. [Architecture](docs/ARCHITECTURE.md) documents implementation and security boundaries. [Source configuration](sources.json) lists the curated discovery inputs, including a bounded paginated A2A Registry feed. The crawler fetches each listed agent's original public Agent Card; directory metadata alone is not treated as a verified card.
+See [API](docs/API.md), [Architecture](docs/ARCHITECTURE.md), and [Operations](docs/OPERATIONS.md) for protocol, security, and deployment details.
