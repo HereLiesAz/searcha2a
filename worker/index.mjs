@@ -1,5 +1,5 @@
 /** Scheduled-crawl registry search, legacy semantic directory and result mailboxes. */
-import { rankAgentCandidates, searchIndexedAgents } from './semantic.mjs';
+import { rankAgentCandidates } from './semantic.mjs';
 import { normalizeAnsName, parseAnsClaim } from './ans.mjs';
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -325,20 +325,18 @@ async function handle(request, env) {
       });
       if (!limit.success) return directoryReply({ error: 'Search rate limit exceeded' }, 429);
     } catch { return directoryReply({ error: 'Search unavailable' }, 503); }
+    if (!env.REGISTRY) return directoryReply({ error: 'Registry not configured' }, 503);
     try {
-      if (env.REGISTRY) {
-        const candidates = await registryStub(env).fetch(
-          new Request('https://registry.internal/candidates'));
-        if (!candidates.ok) throw new Error('Registry unavailable');
-        const data = await candidates.json();
-        const entries = data.entries.map(agent => ({
-          ...agent, kind: 'a2a-agent', installable: false,
-        }));
-        const ranked = await rankAgentCandidates(query, env, entries, data.generated_at);
-        return directoryReply({ ...ranked, candidate_scope: 'persistent-registry',
-          truncated: data.truncated });
-      }
-      return directoryReply(await searchIndexedAgents(query, env));
+      const candidates = await registryStub(env).fetch(
+        new Request('https://registry.internal/candidates'));
+      if (!candidates.ok) throw new Error('Registry unavailable');
+      const data = await candidates.json();
+      const entries = data.entries.map(agent => ({
+        ...agent, kind: 'a2a-agent', installable: false,
+      }));
+      const ranked = await rankAgentCandidates(query, env, entries, data.generated_at);
+      return directoryReply({ ...ranked, candidate_scope: 'persistent-registry',
+        truncated: data.truncated });
     } catch { return directoryReply({ error: 'Indexed directory temporarily unavailable' }, 502); }
   }
   // Read-only registry endpoints are public APIs, including to other web apps.
