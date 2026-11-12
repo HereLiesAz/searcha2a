@@ -453,7 +453,7 @@ async function handle(request, env) {
       }
       const ranked = await rankAgentCandidates(query, env, entries, generatedAt, candidateVectors);
       return directoryReply({ ...ranked, candidate_scope: 'persistent-registry',
-        truncated: false });
+        candidate_count: entries.length, truncated: false });
     } catch { return directoryReply({ error: 'Indexed directory temporarily unavailable' }, 502); }
   }
   // Read-only registry endpoints are public APIs, including to other web apps.
