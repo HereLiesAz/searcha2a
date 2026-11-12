@@ -202,6 +202,30 @@ class ERC8004CheckpointTests(unittest.TestCase):
         self.assertEqual(cards, [])
         self.assertEqual(warnings, [])
 
+    def test_provider_restriction_keeps_adapted_span_after_success(self):
+        seen = []
+        rejected = []
+        def rpc(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x3e8"}  # 1000
+            first = int(params[0]["fromBlock"], 16)
+            last = int(params[0]["toBlock"], 16)
+            seen.append((first, last))
+            if last - first + 1 > 128:
+                rejected.append((first, last))
+                raise discover.DiscoveryError("range too large")
+            return {"result": []}
+        state = {"version": 1, "erc8004": {}}
+        cards, warnings = discover.erc8004_checkpointed_sources(
+            config(start_block=0, window_blocks=4096), state, post=rpc)
+        self.assertEqual(cards, [])
+        self.assertEqual(warnings, [])
+        self.assertEqual(cursor(state)["next_block"], 1001)
+        self.assertEqual(len(rejected), 5)
+        self.assertEqual(seen[5], (0, 127))
+        self.assertEqual(seen[-1], (896, 1000))
+        self.assertEqual(len(seen), 14)
+
     def test_partial_window_budget_is_bounded_with_retriable_height(self):
         called = []
         def rpc(_, method, params):
