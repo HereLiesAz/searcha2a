@@ -113,7 +113,7 @@ def normalize_card(card, source_url: str, source: str):
     if not isinstance(card, dict):
         return None
     name = clean_text(card.get("name"), 160)
-    skills = card.get("skills")
+    skills = card.get("skills", [])
     if not name or not isinstance(skills, list):
         return None
     normalized_skills = []
@@ -193,7 +193,7 @@ def extract_registry_items(document):
     return []
 
 
-def public_card_link(value: str, base_url: str) -> str:
+def public_card_link(value: str, base_url: str, *, explicit_card: bool = False) -> str:
     """Resolve only explicit JSON Agent Card pointers; never call execution URLs."""
     if not isinstance(value, str) or not value.strip() or len(value) > 2048:
         return ""
@@ -204,7 +204,7 @@ def public_card_link(value: str, base_url: str) -> str:
             return ""
         if parsed.port not in (None, 443) or parsed.fragment:
             return ""
-        if not parsed.path.lower().endswith(".json"):
+        if not explicit_card and not parsed.path.lower().endswith(".json"):
             return ""
         return url
     except ValueError:
@@ -221,7 +221,7 @@ def card_references(item, source_url: str):
                 "agent_card_uri", "card"):
         value = item.get(key)
         if isinstance(value, str):
-            link = public_card_link(value, source_url)
+            link = public_card_link(value, source_url, explicit_card=True)
             if link:
                 urls.append(link)
     # Some manifests use {protocol:"a2a", url:".../card.json"}.
