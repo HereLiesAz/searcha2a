@@ -24,6 +24,17 @@ const feed = JSON.stringify({
 const request = (query, options = {}) =>
   new Request('https://searcha2a-api.example.org/api/v1/directory?q=' + encodeURIComponent(query), options);
 
+function registryFixture(entries = [finance, weather]) {
+  return {
+    idFromName: name => name,
+    get: () => ({
+      fetch: async () => new Response(JSON.stringify({
+        entries, generated_at: '2026-11-12T11:12:20Z', truncated: false,
+      })),
+    }),
+  };
+}
+
 function withCatalog(t, data = feed) {
   const original = globalThis.fetch;
   const calls = [];
@@ -39,6 +50,7 @@ test('semantic embeddings rank non-keyword matches without connecting or dispatc
   const calls = withCatalog(t);
   const invoked = [];
   const env = {
+    REGISTRY: registryFixture(),
     SEARCH_RATE_LIMITER: { limit: async ({ key }) => {
       assert.equal(key, 'directory:192.0.2.4');
       return { success: true };
@@ -64,14 +76,13 @@ test('semantic embeddings rank non-keyword matches without connecting or dispatc
   assert.equal(result.results[0].match_score, 0.85);
   assert.equal(invoked.length, 1);
   assert.equal(invoked[0].model, '@cf/baai/bge-small-en-v1.5');
-  assert.equal(calls.length, 1);
-  assert.match(calls[0].url, /raw\.githubusercontent\.com/);
-  assert.equal(calls[0].options.redirect, 'manual');
+  assert.equal(calls.length, 0); // Semantic queries never fetch the static feed.
 });
 
 test('missing embedding entitlement falls back to explicitly labeled keyword matching', async t => {
   withCatalog(t);
   const response = await handle(request('weather'), {
+    REGISTRY: registryFixture(),
     SEARCH_RATE_LIMITER: { limit: async () => ({ success: true }) },
   });
   const result = await response.json();
@@ -99,16 +110,16 @@ test('read-only query validates input and applies a per-client rate limit before
   assert.equal(calls.length, 0);
 });
 
-test('feed failures are bounded and do not leak upstream error details', async t => {
+test('missing persistent registry fails closed without consulting a stale feed', async t => {
   const original = globalThis.fetch;
   globalThis.fetch = async () => { throw new Error('private upstream diagnostics'); };
   t.after(() => { globalThis.fetch = original; });
   const response = await handle(request('weather'), {
     SEARCH_RATE_LIMITER: { limit: async () => ({ success: true }) },
   });
-  assert.equal(response.status, 502);
+  assert.equal(response.status, 503);
   const result = await response.json();
-  assert.match(result.error, /temporarily unavailable/);
+  assert.match(result.error, /Registry not configured/);
   assert.doesNotMatch(result.error, /private/);
 });
 
