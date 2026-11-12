@@ -12,7 +12,7 @@ The registry survives crawler failures and retains previously discovered cards. 
 
 ## How discovery works
 
-Scheduled [GitHub Actions indexing](.github/workflows/pages.yml) reads the curated seeds and compatible public registries in [sources.json](sources.json), including [a2aregistry.org](https://a2aregistry.org), and uses GitHub discovery when available. The crawler reads Agent Cards without invoking their advertised execution endpoints. Each successful batch is merged into a persistent SQLite-backed Cloudflare Durable Object. An empty or failed crawl never deletes existing agents.
+Scheduled [GitHub Actions indexing](.github/workflows/pages.yml) reads the curated seeds and compatible public registries in [sources.json](sources.json), including [a2aregistry.org](https://a2aregistry.org), and uses GitHub discovery when available. The crawler reads Agent Cards without invoking their advertised execution endpoints. Each successful batch is merged into a persistent SQLite-backed Cloudflare Durable Object. Crawls of up to 150 cards use uploads capped at 70 cards and 1 MB, preserving all suppression evidence. An empty or failed crawl never deletes existing agents.
 
 GitHub Actions runs when the source changes, on the daily crawl schedule, or when an operator manually starts indexing. **A user's search never consumes a workflow slot.**
 
