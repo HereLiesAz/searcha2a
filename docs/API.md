@@ -53,6 +53,28 @@ The request is a JSON discovery catalog with `query: ""` and up to 70 normalized
 
 No public write or agent execution endpoint is enabled.
 
+## Registry review and lifecycle (private)
+
+### `POST /internal/registry/manage`
+
+Requires `Authorization: Bearer <REGISTRY_ADMIN_SECRET>`, which must be **different from** the crawler's `RESULT_CALLBACK_SECRET`. The gateway returns 401 if the administrator secret has not been configured. This separation prevents an indexing job from approving its own discoveries.
+
+Send a 20-character lowercase agent `id`, an `action`, and a non-empty `reason` (up to 240 characters):
+
+```json
+{"id":"aaaaaaaaaaaaaaaaaaaa","action":"deactivate","reason":"Publisher requested removal"}
+```
+
+Supported actions: `approve`, `reject`, `reset_review`, `hide`, `deactivate`, and `activate`. **Approval means metadata review only**, not identity proof, endpoint testing, or an Azphalt signature. Rejected entries remain excluded even after `activate` until their review is reset or approved.
+
+A 200 response includes `id`, `listing_state`, `review_status`, and `changed_at`. Invalid requests return 400; unknown agents 404; excess body size 413. Each decision and its reason are stored in a durable private audit trail.
+
+### `GET /internal/registry/audit/{id}`
+
+Requires the same administrator secret. Returns the current listing and review states plus the 100 most recent state changes, newest first. Audit records are private and independent of crawler metadata.
+
+**Public visibility:** `GET /api/v1/agents` and `GET /api/v1/agents/{id}` include only active, non-rejected entries. Visible Agent Cards include a `curation_status` of `unreviewed` or `approved`; the underlying `verification` remains `card_read_only`. Reingesting a card updates its metadata but preserves curator-controlled states. The static Pages snapshot and Azphalt feed remain independently published crawler snapshots until their governance integration is implemented.
+
 ## Static GitHub Pages endpoints
 
 - `GET /api/v1/catalog.json`: latest bounded crawl snapshot, **not** the full persistent registry.

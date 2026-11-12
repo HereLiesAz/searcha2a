@@ -8,7 +8,7 @@ Find public A2A Agent Cards and skills through a persistent, searchable registry
 
 Enter an agent name, skill, or capability and select **Search agents**. Results come directly from SearchA2A's registry. Search does **not** start GitHub Actions, fetch third-party sites, or require Cloudflare Turnstile. Searches may return no matches.
 
-The registry survives crawler failures and retains previously discovered cards. Its contents are metadata only: a published card does **not** prove agent availability, identity, security, or A2A protocol conformance.
+The registry survives crawler failures and retains previously discovered cards. Administrators can independently approve, hide, reject, or deactivate listings; crawler updates cannot override those decisions. Curation uses a separate admin credential. Its contents are metadata only: a published card does **not** prove agent availability, identity, security, or A2A protocol conformance.
 
 ## How discovery works
 

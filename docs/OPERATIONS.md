@@ -35,6 +35,16 @@ GitHub Pages uses GitHub Actions for build/deploy and `searcha2a.azphalt.store` 
 
 Existing `src/report.py` and historical result callbacks are for legacy in-flight requests only. They are not called by the website after migration.
 
+## Registry administration
+
+Set a distinct Worker-only `REGISTRY_ADMIN_SECRET` before enabling curation. **Do not reuse** `RESULT_CALLBACK_SECRET` from GitHub Actions. In the Cloudflare Worker project, use `npx --yes wrangler@4 secret put REGISTRY_ADMIN_SECRET`; do not commit a secret or add it to the public Pages config. Registry search and scheduled ingest continue to function without this optional credential; admin operations fail closed with HTTP 401.
+
+A curator may POST `{"id":"<20 hex characters>","action":"deactivate","reason":"Reason"}` to `/internal/registry/manage` using `Authorization: Bearer <REGISTRY_ADMIN_SECRET>`. Valid actions are `approve`, `reject`, `reset_review`, `hide`, `deactivate`, `activate`. Inspect `GET /internal/registry/audit/{id}` with the same credential for the recent decision history. Do not log or paste secret values. Browser and crawler clients cannot modify review states.
+
+Newly ingested records default to active/unreviewed. Existing records are upgraded in place on Worker rollout; records and their original IDs remain intact. Public registry GETs hide deactivated, hidden, and rejected records, including direct-ID lookups. An ordinary scheduled crawl **cannot** reactivate a deactivated record or reverse a rejection. Approval is metadata-only review, not a signed Azphalt Store listing or proof of agent ownership.
+
+**Boundary:** this first lifecycle step governs the live registry API only. The Pages snapshot and `agent-feed` remain independent exports and must not be used to infer approval status; propagating curator removal and signed publisher attestations needs a separate coordinated publishing step.
+
 ## Automated verification
 
 ```sh
