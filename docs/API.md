@@ -39,7 +39,7 @@ Read one persisted normalized Agent Card. Returns 404 if the ID is unknown.
 
 ### `GET /api/v1/directory?q=weather`
 
-Compatibility endpoint for existing discovery clients. Queries the **same registry** and returns up to 20 read-only external agents, with `schema: 1`, `source: "searcha2a"`, `match_mode: "keyword-fallback"`, `count`, `results`, and `installable: false` on each card. Unlike old documentation, it does **not** invoke Workers AI or GitHub Actions. The `q` value is optional, but clients should supply a meaningful search term.
+The existing semantic capability discovery endpoint remains available to clients such as Aive. It searches the **published static** `agent-feed` snapshot, not the accumulated SQL registry. It uses Workers AI embeddings when available and otherwise reports `match_mode: "keyword-fallback"`; its result cap is 20. Requires `q` of 2–120 characters and uses the existing approximate five-requests-per-minute IP limiter. It never dispatches GitHub Actions or invokes an agent. For all stored agents, including those absent from the latest snapshot, use `GET /api/v1/agents`.
 
 Errors for public endpoints: 400 invalid input, 404 unknown agent, 503 registry binding unavailable, 500 unexpected failure. GET responses do not allocate per-request result mailboxes.
 

@@ -8,7 +8,7 @@
 | --- | --- |
 | Browser | https://searcha2a.azphalt.store |
 | Persistent registry | https://searcha2a-api.hereliesaz.workers.dev/api/v1/agents |
-| Compatibility directory | https://searcha2a-api.hereliesaz.workers.dev/api/v1/directory?q=weather |
+| Snapshot semantic directory | https://searcha2a-api.hereliesaz.workers.dev/api/v1/directory?q=weather |
 | Latest crawl snapshot | https://searcha2a.azphalt.store/api/v1/catalog.json |
 | Azphalt external-agent directory | https://azphalt.store/agents |
 
@@ -16,11 +16,11 @@
 
 - [Reindex and publish Pages](../.github/workflows/pages.yml): on pushes to main, daily at **03:29 UTC**, or manually. Crawls, syncs normalized cards into the persistent registry, exports the bounded Pages snapshot and Azphalt directory.
 - [Deploy API Gateway](../.github/workflows/gateway.yml): on Worker or gateway workflow changes to main, or manually. Deploys `AgentRegistry` with `v2` SQLite migration and checks `GET /api/v1/agents?limit=1`. It also retains the legacy `SearchResult` `v1` class for pending seven-day mailboxes.
-- **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410.
+- **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410. The separate semantic `/api/v1/directory` endpoint remains read-only and uses the published snapshot with optional Workers AI, not Actions.
 
 ## Settings and credentials
 
-**Repository Actions variable:** `SEARCHA2A_API_URL=https://searcha2a-api.hereliesaz.workers.dev`.
+**Repository Actions variable:** `SEARCHA2A_API_URL=https://searcha2a-api.hereliesaz.workers.dev`. The Worker also retains the `AI` binding and `SEARCH_RATE_LIMITER` for the separate semantic directory endpoint.
 
 **Repository Actions secrets:** `CLOUDFLARE_API_TOKEN` (Worker deployment), `CLOUDFLARE_ACCOUNT_ID`, and `RESULT_CALLBACK_SECRET` (reused as the authenticated registry ingestion secret). The last value must match the **Worker secret** `RESULT_CALLBACK_SECRET`. The existing `GITHUB_DISPATCH_TOKEN`, `TURNSTILE_SECRET` and `TURNSTILE_SITE_KEY` are no longer required for public searches; do not delete or rotate them during a deployment without accounting for legacy requests and other consumers.
 

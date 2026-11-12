@@ -12,10 +12,15 @@ Scheduled or manually triggered Pages indexing (GitHub Actions)
   -> Worker POST /internal/registry/ingest
   -> SQLite-backed AgentRegistry Durable Object (persistent upsert)
   
-Browser / Aive / public client
-  -> Worker GET /api/v1/agents?query=... (or /api/v1/directory?q=...)
+Browser / public client
+  -> Worker GET /api/v1/agents?query=...
   -> AgentRegistry SQL query
   -> JSON response immediately, without Actions or external crawl
+
+Aive / semantic client
+  -> GET /api/v1/directory?q=...
+  -> published raw-CDN snapshot + optional Workers AI embedding
+  -> semantic or keyword-fallback metadata results, without Actions
 ```
 
 In parallel, the Pages job publishes the latest **bounded crawl snapshot** as `/api/v1/catalog.json`, per-card JSON, and the Azphalt non-installable directory feed. This static snapshot is **not** the complete accumulated registry.
@@ -27,6 +32,7 @@ In parallel, the Pages job publishes the latest **bounded crawl snapshot** as `/
 - **Why the original result mailbox used SQLite Durable Objects:** Workers KV propagation could delay callback visibility across regions. Existing seven-day result mailboxes remain readable for old requests but no new searches create them.
 - **Why the registry also uses SQLite Durable Objects:** `AgentRegistry` stores normalized cards durably and atomically upserts scheduled batches without wiping unseen records. Its SQL interface provides immediate public reads with no GitHub dependency. `v2` in `worker/wrangler.toml` introduces this class without destroying the `v1` result class.
 - **Why the Azphalt feed is mirrored to GitHub raw CDN:** A same-zone Cloudflare Worker subrequest to the SearchA2A Pages hostname previously returned 502. Keeping the existing `agent-feed` mirror avoids changing that working integration.
+- **Why the semantic directory is retained:** The independently introduced `/api/v1/directory` interface supports existing clients and optional Workers AI over the published snapshot. It remains read-only and cannot invoke Actions. The persistent SQL registry is canonical for cumulative keyword searches; semantic search can migrate to that index separately without restoring dispatch.
 - **Why metadata stays non-installable:** Discovering an Agent Card does not establish runtime health, ownership, conformance, or authorization. The export cannot be represented as a signed `.azp` package.
 
 ## Components
@@ -34,6 +40,7 @@ In parallel, the Pages job publishes the latest **bounded crawl snapshot** as `/
 | Component | Source |
 | --- | --- |
 | Browser search | `site/app.js`, `site/index.html` |
+| Snapshot semantic discovery | `worker/semantic.mjs`, `GET /api/v1/directory` |
 | Registry SQL and HTTP routes | `worker/index.mjs` (`AgentRegistry`, `handle`) |
 | Durable Object migration | `worker/wrangler.toml` (`v2`) |
 | Scheduled discovery | `src/discover.py`, `sources.json`, `.github/workflows/pages.yml` |
