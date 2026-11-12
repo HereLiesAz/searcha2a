@@ -68,7 +68,28 @@ New tests cover SQL persistence, atomic rejection of bad ingest batches, authori
 
 ## Public crawler targets
 
-[`sources.json`](../sources.json) defines `card_urls` (direct single cards or JSON manifests), `domain_urls` (explicit HTTPS origins probed at seven canonical/legacy paths), `assistant_ids` (optional known assistant IDs keyed by exactly matching HTTPS origin), `registry_urls` (bounded JSON feeds) and `paginated_registry_urls` (offset-based public REST feeds), `rotate_registry_feeds` (daily rotating bounded slices of JSON arrays), and `rotate_paginated_registry` (daily page windows when the API reports a sane numeric total). For reproducible diagnostics, `rotation_index` may override the UTC ordinal day. The old `www.a2aregistry.org/registry.json` URL currently serves an SPA rather than a JSON feed and is deliberately not configured; the live `a2aregistry.org/api/agents` REST API remains indexed. Invalid, missing, non-JSON or forbidden sources are skipped; unavailable registries contribute warnings but cannot erase accumulated records. Credentials, private enterprise catalogs, paid task invocations, A2A/MCP POST discovery and ERC-8004 event scraping are deliberately excluded. If a source exposes only HTML or requires login, add a reviewed read-only JSON adapter rather than scraping arbitrary pages.
+[`sources.json`](../sources.json) defines `card_urls` (direct single cards or JSON manifests), `domain_urls` (explicit HTTPS origins probed at eleven canonical/legacy/typed JSON paths), `assistant_ids` (optional known assistant IDs keyed by exactly matching HTTPS origin), `registry_urls` (bounded JSON feeds) and `paginated_registry_urls` (offset-based public REST feeds), `rotate_registry_feeds` (daily rotating bounded slices of JSON arrays), and `rotate_paginated_registry` (daily page windows when the API reports a sane numeric total). For reproducible diagnostics, `rotation_index` may override the UTC ordinal day. The old `www.a2aregistry.org/registry.json` URL currently serves an SPA rather than a JSON feed and is deliberately not configured; the live `a2aregistry.org/api/agents` REST API remains indexed. Invalid, missing, non-JSON or forbidden sources are skipped; unavailable registries contribute warnings but cannot erase accumulated records. Authorized private enterprise JSON feeds may be configured as described below. Paid task invocations, A2A/MCP POST discovery, internal network probing, and ERC-8004 event scraping remain excluded. If a source exposes only HTML or requires login, add a reviewed read-only JSON adapter rather than scraping arbitrary pages.
+
+## Authorized private and enterprise catalogs
+
+A repository owner may set the **Actions secret** `SEARCHA2A_AUTHORIZED_CATALOGS_JSON` to an array of up to five authorized, read-only HTTPS JSON feeds. Example **configuration format only** (never commit a real token):
+
+```json
+[
+  {
+    "url": "https://enterprise.example.org/publication-approved/catalog.json",
+    "auth_type": "bearer",
+    "token": "REPLACE_WITH_AUTHORIZED_READ_ONLY_TOKEN",
+    "publish": true
+  }
+]
+```
+
+`auth_type` supports `bearer` (Authorization header) or `api_key` (X-API-Key). These credentials are delivered solely to the exact feed GET; redirects are rejected and no linked cards receive credentials. Only feeds with **`publish: true`** are fetched and normalized into the public registry, Pages catalog and Azphalt listing feed. A missing flag means **no fetch and no publication**. Explicit publication authorizes disclosure of normalized names, skills, descriptions, endpoints and the feed's source URL; review their contents before enabling it. Raw cards from authenticated feeds are omitted, even if small. Public curation remains independently enforced.
+
+The secret is passed only to the scheduled indexer's process, never to browser config, the Worker or GitHub's static files. The runner requires public-DNS HTTPS access to the feed. Private VPC/localhost addresses remain blocked; private-network deployments require an authorized HTTPS export endpoint or a separate approved runner and network-security design. AWS SigV4, GCP IAM token minting, mTLS, service-mesh discovery and dynamic token refresh are not implemented. A secret is not generated automatically; the integration is inactive until configured.
+
+`sources.json` can also list `webfinger_accounts` by HTTPS origin (explicit account names only, maximum eight each). The crawler probes `/.well-known/webfinger?resource=acct:...`, follows typed A2A self links, and does not enumerate arbitrary accounts. ERC-8004 HTTPS registration files provide A2A card links but no verified on-chain ownership.
 
 ## Troubleshooting
 
@@ -87,4 +108,4 @@ New tests cover SQL persistence, atomic rejection of bad ingest batches, authori
 
 The public API is intentionally read-only; browsers cannot submit or execute agents. Only the private authenticated crawler upload writes the registry. Agent Cards are untrusted descriptive metadata, not verified agent endpoints. Public result IDs and card URLs must not be treated as authorization tokens.
 
-Current per-crawl bounds: 350 initial candidates (up to 50 reserved GitHub leads), 100 one-hop manifest links, 150 normalized cards, at most 12 configured probe domains with seven standard paths each and up to ten explicitly listed assistant IDs per domain, up to five paginated registry pages, 512 KiB per Agent Card, seven seconds per source, and ten concurrent card reads. Scheduled registry uploads use 70-card / 1-MB batches and combine all suppression responses. Explicit curated registry feeds allow up to 8 MiB of JSON; the fixed promotion feed alone allows up to 16 MiB. These bounds do not limit the persistent registry's cumulative record count, but discovery remains incomplete. Indexed records are retained until a deliberate future removal policy is implemented.
+Current per-crawl bounds: 350 initial candidates (up to 50 reserved GitHub leads), 100 one-hop manifest links, 150 normalized cards, at most 12 configured probe domains with eleven JSON paths each and up to eight known WebFinger accounts per domain and up to ten explicitly listed assistant IDs per domain, up to five paginated registry pages, 512 KiB per Agent Card, seven seconds per source, and ten concurrent card reads. Scheduled registry uploads use 70-card / 1-MB batches and combine all suppression responses. Explicit curated and authorized registry feeds allow up to 8 MiB of JSON; the fixed promotion feed alone allows up to 16 MiB. These bounds do not limit the persistent registry's cumulative record count, but discovery remains incomplete. Indexed records are retained until a deliberate future removal policy is implemented.
