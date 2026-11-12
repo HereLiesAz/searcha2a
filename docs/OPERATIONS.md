@@ -59,6 +59,8 @@ node --check site/app.js
 node --check worker/index.mjs
 ```
 
+**Indexed matching verification:** `GET https://searcha2a-api.hereliesaz.workers.dev/api/v1/directory?q=weather` requires no Turnstile and must return `schema: 1`, `source: searcha2a` and `match_mode` equal to `semantic` or `keyword-fallback`. A `semantic` result means Workers AI supplied usable embedding vectors; `keyword-fallback` means it did not. The route is limited to five requests per minute per IP and must not be used as a paid inference load test. The SearchA2A Worker must have `[ai] binding = "AI"` for embedding inference. The Aive client falls back to the read-only published snapshot when the route fails.
+
 **Deployment smoke test:** `gateway.yml` queries `GET /api/v1/results/{random_uuid}` and expects **404** with `{"error":"Search expired or unknown"}`. This verifies the public gateway route can reach the new mailbox binding. It does **not** create a request or test the callback.
 
 **End-to-end test:** From [the website](https://searcha2a.azphalt.store), submit `weather` and complete Turnstile. Confirm the page says a search was queued, then inspect the newest `On-demand A2A search` run in [Actions](https://github.com/HereLiesAz/searcha2a/actions/workflows/search.yml). Verify both **Discover Agent Cards** and **Return results to request gateway** succeeded, and that the page changes from queued to completed results (including a legitimate zero-match result). This is the evidence for live dispatch, callback and polling. Older workflow success, the indexed card list or the smoke test alone are insufficient.
@@ -84,6 +86,8 @@ Review the latest [Reindex and publish Pages](../.github/workflows/pages.yml) jo
 | `502 GitHub Actions rejected dispatch` | Fine-grained `GITHUB_DISPATCH_TOKEN` scope and Actions write permission |
 | Run succeeds, site still displays queued results | Check `Return results to request gateway` step, callback secret parity, request UUID, and new result GET; old KV requests cannot be read after migration |
 | Search returns no results | May be genuine; review workflow warnings and source coverage |
+| Indexed search returns keyword fallback | Verify `AI` binding, model entitlement/quota, and Worker inference logs; metadata remains searchable without embeddings |
+| Indexed search returns 502 | Inspect mirrored `agent-feed` catalog and Cloudflare-to-GitHub raw fetch; this does not mean the live Actions service is broken |
 | Public catalog seems stale | Run Pages reindex and inspect its logs, source availability and published `generated_at` |
 | Azphalt Store agents page returns 502 | Investigate Azphalt's `/api/a2a/agents` proxy and mirrored `agent-feed` data separately; it is not the live search Worker |
 

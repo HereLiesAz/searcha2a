@@ -21,3 +21,7 @@ namespace_id = "1001"
 [ratelimits.simple]
 limit = 5
 period = 60
+
+# Optional model inference. A missing entitlement returns explicitly labelled keyword fallback.
+[ai]
+binding = "AI"
