@@ -63,6 +63,12 @@ The request is a JSON discovery catalog with `query: ""` and up to 70 normalized
 
 No public write or agent execution endpoint is enabled. Authenticated private catalog connectors only read a configured HTTPS JSON feed (or the explicitly allowlisted Google Cloud Agent Registry listing API with bounded pagination) with a scoped credential provided to the scheduled crawler; they never expose an authorization header to browsers, public registry APIs, or linked Agent Card requests. Publication requires explicit `publish: true` and is subject to normal registry moderation.
 
+## Scheduled endpoint checks (private)
+
+`GET /internal/registry/health/due` and `POST /internal/registry/health` require the scheduled crawler's existing `RESULT_CALLBACK_SECRET`. The former returns up to 60 oldest or unchecked *visible public* endpoint records. Authorized private-catalog endpoints are excluded. The latter accepts at most 60 bounded reports with `id`, `endpoint`, `status` and `http_status`. The registry only stores reports whose ID and endpoint still match an active, non-rejected public record. Health snapshots are separate from Agent Card verification and curator decisions.
+
+The scheduled job sends a credential-free HTTPS `HEAD` to the endpoint using pinned, publicly routable DNS addresses, strict TLS, a five-second timeout, and no redirects or task bodies. Query-bearing endpoint URLs are skipped to avoid leaking tokens. Failures never cause cards to be deactivated or remove persisted metadata.
+
 ## Registry review and lifecycle (private)
 
 ### `POST /internal/registry/manage`
