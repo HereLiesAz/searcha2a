@@ -109,8 +109,7 @@ The current scheduled collector reads up to 350 initial candidate URLs (includin
 
 SQL keyword search scans stored normalized name/skill/description/endpoint text and ranks by name, skill and description hits. The separate semantic endpoint pages through every visible persisted candidate in batches of 100, then ranks them with optional Workers AI; the 20-result response cap remains separate from candidate coverage. It does not fetch static feeds or third-party sites. A single Durable Object coordinates the registry; future high-traffic growth may require sharding or migrating to Cloudflare D1.
 
-Semantic search batches Workers AI text embeddings in groups of at most 99 candidates plus
-one query (100 strings per model request). A failure in any embedding batch falls back to
+Semantic search caches per-agent Workers AI embeddings in the persistent SQLite `agent_embeddings` table, keyed by agent ID, model and indexed text. Ingestion invalidates only changed semantic inputs and schedules best-effort asynchronous updates; directory reads backfill missing vectors in batches of at most 100. Once cached, each search embeds only the query. Moderation is applied before cached vectors are read. Any missing or invalid vectors, or unavailable Workers AI, produce explicit keyword fallback. The standalone feed reader retains its legacy batched embeddings. A failure in any embedding batch falls back to
 keyword ranking for the whole query rather than mixing incompatible partial results.
 When an embedded registry row and an independently fetched card advertise the same
 endpoint, fresh publisher-origin proof evidence takes precedence; no unverified
