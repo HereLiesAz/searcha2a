@@ -42,6 +42,12 @@ MAX_ERC8004_LOGS = 120
 MAX_OCI_SOURCES = 4
 MAX_OCI_LAYERS = 6
 MAX_OCI_DOCUMENT = 524288
+MAX_MCP_SOURCES = 4
+MAX_MCP_PAGES = 3
+MAX_MCP_RESOURCES_PER_PAGE = 50
+MAX_MCP_RESOURCE_READS = 10
+MAX_MCP_DOCUMENT = 262144
+MCP_PROTOCOL_VERSION = "2026-07-28"
 REGISTERED_TOPIC = "0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a"
 URI_UPDATED_TOPIC = "0x3a2c7fffc2cba7582c690e3b82c453ea02a308326a98a3ad7576c606336409fb"
 A2A_CATALOG_TYPES = {'application/a2a-agent-card+json', 'application/a2a+json'}
@@ -755,6 +761,151 @@ def agntcy_oci_sources(config, read=fetch_oci_bytes):
     return cards, list(dict.fromkeys(links))[:MAX_FOLLOWUP_CARD_URLS], warnings
 
 
+def post_mcp_metadata(url: str, method: str, params, token: str = ""):
+    """Call only 2026-07-28 MCP metadata methods, never tools or tasks."""
+    if method not in ("resources/list", "resources/read"):
+        raise DiscoveryError("Disallowed MCP method")
+    require_public_https(url)
+    if not isinstance(token, str) or len(token) > 4096 or "\r" in token or "\n" in token:
+        raise DiscoveryError("Invalid MCP credential")
+    if not isinstance(params, dict) or set(params) - {"cursor", "uri"}:
+        raise DiscoveryError("Invalid MCP parameters")
+    if method == "resources/read" and (
+            not isinstance(params.get("uri"), str) or len(params["uri"]) > 1024):
+        raise DiscoveryError("Invalid MCP resource")
+    rpc_id = 1 if method == "resources/list" else 2
+    payload = {"jsonrpc": "2.0", "id": rpc_id, "method": method,
+               "params": {**params, "_meta": {
+                   "io.modelcontextprotocol/protocolVersion": MCP_PROTOCOL_VERSION,
+                   "io.modelcontextprotocol/clientCapabilities": {},
+                   "io.modelcontextprotocol/clientInfo": {
+                       "name": "SearchA2A", "version": "0.1.0"}}}}
+    body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    if len(body) > 2048:
+        raise DiscoveryError("Oversized MCP request")
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+        "MCP-Protocol-Version": MCP_PROTOCOL_VERSION,
+        "Mcp-Method": method,
+        "User-Agent": USER_AGENT,
+    }
+    if method == "resources/read":
+        if not params["uri"].isascii() or any(ord(ch) < 32 for ch in params["uri"]):
+            raise DiscoveryError("Unsupported MCP resource name")
+        headers["Mcp-Name"] = params["uri"]
+    if token:
+        headers["Authorization"] = "Bearer " + token
+    try:
+        with OPENER.open(urllib.request.Request(
+                url, data=body, headers=headers, method="POST"), timeout=7) as response:
+            if response.status != 200:
+                raise DiscoveryError("MCP source unavailable")
+            media = response.headers.get("Content-Type", "").split(";", 1)[0].lower()
+            # SSE is intentionally unsupported: an unbounded stream must not
+            # be treated as a small, deterministic discovery result.
+            if media != "application/json" and not media.endswith("+json"):
+                raise DiscoveryError("MCP response is not bounded JSON")
+            data = response.read(MAX_MCP_DOCUMENT + 1)
+            if len(data) > MAX_MCP_DOCUMENT:
+                raise DiscoveryError("Oversized MCP response")
+            result = json.loads(data)
+            if (not isinstance(result, dict) or result.get("jsonrpc") != "2.0"
+                    or result.get("id") != rpc_id or not isinstance(result.get("result"), dict)
+                    or result.get("error") is not None):
+                raise DiscoveryError("Invalid MCP response")
+            return result["result"]
+    except (ValueError, urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise DiscoveryError("MCP source unavailable") from exc
+
+
+def mcp_resource_card_uri(value: str) -> bool:
+    """Allow only agent-specific opaque URIs, never filesystem or HTTP URLs."""
+    if not isinstance(value, str) or len(value) > 1024 or not value.isascii():
+        return False
+    try:
+        parsed = urllib.parse.urlsplit(value)
+        return (parsed.scheme in ("a2a", "agent", "agents", "agent-card", "mcp")
+                and not parsed.username and not parsed.password
+                and not parsed.fragment and bool(parsed.netloc or parsed.path))
+    except ValueError:
+        return False
+
+
+def mcp_metadata_sources(config, post=post_mcp_metadata):
+    """Read explicitly approved typed A2A resources from stateless MCP APIs."""
+    sources = config.get("mcp_sources", [])
+    cards, links, warnings = [], [], []
+    if not isinstance(sources, list):
+        return cards, links, warnings
+    for entry in sources[:MAX_MCP_SOURCES]:
+        if not isinstance(entry, dict) or entry.get("publish") is not True:
+            continue
+        endpoint = entry.get("endpoint")
+        token = entry.get("token", "")
+        if not isinstance(endpoint, str) or not isinstance(token, str):
+            warnings.append("MCP discovery misconfigured")
+            continue
+        try:
+            seen_cursors, seen_resources = set(), set()
+            next_cursor = ""
+            reads = 0
+            local_cards, local_links = [], []
+            for _ in range(MAX_MCP_PAGES):
+                params = {"cursor": next_cursor} if next_cursor else {}
+                response = post(endpoint, "resources/list", params, token)
+                resources = response.get("resources") if isinstance(response, dict) else None
+                if not isinstance(resources, list):
+                    raise DiscoveryError("Invalid MCP resource list")
+                for resource in resources[:MAX_MCP_RESOURCES_PER_PAGE]:
+                    if not isinstance(resource, dict):
+                        continue
+                    mime = clean_text(resource.get("mimeType"), 100).lower()
+                    uri = resource.get("uri")
+                    if mime not in A2A_CATALOG_TYPES or not isinstance(uri, str):
+                        continue
+                    if uri.startswith("https://"):
+                        link = public_card_link(uri, endpoint, explicit_card=True)
+                        if link:
+                            local_links.append(link)
+                    elif (entry.get("allow_resource_read") is True and
+                          reads < MAX_MCP_RESOURCE_READS and
+                          mcp_resource_card_uri(uri) and uri not in seen_resources):
+                        seen_resources.add(uri)
+                        reads += 1
+                        response_card = post(endpoint, "resources/read", {"uri": uri}, token)
+                        contents = response_card.get("contents") if isinstance(response_card, dict) else None
+                        if not isinstance(contents, list):
+                            continue
+                        for part in contents[:4]:
+                            if (not isinstance(part, dict)
+                                    or clean_text(part.get("mimeType"), 100).lower()
+                                    not in A2A_CATALOG_TYPES):
+                                continue
+                            text = part.get("text")
+                            if not isinstance(text, str) or len(text) > MAX_MCP_DOCUMENT:
+                                continue
+                            try:
+                                card = normalize_card(json.loads(text), endpoint, "mcp-resource")
+                            except (ValueError, TypeError):
+                                card = None
+                            if card:
+                                card.pop("raw_card", None)
+                                local_cards.append(card)
+                cursor = response.get("nextCursor")
+                if (not isinstance(cursor, str) or not 1 <= len(cursor) <= 256
+                        or not cursor.isascii() or cursor in seen_cursors):
+                    break
+                seen_cursors.add(cursor)
+                next_cursor = cursor
+            cards.extend(local_cards)
+            links.extend(local_links)
+        except (DiscoveryError, ValueError, TypeError):
+            # Configured MCP hosts and Bearer secrets may be private; no leaks.
+            warnings.append("MCP discovery unavailable")
+    return cards, list(dict.fromkeys(links))[:MAX_FOLLOWUP_CARD_URLS], warnings
+
+
 def candidate_sources(config):
     candidates = []
     for url in config.get("card_urls", []):
@@ -823,7 +974,7 @@ def rank(record, query: str) -> int:
 
 def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github=github_sources,
              private_fetch=fetch_json, dns_fetch=fetch_json, chain_rpc=post_chain_rpc,
-             oci_read=fetch_oci_bytes):
+             oci_read=fetch_oci_bytes, mcp_post=post_mcp_metadata):
     results = {}
     warnings = []
     candidates = candidate_sources(config)
@@ -840,6 +991,11 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
         results.setdefault(record["id"], record)
     candidates.extend((link, "agntcy-oci") for link in oci_links)
     warnings.extend(oci_warnings)
+    mcp_cards, mcp_links, mcp_warnings = mcp_metadata_sources(config, post=mcp_post)
+    for record in mcp_cards:
+        results.setdefault(record["id"], record)
+    candidates.extend((link, "mcp-resource") for link in mcp_links)
+    warnings.extend(mcp_warnings)
     rotation = config.get('rotation_index')
     if type(rotation) is not int or rotation < 0:
         rotation = datetime.now(timezone.utc).date().toordinal()
@@ -1073,6 +1229,15 @@ def main():
         if not isinstance(sources, list):
             raise SystemExit("AGNTCY OCI sources configuration must be a JSON array")
         config["agntcy_oci_sources"] = sources
+    mcp_sources = os.environ.get("SEARCHA2A_MCP_SOURCES_JSON", "")
+    if mcp_sources:
+        try:
+            sources = json.loads(mcp_sources)
+        except ValueError as exc:
+            raise SystemExit("Invalid MCP source configuration JSON") from exc
+        if not isinstance(sources, list):
+            raise SystemExit("MCP source configuration must be a JSON array")
+        config["mcp_sources"] = sources
     data = discover(args.query.strip(), config, token=os.environ.get("GITHUB_TOKEN", ""))
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
