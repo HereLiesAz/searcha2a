@@ -1,4 +1,5 @@
-/** Thin, authenticated workflow dispatcher and result mailbox. No search runs here. */
+/** SearchA2A gateway: protected live discovery and read-only indexed capability matching. */
+import { searchIndexedAgents } from './semantic.mjs';
 const REPOSITORY = 'HereLiesAz/searcha2a';
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -100,6 +101,36 @@ async function handle(request, env) {
   const origin = request.headers.get('Origin') || '';
   const allowedOrigin = env.ALLOWED_ORIGIN || '';
   const reply = (body, status) => respond(body, status, origin, allowedOrigin);
+  // This public GET API searches only the indexed metadata snapshot. No GitHub workflow,
+  // third-party Agent Card, credential or agent task is contacted.
+  if (url.pathname === '/api/v1/directory') {
+    const directoryReply = (body, status = 200) => new Response(
+      status === 204 ? null : JSON.stringify(body),
+      { status, headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'no-store',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Vary': 'Origin',
+      } },
+    );
+    if (request.method === 'OPTIONS') return directoryReply({}, 204);
+    if (request.method !== 'GET') return directoryReply({ error: 'Method not allowed' }, 405);
+    const query = (url.searchParams.get('q') || '').trim().replace(/\s+/g, ' ');
+    if (query.length < 2 || query.length > 120 || /[\x00-\x1f]/.test(query)) {
+      return directoryReply({ error: 'Query must be 2–120 characters' }, 400);
+    }
+    if (!env.SEARCH_RATE_LIMITER) return directoryReply({ error: 'Search unavailable' }, 503);
+    try {
+      const limit = await env.SEARCH_RATE_LIMITER.limit({
+        key: 'directory:' + (request.headers.get('CF-Connecting-IP') || 'unknown'),
+      });
+      if (!limit.success) return directoryReply({ error: 'Search rate limit exceeded' }, 429);
+    } catch { return directoryReply({ error: 'Search unavailable' }, 503); }
+    try {
+      return directoryReply(await searchIndexedAgents(query, env));
+    } catch { return directoryReply({ error: 'Published directory temporarily unavailable' }, 502); }
+  }
   if (request.method === 'OPTIONS') {
     return origin === allowedOrigin ? reply({}, 204) : reply({ error: 'Origin not allowed' }, 403);
   }
