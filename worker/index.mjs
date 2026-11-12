@@ -54,6 +54,13 @@ export class AgentRegistry {
       input_text TEXT NOT NULL,
       vector TEXT NOT NULL
     )`);
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS agent_health (
+      id TEXT PRIMARY KEY,
+      endpoint TEXT NOT NULL,
+      status TEXT NOT NULL,
+      http_status INTEGER,
+      checked_at TEXT NOT NULL
+    )`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS registry_audit (
       revision INTEGER PRIMARY KEY AUTOINCREMENT,
       agent_id TEXT NOT NULL,
@@ -202,6 +209,76 @@ export class AgentRegistry {
           data.id, data.action, listing, review, data.reason.trim(), changedAt);
       });
       return respond({ id: data.id, listing_state: listing, review_status: review, changed_at: changedAt });
+    }
+
+    if (request.method === 'GET' && path === '/health/due') {
+      const due = this.sql.exec(`SELECT agents.id, json_extract(agents.record, '$.endpoint') AS endpoint
+        FROM agents LEFT JOIN agent_health AS health ON health.id=agents.id
+        WHERE agents.listing_state='active' AND agents.review_status != 'rejected'
+          AND json_extract(agents.record, '$.source') != 'authorized-catalog'
+          AND length(json_extract(agents.record, '$.endpoint')) > 0
+        ORDER BY CASE WHEN health.endpoint=json_extract(agents.record, '$.endpoint')
+          THEN health.checked_at ELSE '' END ASC, agents.id ASC LIMIT 60`).toArray();
+      return respond({ entries: due });
+    }
+
+    if (request.method === 'POST' && path === '/health') {
+      let data;
+      try { data = await request.json(); } catch { return respond({ error: 'Invalid JSON' }, 400); }
+      if (!data || !Array.isArray(data.results) || data.results.length > 60 ||
+          data.results.some(item => !item || !/^[0-9a-f]{20}$/.test(item.id || '') ||
+            typeof item.endpoint !== 'string' || !item.endpoint.startsWith('https://') ||
+            item.endpoint.length > 1000 ||
+            !['responding', 'server_error', 'unreachable', 'skipped'].includes(item.status) ||
+            !(item.http_status === null || (Number.isInteger(item.http_status) &&
+              item.http_status >= 100 && item.http_status <= 599)) ||
+            ((item.status === 'responding' || item.status === 'server_error') !==
+              (item.http_status !== null)) ||
+            (item.status === 'responding' && item.http_status >= 500) ||
+            (item.status === 'server_error' && item.http_status < 500))) {
+        return respond({ error: 'Invalid health report' }, 400);
+      }
+      const timestamp = new Date().toISOString();
+      let stored = 0;
+      this.ctx.storage.transactionSync(() => {
+        for (const item of data.results) {
+          const current = this.sql.exec(`SELECT record FROM agents WHERE id=?
+            AND listing_state='active' AND review_status != 'rejected'`, item.id).toArray()[0];
+          if (!current) continue;
+          const agent = JSON.parse(current.record);
+          if (agent.endpoint !== item.endpoint || agent.source === 'authorized-catalog') continue;
+          this.sql.exec(`INSERT INTO agent_health (id, endpoint, status, http_status, checked_at)
+            VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET
+            endpoint=excluded.endpoint, status=excluded.status,
+            http_status=excluded.http_status, checked_at=excluded.checked_at`,
+            item.id, item.endpoint, item.status, item.http_status, timestamp);
+          stored++;
+        }
+      });
+      return respond({ status: 'stored', stored });
+    }
+
+    const health = path.match(/^\/health\/([0-9a-f]{20})$/);
+    if (request.method === 'GET' && health) {
+      const record = this.sql.exec(`SELECT agents.record, agent_health.endpoint, agent_health.status,
+        agent_health.http_status, agent_health.checked_at FROM agents
+        LEFT JOIN agent_health ON agent_health.id=agents.id
+        WHERE agents.id=? AND agents.listing_state='active'
+          AND agents.review_status != 'rejected'`, health[1]).toArray()[0];
+      if (!record) return respond({ error: 'Agent unknown' }, 404);
+      const agent = JSON.parse(record.record);
+      if (!record.checked_at || record.endpoint !== agent.endpoint) {
+        return respond({ id: health[1], status: 'unchecked', checked_at: null,
+          protocol_verified: false });
+      }
+      const age = Date.now() - Date.parse(record.checked_at);
+      if (!Number.isFinite(age) || age < 0 || age > 7 * 86400000) {
+        return respond({ id: health[1], status: 'stale', checked_at: record.checked_at,
+          protocol_verified: false });
+      }
+      return respond({ id: health[1], status: record.status,
+        http_status: record.http_status, checked_at: record.checked_at,
+        protocol_verified: false });
     }
 
     const audit = path.match(/^\/audit\/([0-9a-f]{20})$/);
@@ -458,6 +535,7 @@ async function handle(request, env) {
   }
   // Read-only registry endpoints are public APIs, including to other web apps.
   const isPublic = url.pathname === '/api/v1/agents' ||
+    /^\/api\/v1\/agents\/[0-9a-f]{20}\/health$/.test(url.pathname) ||
     url.pathname.startsWith('/api/v1/agents/') ||
     url.pathname === '/api/v1/ans/resolve';
   const publicReply = (body, status) => {
@@ -481,11 +559,31 @@ async function handle(request, env) {
     if (!env.REGISTRY) return publicReply({ error: 'Registry not configured' }, 503);
     const path = url.pathname === '/api/v1/agents'
       ? '/search' + url.search
+      : /^\/api\/v1\/agents\/[0-9a-f]{20}\/health$/.test(url.pathname)
+        ? '/health/' + url.pathname.split('/')[4]
       : url.pathname === '/api/v1/ans/resolve'
         ? '/ans' + url.search
         : '/agent/' + url.pathname.slice('/api/v1/agents/'.length);
     const result = await registryStub(env).fetch(new Request('https://registry.internal' + path));
     return publicReply(await result.json(), result.status);
+  }
+  if ((request.method === 'GET' && url.pathname === '/internal/registry/health/due') ||
+      (request.method === 'POST' && url.pathname === '/internal/registry/health')) {
+    if (!env.RESULT_CALLBACK_SECRET ||
+        request.headers.get('Authorization') !== `Bearer ${env.RESULT_CALLBACK_SECRET}`) {
+      return reply({ error: 'Unauthorized' }, 401);
+    }
+    if (!env.REGISTRY) return reply({ error: 'Registry not configured' }, 503);
+    let body;
+    if (request.method === 'POST') {
+      body = await request.text();
+      if (body.length > 20000) return reply({ error: 'Health report too large' }, 413);
+    }
+    const result = await registryStub(env).fetch(new Request(
+      'https://registry.internal' + (request.method === 'GET' ? '/health/due' : '/health'), {
+        method: request.method, ...(body === undefined ? {} : { body }),
+      }));
+    return reply(await result.json(), result.status);
   }
   if (request.method === 'POST' && url.pathname === '/internal/registry/ingest') {
     // Reuse the already-provisioned shared Actions/Worker secret. No browser writes.

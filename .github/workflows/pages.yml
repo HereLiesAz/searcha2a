@@ -57,6 +57,12 @@ jobs:
           REGISTRY_API_URL: ${{ vars.SEARCHA2A_API_URL }}
           REGISTRY_SYNC_SECRET: ${{ secrets.RESULT_CALLBACK_SECRET }}
         run: python3 src/registry_sync.py --catalog dist/api/v1/catalog.json
+      - name: Check public agent endpoint reachability
+        continue-on-error: true # A health-check outage must not roll back a valid catalog.
+        env:
+          REGISTRY_API_URL: ${{ vars.SEARCHA2A_API_URL }}
+          REGISTRY_SYNC_SECRET: ${{ secrets.RESULT_CALLBACK_SECRET }}
+        run: python3 src/agent_health.py
       # Persist failed off-chain public cards before confirming on-chain
       # progress. If the queue write fails, the chain cursor remains unchanged.
       - name: Persist public Agent Card retries

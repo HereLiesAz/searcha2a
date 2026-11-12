@@ -37,6 +37,10 @@ The counts and timestamp above are illustrative. `count` is the total number of 
 
 Read one persisted normalized Agent Card. Returns 404 if the ID is unknown.
 
+### `GET /api/v1/agents/{id}/health`
+
+Returns the latest scheduled *HTTPS endpoint reachability* observation for a visible agent, or 404 for an unknown or moderated-out agent. Shape: `{"id":"...","status":"responding","http_status":405,"checked_at":"...","protocol_verified":false}`. Status is `unchecked`, `responding`, `server_error`, `unreachable`, `skipped`, or `stale` (older than seven days). Unchecked entries have a null `checked_at`. A response to `HEAD`, even HTTP 200, does **not** demonstrate A2A protocol conformance, authorization, identity or task availability. Public GET requests never trigger endpoint probes.
+
 ### `GET /api/v1/directory?q=weather`
 
 The existing semantic capability discovery endpoint remains available to clients such as Aive. It ranks all active, non-rejected candidates from the **persistent SQL registry** (paged in batches of 100, newest indexed first) with persistent, incrementally updated Workers AI embeddings when available and otherwise reports `match_mode: "keyword-fallback"`. Once candidate vectors are cached, only the query is embedded. Its result cap is 20. The response carries `candidate_scope: "persistent-registry"`, `candidate_count` (all eligible persisted records examined, distinct from the 20-result cap), and `truncated: false` after reading every eligible candidate. Requires `q` of 2–120 characters and uses the existing approximate five-requests-per-minute IP limiter. No remote Agent Cards, static feeds or GitHub Actions are contacted. A missing registry binding returns 503 instead of falling back to potentially suppressed static listings. For complete metadata keyword search, use `GET /api/v1/agents`.
@@ -58,6 +62,12 @@ Called only by `src/registry_sync.py` during the scheduled/push-triggered Pages 
 The request is a JSON discovery catalog with `query: ""` and up to 70 normalized `results` per upload. The scheduled synchronizer splits crawls of up to 150 cards into uploads of 70 cards / 1,000,000 encoded bytes, combining suppression IDs across all responses. A single oversized card fails closed. Each row must contain a valid card ID, name, public HTTPS card source, a skills array (possibly empty only for marked partial A2A interface cards), and `verification: "card_read_only"`. The entire batch is validated before an atomic SQLite upsert. Existing entries absent from a crawl are retained. A successful response is `{"status":"stored","ingested":N,"total":M,"suppressed_ids":[]}`; errors include 400 invalid data, 401 missing secret, 413 excessive size, and 503 unconfigured registry.
 
 No public write or agent execution endpoint is enabled. Authenticated private catalog connectors only read a configured HTTPS JSON feed (or the explicitly allowlisted Google Cloud Agent Registry listing API with bounded pagination) with a scoped credential provided to the scheduled crawler; they never expose an authorization header to browsers, public registry APIs, or linked Agent Card requests. Publication requires explicit `publish: true` and is subject to normal registry moderation.
+
+## Scheduled endpoint checks (private)
+
+`GET /internal/registry/health/due` and `POST /internal/registry/health` require the scheduled crawler's existing `RESULT_CALLBACK_SECRET`. The former returns up to 60 oldest or unchecked *visible public* endpoint records. Authorized private-catalog endpoints are excluded. The latter accepts at most 60 bounded reports with `id`, `endpoint`, `status` and `http_status`. The registry only stores reports whose ID and endpoint still match an active, non-rejected public record. Health snapshots are separate from Agent Card verification and curator decisions.
+
+The scheduled job sends a credential-free HTTPS `HEAD` to the endpoint using pinned, publicly routable DNS addresses, strict TLS, a five-second timeout, and no redirects or task bodies. Query-bearing endpoint URLs are skipped to avoid leaking tokens. Failures never cause cards to be deactivated or remove persisted metadata.
 
 ## Registry review and lifecycle (private)
 

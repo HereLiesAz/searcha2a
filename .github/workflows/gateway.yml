@@ -53,6 +53,24 @@ jobs:
           [[ "$code" = 200 ]] || { echo "::error::Registry route returned HTTP $code"; cat /tmp/searcha2a-registry.json; exit 1; }
           jq -e '(.results | type) == "array" and (.total | type) == "number"' /tmp/searcha2a-registry.json >/dev/null
           echo 'Persistent registry search verified.'
+      - name: Verify public agent reachability status
+        if: steps.configured.outputs.ready == 'true'
+        env:
+          SEARCHA2A_API_URL: ${{ vars.SEARCHA2A_API_URL }}
+        run: |
+          set -euo pipefail
+          id="$(jq -r '.results[0].id // empty' /tmp/searcha2a-registry.json)"
+          if [[ -n "$id" ]]; then
+            code="$(curl --silent --show-error --retry 3 --retry-delay 2 \
+              -o /tmp/searcha2a-health.json -w '%{http_code}' \
+              "${SEARCHA2A_API_URL%/}/api/v1/agents/$id/health")"
+            [[ "$code" = 200 ]] || { echo "::error::Health route HTTP $code"; exit 1; }
+            jq -e --arg id "$id" '.id == $id and .protocol_verified == false and
+              (.status | IN("unchecked", "responding", "server_error",
+                            "unreachable", "skipped", "stale"))' \
+              /tmp/searcha2a-health.json >/dev/null
+            echo 'Public endpoint reachability status verified (no task execution).'
+          fi
       - name: Verify Durable Object mailbox binding
         if: steps.configured.outputs.ready == 'true'
         env:
