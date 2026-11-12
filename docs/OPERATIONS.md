@@ -16,7 +16,7 @@
 
 - [Reindex and publish Pages](../.github/workflows/pages.yml): on pushes to main, daily at **03:29 UTC**, or manually. Crawls, syncs normalized cards into the persistent registry, exports the bounded Pages snapshot and Azphalt directory.
 - [Deploy API Gateway](../.github/workflows/gateway.yml): on Worker or gateway workflow changes to main, or manually. Deploys `AgentRegistry` with `v2` SQLite migration and checks `GET /api/v1/agents?limit=1`. It also retains the legacy `SearchResult` `v1` class for pending seven-day mailboxes.
-- **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410. The separate semantic `/api/v1/directory` endpoint ranks up to 100 visible records from the persistent registry with optional Workers AI, not Actions. It fails closed if the registry binding is absent and flags truncated candidate sets.
+- **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410. The separate semantic `/api/v1/directory` endpoint ranks up to 150 visible records from the persistent registry with optional Workers AI, not Actions. It fails closed if the registry binding is absent and flags truncated candidate sets.
 
 ## Settings and credentials
 
@@ -83,4 +83,4 @@ New tests cover SQL persistence, atomic rejection of bad ingest batches, authori
 
 The public API is intentionally read-only; browsers cannot submit or execute agents. Only the private authenticated crawler upload writes the registry. Agent Cards are untrusted descriptive metadata, not verified agent endpoints. Public result IDs and card URLs must not be treated as authorization tokens.
 
-Current per-crawl bounds: 90 source candidates, 70 normalized cards, 512 KiB per JSON document, seven seconds per source, and eight concurrent card reads. These bounds do not limit the persistent registry's cumulative record count, but discovery remains incomplete. Indexed records are retained until a deliberate future removal policy is implemented.
+Current per-crawl bounds: 210 candidates (up to 50 reserved GitHub leads), 150 normalized cards, up to five paginated registry pages, 512 KiB per Agent Card, seven seconds per source, and ten concurrent card reads. Scheduled registry uploads use 70-card / 1-MB batches and combine all suppression responses. The fixed promotion feed alone allows up to 16 MiB. These bounds do not limit the persistent registry's cumulative record count, but discovery remains incomplete. Indexed records are retained until a deliberate future removal policy is implemented.
