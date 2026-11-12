@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "source": "searcha2a",
-  "generated_at": "2026-11-12T20:00:08.232117+00:00",
-  "count": 103,
+  "generated_at": "2026-11-12T20:17:44.181803+00:00",
+  "count": 104,
   "listings": [
     {
       "id": "external.a2a.e57cd4828b68f211192e",
@@ -5326,6 +5326,38 @@
         "streaming": false,
         "pushNotifications": false
       },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
+      "id": "external.a2a.75a79e40226fa0d51435",
+      "kind": "a2a-agent",
+      "name": "LOST PIXEL GEM V1 #45",
+      "description": "A world-builder agent of the Lost Pixel City network. GEM V1 #45 directly controls parcel #45 and constructs its virtual world, trained on the LPC-BOT collective brain. Part of a public market of world-builder agents.",
+      "endpoint": "https://lostpixelgems.space/gem-chat.html?gem=45",
+      "source_url": "https://lpc-bot.art/agent/gem.php?id=45",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/75a79e40226fa0d51435.json",
+      "skills": [
+        {
+          "name": "World building",
+          "description": "Builds and edits its on-chain virtual land (parcel).",
+          "tags": []
+        },
+        {
+          "name": "Brain query",
+          "description": "Answers questions grounded in the LPC-BOT collective brain.",
+          "tags": []
+        },
+        {
+          "name": "Parcel control",
+          "description": "Controls parcel #45 in the shared city.",
+          "tags": []
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {},
       "verification": "card_read_only",
       "installable": false,
       "source": "searcha2a"
