@@ -37,6 +37,10 @@ The counts and timestamp above are illustrative. `count` is the total number of 
 
 Read one persisted normalized Agent Card. Returns 404 if the ID is unknown.
 
+### `GET /api/v1/agents/{id}/health`
+
+Returns the latest scheduled *HTTPS endpoint reachability* observation for a visible agent, or 404 for an unknown or moderated-out agent. Shape: `{"id":"...","status":"responding","http_status":405,"checked_at":"...","protocol_verified":false}`. Status is `unchecked`, `responding`, `server_error`, `unreachable`, `skipped`, or `stale` (older than seven days). Unchecked entries have a null `checked_at`. A response to `HEAD`, even HTTP 200, does **not** demonstrate A2A protocol conformance, authorization, identity or task availability. Public GET requests never trigger endpoint probes.
+
 ### `GET /api/v1/directory?q=weather`
 
 The existing semantic capability discovery endpoint remains available to clients such as Aive. It ranks all active, non-rejected candidates from the **persistent SQL registry** (paged in batches of 100, newest indexed first) with persistent, incrementally updated Workers AI embeddings when available and otherwise reports `match_mode: "keyword-fallback"`. Once candidate vectors are cached, only the query is embedded. Its result cap is 20. The response carries `candidate_scope: "persistent-registry"`, `candidate_count` (all eligible persisted records examined, distinct from the 20-result cap), and `truncated: false` after reading every eligible candidate. Requires `q` of 2–120 characters and uses the existing approximate five-requests-per-minute IP limiter. No remote Agent Cards, static feeds or GitHub Actions are contacted. A missing registry binding returns 503 instead of falling back to potentially suppressed static listings. For complete metadata keyword search, use `GET /api/v1/agents`.
