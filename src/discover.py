@@ -21,9 +21,19 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_DOCUMENT = 524288
 # The aggregate Azphalt listings feed can contain up to 150 bounded Agent Cards.
 MAX_CATALOG_DOCUMENT = 16_777_216
-MAX_CANDIDATES = 210
+MAX_CANDIDATES = 350
 MAX_RESULTS = 150
 MAX_GITHUB_CANDIDATES = 50
+MAX_DOMAIN_SEEDS = 12
+MAX_MANIFEST_ITEMS = 150
+MAX_FOLLOWUP_CARD_URLS = 100
+MAX_RAW_CARD_BYTES = 4096
+# Paths are literal; unknown assistant identifiers are never enumerated.
+PROBE_PATHS = (
+    '/.well-known/agent-card.json', '/.well-known/agent.json',
+    '/.well-known/agents.json', '/agents.json', '/agent.json',
+    '/a2a/.well-known/agent.json', '/.wellknown/agent-card.json',
+)
 # Paginated registries are explicit, trusted configuration, never crawler-discovered links.
 MAX_REGISTRY_PAGES = 5
 REGISTRY_PAGE_SIZE = 30
@@ -84,6 +94,9 @@ def fetch_json(url: str, token: str = "", *, max_bytes: int = MAX_DOCUMENT):
         with OPENER.open(urllib.request.Request(url, headers=headers), timeout=7) as response:
             if response.status != 200:
                 raise DiscoveryError(f"HTTP {response.status}")
+            content_type = response.headers.get("Content-Type", "").split(";", 1)[0].lower().strip()
+            if content_type != "application/json" and not (content_type.startswith("application/") and content_type.endswith("+json")):
+                raise DiscoveryError("Non-JSON response Content-Type")
             data = response.read(max_bytes + 1)
             if len(data) > max_bytes:
                 raise DiscoveryError("Oversized JSON")
@@ -100,8 +113,8 @@ def normalize_card(card, source_url: str, source: str):
     if not isinstance(card, dict):
         return None
     name = clean_text(card.get("name"), 160)
-    skills = card.get("skills")
-    if not name or not isinstance(skills, list) or not skills:
+    skills = card.get("skills", [])
+    if not name or not isinstance(skills, list):
         return None
     normalized_skills = []
     for skill in skills[:40]:
@@ -114,9 +127,13 @@ def normalize_card(card, source_url: str, source: str):
                 "description": clean_text(skill.get("description")),
                 "tags": [clean_text(tag, 70) for tag in skill.get("tags", [])[:20] if isinstance(tag, str)] if isinstance(skill.get("tags", []), list) else [],
             })
-    if not normalized_skills:
-        return None
     interfaces = card.get("supportedInterfaces")
+    # Tolerate public A2A cards with no declared skills only when an A2A
+    # interface exists; never turn ordinary named JSON into an agent.
+    if not normalized_skills and not (isinstance(interfaces, list) and any(
+            isinstance(interface, dict) and isinstance(interface.get("url"), str)
+            and interface["url"].startswith("https://") for interface in interfaces)):
+        return None
     endpoint = clean_text(card.get("url"), 1000)
     protocols = []
     if isinstance(interfaces, list):
@@ -140,6 +157,7 @@ def normalize_card(card, source_url: str, source: str):
     raw_host = card.get("agentHost") or card.get("ansHost") or card.get("ans_host")
     ans_name = raw_name if isinstance(raw_name, str) and len(raw_name) <= 259 else ""
     ans_host = raw_host if isinstance(raw_host, str) and len(raw_host) <= 251 else ""
+    raw = json.dumps(card, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     return {
         "id": identity,
         "name": name,
@@ -152,6 +170,9 @@ def normalize_card(card, source_url: str, source: str):
         "capabilities": {k: bool(capabilities.get(k)) for k in ("streaming", "pushNotifications") if isinstance(capabilities.get(k), bool)},
         "security_schemes": security,
         "version": clean_text(card.get("version"), 80),
+        "schema_status": "declared_skills" if normalized_skills else "partial_agent_card",
+        "raw_sha256": hashlib.sha256(raw).hexdigest(),
+        **({"raw_card": card} if len(raw) <= MAX_RAW_CARD_BYTES else {}),
         **({"ans_name": ans_name, "ans_host": ans_host} if ans_name and ans_host else {}),
         "verification": "card_read_only",  # No L2 protocol probe; don't claim the agent works.
     }
@@ -172,11 +193,97 @@ def extract_registry_items(document):
     return []
 
 
+def public_card_link(value: str, base_url: str, *, explicit_card: bool = False) -> str:
+    """Resolve only explicit JSON Agent Card pointers; never call execution URLs."""
+    if not isinstance(value, str) or not value.strip() or len(value) > 2048:
+        return ""
+    try:
+        url = urllib.parse.urljoin(base_url, value.strip())
+        parsed = urllib.parse.urlsplit(url)
+        if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
+            return ""
+        if parsed.port not in (None, 443) or parsed.fragment:
+            return ""
+        if not explicit_card and not parsed.path.lower().endswith(".json"):
+            return ""
+        return url
+    except ValueError:
+        return ""
+
+
+def card_references(item, source_url: str):
+    """Only structural card URL fields are traversed, never skill text or task endpoints."""
+    if not isinstance(item, dict):
+        return []
+    urls = []
+    for key in ("wellKnownURI", "card_url", "cardUrl", "agentCardUrl",
+                "agentCardURI", "agentURI", "agentUri", "agent_card_url",
+                "agent_card_uri", "card"):
+        value = item.get(key)
+        if isinstance(value, str):
+            link = public_card_link(value, source_url, explicit_card=True)
+            if link:
+                urls.append(link)
+    # Some manifests use {protocol:"a2a", url:".../card.json"}.
+    protocol = str(item.get("protocol", "")).lower()
+    if protocol == "a2a" or protocol == "agent2agent":
+        link = public_card_link(item.get("url"), source_url)
+        if link:
+            urls.append(link)
+    return list(dict.fromkeys(urls))
+
+
+def unpack_cards(document, source_url: str, source: str):
+    """Read a single card or bounded multi-agent manifest; collect one-hop card links."""
+    direct = normalize_card(document, source_url, source)
+    if direct:
+        return [direct], []
+    cards, links = [], []
+    for item in extract_registry_items(document)[:MAX_MANIFEST_ITEMS]:
+        if not isinstance(item, dict):
+            continue
+        embedded = item.get("card") or item.get("agentCard") or item
+        normalized = normalize_card(embedded, source_url, source)
+        if normalized:
+            cards.append(normalized)
+        links.extend(card_references(item, source_url))
+    return cards, list(dict.fromkeys(links))
+
+
+def domain_sources(config):
+    """Probe only explicitly configured domains; no wildcard, port or tenant guessing."""
+    sources = []
+    assistants = config.get("assistant_ids", {})
+    if not isinstance(assistants, dict):
+        assistants = {}
+    for base in config.get("domain_urls", [])[:MAX_DOMAIN_SEEDS]:
+        if not isinstance(base, str):
+            continue
+        try:
+            parsed = urllib.parse.urlsplit(base)
+            if (parsed.scheme != "https" or not parsed.hostname or
+                    parsed.username or parsed.password or parsed.port not in (None, 443) or
+                    parsed.path not in ("", "/") or parsed.query or parsed.fragment):
+                continue
+        except ValueError:
+            continue
+        origin = base.rstrip("/")
+        sources.extend((origin + path, "domain-probe") for path in PROBE_PATHS)
+        ids = assistants.get(origin, [])
+        if isinstance(ids, list):
+            for assistant_id in ids[:10]:
+                if isinstance(assistant_id, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,80}", assistant_id):
+                    sources.append((origin + "/.well-known/agent-card.json?assistant_id=" +
+                                    urllib.parse.quote(assistant_id), "assistant-probe"))
+    return sources
+
+
 def candidate_sources(config):
     candidates = []
     for url in config.get("card_urls", []):
         if isinstance(url, str):
             candidates.append((url, "seed"))
+    candidates.extend(domain_sources(config))
     return candidates[:MAX_CANDIDATES]
 
 
@@ -185,7 +292,7 @@ def github_sources(query: str, token: str):
         return [], ["GitHub search skipped: GITHUB_TOKEN unavailable"]
     results = []
     errors = []
-    for filename in ("agent-card.json", "agent.json"):
+    for filename in ("agent-card.json", "agent.json", "agents.json"):
         text_query = f"{query} filename:{filename}" if query else f"filename:{filename} a2a"
         url = "https://api.github.com/search/code?" + urllib.parse.urlencode({"q": text_query, "per_page": 25})
         try:
@@ -219,7 +326,8 @@ def github_sources(query: str, token: str):
                 if not (re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", full_name) and branch):
                     continue
                 base = "https://raw.githubusercontent.com/" + full_name + "/" + urllib.parse.quote(branch, safe="")
-                for path in (".well-known/agent-card.json", ".well-known/agent.json", "agent-card.json"):
+                for path in (".well-known/agent-card.json", ".well-known/agent.json",
+                             ".well-known/agents.json", "agents.json", "agent-card.json"):
                     results.append((base + "/" + path, "github"))
         except DiscoveryError as exc:
             errors.append(f"GitHub repository search: {str(exc)}")
@@ -246,17 +354,10 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     for url in config.get("registry_urls", [])[:10]:
         try:
             document = fetch(url)
-            for item in extract_registry_items(document):
-                if not isinstance(item, dict):
-                    continue
-                embedded = item.get("card") or item.get("agentCard") or item
-                normalized = normalize_card(embedded, url, "registry")
-                if normalized:
-                    results.setdefault(normalized["id"], normalized)
-                else:
-                    card_url = item.get("card_url") or item.get("cardUrl")
-                    if isinstance(card_url, str):
-                        candidates.append((card_url, "registry"))
+            embedded, links = unpack_cards(document, url, "registry")
+            for record in embedded:
+                results.setdefault(record["id"], record)
+            candidates.extend((link, "registry") for link in links)
         except DiscoveryError:
             warnings.append(f"Registry unavailable: {urllib.parse.urlsplit(url).hostname}")
     # Public A2A registries expose Agent Card URLs through a paginated API.
@@ -283,12 +384,11 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
             for record in records[:REGISTRY_PAGE_SIZE]:
                 if not isinstance(record, dict):
                     continue
-                card_url = record.get("wellKnownURI")
-                if isinstance(card_url, str) and card_url.startswith("https://"):
-                    candidates.append((card_url, "registry"))
-                    seen += 1
+                for card_url in card_references(record, page_url):
                     if seen >= MAX_REGISTRY_CARD_URLS:
                         break
+                    candidates.append((card_url, "registry"))
+                    seen += 1
             if len(records) < REGISTRY_PAGE_SIZE:
                 break
     # Preserve bounded GitHub discovery even when explicit registries are crowded.
@@ -306,23 +406,41 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     existing_urls = {url for url, _ in unique}
     unique.extend((url, origin) for url, origin in github_cards if url not in existing_urls)
     unique = unique[:MAX_CANDIDATES]
-    # Fetch Agent Cards read-only. A publisher opt-in is independently checked
-    # against a same-origin HTTPS proof and is not a cryptographic ANS identity.
+    # Fetch metadata only. A publisher opt-in is checked against a same-origin
+    # HTTPS proof, never mistaken for cryptographic ANS identity.
     def pull(pair):
         url, origin = pair
         try:
-            card = fetch(url)
-            record = normalize_card(card, url, origin)
-            if record:
-                evidence = verify_publisher(record, card, fetch=fetch)
+            document = fetch(url)
+            cards, links = unpack_cards(document, url, origin)
+            if len(cards) == 1 and isinstance(document, dict) and cards[0]["source_url"] == url:
+                evidence = verify_publisher(cards[0], document, fetch=fetch)
                 if evidence:
-                    record["publisher_verification"] = evidence
-            return record
-        except (DiscoveryError, ValueError, TypeError, OverflowError):
-            return None
+                    cards[0]["publisher_verification"] = evidence
+            return cards, links
+        except (DiscoveryError, ValueError, TypeError, OverflowError, RecursionError):
+            return [], []
+
+    discovered = []
     with ThreadPoolExecutor(max_workers=10) as pool:
-        for record in pool.map(pull, unique):
-            if record:
+        for cards, links in pool.map(pull, unique):
+            for record in cards:
+                results.setdefault(record["id"], record)
+            discovered.extend(links)
+
+    # At most one further GET hop. Do not spider arbitrary links, invoke A2A
+    # tasks/MCP tools, or let manifests override a publisher's own card.
+    visited = {url for url, _ in unique}
+    followups = []
+    for url in discovered:
+        if url not in visited:
+            visited.add(url)
+            followups.append((url, "manifest"))
+            if len(followups) >= MAX_FOLLOWUP_CARD_URLS:
+                break
+    with ThreadPoolExecutor(max_workers=10) as pool:
+        for cards, _links in pool.map(pull, followups):
+            for record in cards:
                 results.setdefault(record["id"], record)
     ordered = sorted(results.values(), key=lambda r: (-rank(r, query), r["name"].lower()))
     if query:

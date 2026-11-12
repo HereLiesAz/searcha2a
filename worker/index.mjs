@@ -72,7 +72,10 @@ export class AgentRegistry {
             || typeof a.name !== 'string' || !a.name.trim() || a.name.length > 160
             || typeof a.description !== 'string'
             || typeof a.source_url !== 'string' || !a.source_url.startsWith('https://')
-            || !Array.isArray(a.skills) || !a.skills.length
+            || !Array.isArray(a.skills)
+            || (a.skills.length === 0 && (a.schema_status !== 'partial_agent_card'
+              || typeof a.endpoint !== 'string' || !a.endpoint.startsWith('https://')
+              || !Array.isArray(a.protocols) || !a.protocols.length))
             || a.verification !== 'card_read_only')) {
         return respond({ error: 'Invalid Agent Card record' }, 400);
       }

@@ -6,7 +6,7 @@
 
 ```text
 Scheduled or manually triggered Pages indexing (GitHub Actions)
-  -> discover.py: curated public HTTPS Agent Cards, registries, GitHub leads
+  -> discover.py: curated HTTPS Agent Cards, bounded domain probes, JSON manifests, registry feeds, GitHub leads
   -> bounded discovery catalog JSON
   -> registry_sync.py (existing private shared secret)
   -> Worker POST /internal/registry/ingest
@@ -84,17 +84,17 @@ Azphalt package signing remains a separate authority.
 | Only authorized scheduled crawls can mutate the registry | `worker/index.mjs`: `POST /internal/registry/ingest` checks shared secret |
 | A batch is all-or-nothing and does not delete unseen agents | `AgentRegistry.fetch`: input validation before `storage.transactionSync`, `INSERT ... ON CONFLICT DO UPDATE` |
 | Public search is bounded | `AgentRegistry.fetch`: 120-char query, up to 12 terms, limit <= 100, bounded offset |
-| Crawling never invokes advertised execution endpoints | `src/discover.py`: `fetch_json` and `normalize_card` |
-| Card fetches are limited to public HTTPS and reject redirects | `src/discover.py`: `require_public_https`, `NoRedirect`, `fetch_json` |
+| Crawling never invokes advertised execution endpoints | `src/discover.py`: `card_references`, `unpack_cards`, `fetch_json` (GET only and one hop) |
+| Card fetches are limited to public HTTPS, JSON media types and reject redirects | `src/discover.py`: `require_public_https`, `NoRedirect`, `fetch_json` |
 | Store entries remain read-only and non-installable | `src/azphalt_listings.py`: `build_listings` |
 
 ## Limits and caveats
 
-The current scheduled collector reads up to 210 candidate cards (including up to 50 reserved GitHub leads) and publishes up to 150 normalized cards per run. It also reads up to five pages of 30 agents from each explicitly configured paginated registry, including a2aregistry.org. Those are **per-crawl** limits, not a cap on accumulated registry records. The persistent registry retains IDs across runs. A new crawl does not invalidate a card it fails to rediscover, so stale entries are possible; curator hide/reject/deactivate decisions persist across crawls. Publishing filters the static Pages catalog and Azphalt export using the signed-in crawler's authenticated suppression manifest (and fails closed if it is missing); statuses propagate to the snapshots on the next index run, not immediately; there is no health probe, verified ownership, explicit self-registration, global search-engine crawl, or automatic removal policy yet.
+The current scheduled collector reads up to 350 initial candidate URLs (including up to 50 reserved GitHub leads) and at most 100 one-hop manifest links and publishes up to 150 normalized cards per run. It also reads up to five pages of 30 agents from each explicitly configured paginated registry, including a2aregistry.org. Those are **per-crawl** limits, not a cap on accumulated registry records. The persistent registry retains IDs across runs. A new crawl does not invalidate a card it fails to rediscover, so stale entries are possible; curator hide/reject/deactivate decisions persist across crawls. Publishing filters the static Pages catalog and Azphalt export using the signed-in crawler's authenticated suppression manifest (and fails closed if it is missing); statuses propagate to the snapshots on the next index run, not immediately; there is no health probe, verified ownership, explicit self-registration, global search-engine crawl, or automatic removal policy yet.
 
 SQL keyword search scans stored normalized name/skill/description/endpoint text and ranks by name, skill and description hits. The separate semantic endpoint ranks up to 150 visible persisted candidates with optional Workers AI; a `truncated` response signals incomplete coverage when the registry has more than 150 visible entries. It does not fetch static feeds or third-party sites. A single Durable Object coordinates the registry; future high-traffic growth may require sharding or migrating to Cloudflare D1.
 
-The crawler's DNS safety checks happen before HTTP connection, so DNS rebinding remains a known limitation. Query output is third-party metadata only.
+The crawler only accepts HTTP GET application/json (or application/*+json) documents over HTTPS, rejects HTTP redirects and private DNS results, limits each document to 512 KiB, and follows at most 100 explicit card links one hop from bounded manifests. Probe domains and assistant IDs are explicitly configured: no wildcard enumeration, task execution, authenticated extended-card retrieval, on-chain events, DNS TXT sweeps, MCP tool calls, or enterprise directory access. Missing skills are retained only when an explicit v1 supportedInterface identifies an agent. Raw public card JSON is retained only when <= 4 KiB; otherwise its SHA-256 is recorded. Raw fields are untrusted and **not** proof of A2A conformance or JWS integrity. DNS safety checks happen before HTTP connection, so DNS rebinding remains a known limitation. Query output is third-party metadata only.
 
 ## Deployment ordering
 
