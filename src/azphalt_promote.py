@@ -14,7 +14,6 @@ import hashlib
 import json
 from pathlib import Path
 import re
-import shutil
 from urllib.parse import urlsplit
 
 from discover import DiscoveryError, fetch_json, normalize_card
