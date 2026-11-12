@@ -269,9 +269,13 @@ def unpack_cards(document, source_url: str, source: str, *, offset: int = 0,
     Typed non-A2A artifacts must never be misclassified as cards. Nested inline
     catalogs are strictly bounded; external document traversal remains one hop.
     """
-    special_document = (isinstance(document, dict) and
-                        (document.get("type") == "https://eips.ethereum.org/EIPS/eip-8004#registration-v1"
-                         or isinstance(document.get("entries"), list)))
+    entries = document.get("entries") if isinstance(document, dict) else None
+    is_ai_catalog = (isinstance(entries, list) and (
+        isinstance(document.get("specVersion"), str) or
+        any(isinstance(item, dict) and "mediaType" in item
+            for item in entries[:MAX_MANIFEST_ITEMS])))
+    special_document = (is_ai_catalog or (isinstance(document, dict) and
+                        document.get("type") == "https://eips.ethereum.org/EIPS/eip-8004#registration-v1"))
     direct = None if special_document else normalize_card(document, source_url, source)
     if direct:
         return [direct], []
@@ -279,8 +283,7 @@ def unpack_cards(document, source_url: str, source: str, *, offset: int = 0,
     if isinstance(document, dict):
         # AI Catalog 1.0 is typed. Only A2A entries, not MCP/model/skill
         # artifacts, contribute Agent Cards or card URLs.
-        entries = document.get("entries")
-        if isinstance(entries, list):
+        if is_ai_catalog:
             nested = 0
             for entry in entries[:MAX_MANIFEST_ITEMS]:
                 if not isinstance(entry, dict):
@@ -336,7 +339,7 @@ def unpack_cards(document, source_url: str, source: str, *, offset: int = 0,
 
     # AI Catalog entries are typed and must never be treated as arbitrary
     # registry rows (which might accidentally publish non-A2A artifacts).
-    if not (isinstance(document, dict) and isinstance(document.get("entries"), list)):
+    if not is_ai_catalog:
         for item in extract_registry_items(document, offset=offset, limit=MAX_MANIFEST_ITEMS):
             if not isinstance(item, dict):
                 continue
