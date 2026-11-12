@@ -35,6 +35,16 @@ GitHub Pages uses GitHub Actions for build/deploy and `searcha2a.azphalt.store` 
 
 Existing `src/report.py` and historical result callbacks are for legacy in-flight requests only. They are not called by the website after migration.
 
+## ANS name claims
+
+`GET /api/v1/ans/resolve?name=ans%3A%2F%2Frelease-2026.agent.example.com`
+is a public, read-only query against the persistent, curated registry.
+The crawler stores publisher-supplied `ansName` + `agentHost` claims,
+which are neither signed attestations nor verified DNS identities.
+The response reports `identity_verified:false`; moderated or rejected
+entries remain hidden. No DNS lookup, task invocation, or GitHub workflow
+happens at query time. This change does not provision a verifier or its keys.
+
 ## Registry administration
 
 Set a distinct Worker-only `REGISTRY_ADMIN_SECRET` before enabling curation. **Do not reuse** `RESULT_CALLBACK_SECRET` from GitHub Actions. In the Cloudflare Worker project, use `npx --yes wrangler@4 secret put REGISTRY_ADMIN_SECRET`; do not commit a secret or add it to the public Pages config. Registry search and scheduled ingest continue to function without this optional credential; admin operations fail closed with HTTP 401.
