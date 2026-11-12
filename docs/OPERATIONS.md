@@ -68,6 +68,14 @@ New tests cover SQL persistence, atomic rejection of bad ingest batches, authori
 
 ## Public crawler targets
 
+AGNTCY Directory’s OCI artifacts can be imported from explicitly configured digest-pinned repositories. Configure an Actions secret `SEARCHA2A_AGNTCY_OCI_SOURCES_JSON` containing up to four JSON entries such as:
+
+```json
+[{"registry_origin":"https://oci.example.org","repository":"published/agents","manifest_digest":"sha256:<64-lowercase-hex>","publish":true}]
+```
+
+The crawler constructs only `GET /v2/<repository>/manifests/<digest>` and corresponding `GET /v2/<repository>/blobs/<digest>` URLs. SHA-256 digests are independently checked before parsing an AGNTCY Directory artifact and its OASF Record layers. Only typed `integration/a2a` module cards or explicit HTTPS card pointers enter the index. Private OCI repositories may additionally use a `token` in this **secret**, sent as Bearer only to the configured registry's manifest/blob paths, never to discovered agent cards. Raw inline cards are not exported from these sources. The default `agntcy_oci_sources` list is empty: there is no new paid service, no private repo enumeration and no publication until `publish: true`. Some OCI registries redirect blob requests or require a token-exchange flow, neither of which is followed; an export to public JSON remains an alternative. Neither OCI digests nor OASF ownership fields establish identity or A2A conformance.
+
 Two public, keyless and rate-limited chain RPC endpoints are configured for read-only ERC-8004 registration and URI-update events: Base `https://mainnet.base.org` and Ethereum `https://ethereum-rpc.publicnode.com`. Each daily run makes at most two RPC calls per source (`eth_blockNumber`, `eth_getLogs`) and scans the latest 512 blocks with at most 120 event results per source. RPC observations do not verify ownership, signatures, payments, reputation, or A2A operation. Some blocks between daily runs will be missed; fixed `from_block`/`to_block` windows (at most 512 inclusive) can be configured for manual backfills. Only HTTPS `agentURI` pointers are followed, not IPFS or inline data URIs.
 
 To override the RPC list without committing credentials, add the GitHub Actions secret `SEARCHA2A_ERC8004_RPC_SOURCES_JSON` as a JSON array of `{ "enabled": true, "rpc_url": "https://...", "registry_address": "0x...", "lookback_blocks": 128 }`, or explicit integer `from_block` and `to_block`. Up to four sources are consulted. Keep provider API keys out of `sources.json`. Unset the secret to use public keyless defaults. A provider may rate-limit requests; failure skips only that source. No transactions or payments are invoked.
