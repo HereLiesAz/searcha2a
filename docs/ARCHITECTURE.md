@@ -6,7 +6,7 @@
 
 ```text
 Scheduled or manually triggered Pages indexing (GitHub Actions)
-  -> discover.py: curated HTTPS cards, domain probes, AI Catalog/WebFinger/ERC-8004 links, opt-in authorized feeds, registry and GitHub leads
+  -> discover.py: curated HTTPS cards, domain probes, opt-in NAIS DNS TXT, AI Catalog/WebFinger/ERC-8004 links, authorized feeds, registry and GitHub
   -> bounded discovery catalog JSON
   -> registry_sync.py (existing private shared secret)
   -> Worker POST /internal/registry/ingest
@@ -85,6 +85,7 @@ Azphalt package signing remains a separate authority.
 | A batch is all-or-nothing and does not delete unseen agents | `AgentRegistry.fetch`: input validation before `storage.transactionSync`, `INSERT ... ON CONFLICT DO UPDATE` |
 | Public search is bounded | `AgentRegistry.fetch`: 120-char query, up to 12 terms, limit <= 100, bounded offset |
 | Crawling never invokes advertised execution endpoints | `src/discover.py`: `card_references`, `unpack_cards`, `fetch_json` (GET only and one hop) |
+| DNS produces unverified Agent Card leads, not authenticated ANS identities | `src/discover.py`: `dns_txt_sources`, `normalize_card` (`card_read_only`); `worker/ans.mjs`: publisher claims remain unverified |
 | Private catalogs require explicit publication permission, and credentials never leave the configured feed request | `src/discover.py`: `private_catalogs` with `publish is True`, `fetch_json(private_auth=...)`, `NoRedirect`, no authenticated link traversal; `.github/workflows/pages.yml` passes the secret only to the crawler |
 | Card fetches are limited to public HTTPS, JSON media types and reject redirects | `src/discover.py`: `require_public_https`, `NoRedirect`, `fetch_json` |
 | Store entries remain read-only and non-installable | `src/azphalt_listings.py`: `build_listings` |
