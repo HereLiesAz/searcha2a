@@ -346,3 +346,33 @@ test('ANS resolution exposes duplicate publisher claims without selecting an ide
     assert.deepEqual(data.results.map(item => item.name), ['Calendar Helper', 'Weather Expert']);
   } finally { state.close(); }
 });
+
+test('partial A2A cards are indexed with empty skills without accepting generic JSON', async () => {
+  const state = registryEnvironment();
+  try {
+    const partial = {
+      ...weather,
+      id: 'dddddddddddddddddddd',
+      name: 'No Skills Yet',
+      skills: [],
+      protocols: ['JSONRPC'],
+      schema_status: 'partial_agent_card',
+      raw_card: {
+        name: 'No Skills Yet',
+        supportedInterfaces: [{ url: 'https://agents.example/a2a',
+                                protocolBinding: 'JSONRPC', protocolVersion: '1.0' }],
+      },
+    };
+    assert.equal((await ingest(state.env, [partial])).status, 200);
+    const body = await (await lookup(state.env, 'no skills')).json();
+    assert.equal(body.count, 1);
+    assert.deepEqual(body.results[0].skills, []);
+    assert.equal(body.results[0].schema_status, 'partial_agent_card');
+    assert.equal(body.results[0].raw_card.name, 'No Skills Yet');
+    assert.equal((await ingest(state.env, [{ ...partial, id: 'eeeeeeeeeeeeeeeeeeee',
+      schema_status: 'unknown' }])).status, 400);
+    assert.equal((await ingest(state.env, [{ ...partial, id: 'ffffffffffffffffffff',
+      endpoint: '' }])).status, 400);
+    assert.equal((await (await lookup(state.env)).json()).total, 1);
+  } finally { state.close(); }
+});
