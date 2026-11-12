@@ -203,7 +203,7 @@ export class AgentRegistry {
       if (!name) return respond({ error: 'Invalid ANS name' }, 400);
       const limitText = url.searchParams.get('limit') || '20';
       const offsetText = url.searchParams.get('offset') || '0';
-      if (!/^\\d{1,2}$/.test(limitText) || !/^\\d{1,6}$/.test(offsetText)) {
+      if (!/^\d{1,2}$/.test(limitText) || !/^\d{1,6}$/.test(offsetText)) {
         return respond({ error: 'Invalid ANS pagination' }, 400);
       }
       const limit = Number(limitText), offset = Number(offsetText);
