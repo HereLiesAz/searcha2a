@@ -39,6 +39,10 @@ MAX_DNS_TXT_ANSWERS = 8
 MAX_ERC8004_RPC_SOURCES = 4
 MAX_ERC8004_BLOCK_WINDOW = 512
 MAX_ERC8004_LOGS = 120
+MAX_ERC8004_CHECKPOINT_WINDOW = 4096
+MAX_ERC8004_WINDOWS_PER_RUN = 16
+MAX_ERC8004_ATTEMPTS_PER_RUN = 24
+MAX_ERC8004_CHECKPOINT_URLS_PER_SOURCE = 40
 MAX_OCI_SOURCES = 4
 MAX_OCI_LAYERS = 6
 MAX_OCI_DOCUMENT = 524288
@@ -626,6 +630,129 @@ def erc8004_event_sources(config, post=post_chain_rpc):
     return list(dict.fromkeys(candidates)), warnings
 
 
+def erc8004_checkpointed_sources(config, state: dict, post=post_chain_rpc):
+    """Resume sequential confirmed ERC-8004 block windows without skipping gaps.
+
+    State is a staged, sanitized copy of the last committed checkpoint.
+    The caller persists it only after a successful authenticated ingest.
+    A failed or oversized RPC response never advances the block cursor.
+    """
+    candidates, warnings = [], []
+    entries = config.get("erc8004_rpc_sources", [])
+    if not isinstance(entries, list) or not isinstance(state, dict):
+        return candidates, warnings
+    checkpoints = state.setdefault("erc8004", {})
+    if not isinstance(checkpoints, dict):
+        raise DiscoveryError("Invalid ERC-8004 checkpoint state")
+    for source in entries[:MAX_ERC8004_RPC_SOURCES]:
+        if not isinstance(source, dict) or source.get("enabled") is not True:
+            continue
+        rpc, address = source.get("rpc_url"), source.get("registry_address")
+        if (not isinstance(rpc, str) or not isinstance(address, str)
+                or not re.fullmatch(r"0x[0-9a-fA-F]{40}", address)):
+            warnings.append("ERC-8004 source misconfigured")
+            continue
+        # Explicit fixed blocks remain available for one-off/manual probes.
+        # They do not mutate a persistent sequential cursor.
+        if source.get("from_block") is not None or source.get("to_block") is not None:
+            found, errors = erc8004_event_sources(
+                {"erc8004_rpc_sources": [source]}, post=post)
+            candidates.extend(found)
+            warnings.extend(errors)
+            continue
+        lookback = source.get("lookback_blocks", 512)
+        finality = source.get("finality_blocks", 64)
+        first = source.get("start_block")
+        configured_window = source.get("window_blocks", MAX_ERC8004_CHECKPOINT_WINDOW)
+        if (type(lookback) is not int or not 1 <= lookback <= MAX_ERC8004_CHECKPOINT_WINDOW
+                or type(finality) is not int or not 0 <= finality <= 4096
+                or first is not None and (type(first) is not int or not 0 <= first <= 2**60)
+                or type(configured_window) is not int
+                or not 1 <= configured_window <= MAX_ERC8004_CHECKPOINT_WINDOW):
+            warnings.append("ERC-8004 source misconfigured")
+            continue
+        # Hash the configured RPC locator: provider API keys and credentials
+        # must never appear in a public checkpoint branch.
+        key = hashlib.sha256((rpc + "|" + address.lower()).encode()).hexdigest()[:32]
+        previous = checkpoints.get(key, {})
+        if not isinstance(previous, dict):
+            raise DiscoveryError("Invalid ERC-8004 cursor record")
+        prior_block = previous.get("next_block")
+        prior_span = previous.get("window")
+        if prior_block is not None and (
+                type(prior_block) is not int or not 0 <= prior_block <= 2**60):
+            raise DiscoveryError("Invalid ERC-8004 cursor height")
+        if prior_span is not None and (
+                type(prior_span) is not int or not 1 <= prior_span <= MAX_ERC8004_CHECKPOINT_WINDOW):
+            raise DiscoveryError("Invalid ERC-8004 cursor window")
+        try:
+            status = post(rpc, "eth_blockNumber", [])
+            latest = status.get("result") if isinstance(status, dict) else None
+            if not isinstance(latest, str) or not re.fullmatch(r"0x[0-9a-fA-F]{1,16}", latest):
+                raise DiscoveryError("Invalid chain tip")
+            end = int(latest, 16) - finality
+            if end < 0:
+                continue
+            cursor = (prior_block if prior_block is not None else
+                      first if first is not None else max(0, end - lookback + 1))
+            window = prior_span if prior_span is not None else configured_window
+            completed = 0
+            attempts = 0
+            per_agent = {}
+            while (cursor <= end and completed < MAX_ERC8004_WINDOWS_PER_RUN
+                   and attempts < MAX_ERC8004_ATTEMPTS_PER_RUN):
+                to_block = min(end, cursor + window - 1)
+                attempts += 1
+                reply = post(rpc, "eth_getLogs", [{
+                    "address": address, "fromBlock": hex(cursor),
+                    "toBlock": hex(to_block),
+                    "topics": [[REGISTERED_TOPIC, URI_UPDATED_TOPIC]],
+                }])
+                logs = reply.get("result") if isinstance(reply, dict) else None
+                if not isinstance(logs, list):
+                    # Provider overload/errors may be block-range limits.
+                    # Narrow and retry; never mark unseen blocks complete.
+                    if window > 1:
+                        window = max(1, window // 2)
+                        continue
+                    raise DiscoveryError("Invalid chain log response")
+                if len(logs) > MAX_ERC8004_LOGS:
+                    if window > 1:
+                        window = max(1, window // 2)
+                        continue
+                    warnings.append("ERC-8004 single block exceeds bounded log budget")
+                    break
+                tentative = dict(per_agent)
+                for log in logs:
+                    uri = erc8004_event_uri(log, address)
+                    link = (public_card_link(uri, rpc, explicit_card=True)
+                            if uri.startswith("https://") else "")
+                    if link:
+                        tentative[log["topics"][1].lower()] = link
+                if len(tentative) > MAX_ERC8004_CHECKPOINT_URLS_PER_SOURCE:
+                    if window > 1:
+                        window = max(1, window // 2)
+                        continue
+                    warnings.append("ERC-8004 URL budget reached; cursor retained")
+                    break
+                per_agent = tentative
+                cursor = to_block + 1
+                completed += 1
+                # Grow conservatively after a successful sparse window.
+                if len(logs) < MAX_ERC8004_LOGS // 4:
+                    window = min(configured_window, window * 2)
+            checkpoints[key] = {"next_block": cursor, "window": window}
+            candidates.extend((url, "erc8004-registration")
+                              for url in per_agent.values())
+            if cursor <= end:
+                warnings.append("ERC-8004 backfill continues at saved cursor")
+        except (DiscoveryError, ValueError, TypeError, RecursionError):
+            # A partial successful prefix is not silently committed on error:
+            # retry the entire source scan next scheduled run.
+            warnings.append("ERC-8004 source unavailable")
+    return list(dict.fromkeys(candidates)), warnings
+
+
 def fetch_oci_bytes(url: str, auth: str = "") -> bytes:
     """GET an OCI manifest or digest-verified blob without redirects or leaks."""
     require_public_https(url)
@@ -1147,7 +1274,7 @@ def rank(record, query: str) -> int:
 def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github=github_sources,
              private_fetch=fetch_json, dns_fetch=fetch_json, chain_rpc=post_chain_rpc,
              oci_read=fetch_oci_bytes, mcp_post=post_mcp_metadata,
-             public_discover=post_public_directory_discover):
+             public_discover=post_public_directory_discover, chain_state=None):
     results = {}
     warnings = []
     candidates = candidate_sources(config)
@@ -1156,7 +1283,9 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     dns_cards, dns_warnings = dns_txt_sources(config, fetch=dns_fetch)
     candidates.extend(dns_cards)
     warnings.extend(dns_warnings)
-    chain_cards, chain_warnings = erc8004_event_sources(config, post=chain_rpc)
+    chain_cards, chain_warnings = (erc8004_checkpointed_sources(config, chain_state, post=chain_rpc)
+                                  if chain_state is not None else
+                                  erc8004_event_sources(config, post=chain_rpc))
     candidates.extend(chain_cards)
     warnings.extend(chain_warnings)
     oci_cards, oci_links, oci_warnings = agntcy_oci_sources(config, read=oci_read)
@@ -1380,6 +1509,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", default="")
     parser.add_argument("--output", required=True)
+    parser.add_argument("--checkpoint-in")
+    parser.add_argument("--checkpoint-out")
     args = parser.parse_args()
     if len(args.query) > 120:
         parser.error("query exceeds 120 characters")
@@ -1420,7 +1551,27 @@ def main():
         if not isinstance(sources, list):
             raise SystemExit("MCP source configuration must be a JSON array")
         config["mcp_sources"] = sources
-    data = discover(args.query.strip(), config, token=os.environ.get("GITHUB_TOKEN", ""))
+    if bool(args.checkpoint_in) != bool(args.checkpoint_out):
+        parser.error("--checkpoint-in and --checkpoint-out are required together")
+    chain_state = None
+    if args.checkpoint_in:
+        location = Path(args.checkpoint_in)
+        if not location.exists():
+            parser.error("Checkpoint file missing; run checkpoint load first")
+        try:
+            chain_state = json.loads(location.read_text(encoding="utf-8"))
+        except (ValueError, OSError):
+            parser.error("Invalid checkpoint file")
+        if (not isinstance(chain_state, dict) or chain_state.get("version") != 1
+                or not isinstance(chain_state.get("erc8004"), dict)):
+            parser.error("Unsupported checkpoint schema")
+    data = discover(args.query.strip(), config, token=os.environ.get("GITHUB_TOKEN", ""),
+                    chain_state=chain_state)
+    if args.checkpoint_out:
+        output_state = Path(args.checkpoint_out)
+        output_state.parent.mkdir(parents=True, exist_ok=True)
+        output_state.write_text(json.dumps(chain_state, sort_keys=True, indent=2) + "\n",
+                                encoding="utf-8")
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
