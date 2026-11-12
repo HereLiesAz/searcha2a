@@ -1469,13 +1469,12 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
         today = (retry_day if retry_day is not None
                  else datetime.now(timezone.utc).date().toordinal())
         retry_prefix, deferred = crawl_retry.due_retries(retry_state, today)
-        for url, origin in [*retry_prefix, *candidates, *((u, "github") for u in code_urls)]:
+        for url, origin in [*retry_prefix, *candidates, *code_urls]:
             if (origin in crawl_retry.PUBLIC_ORIGINS and
                     crawl_retry.safe_public_card_url(url)):
                 eligible_public.setdefault(url, origin)
-    code_pairs = ((url, "github") for url in code_urls)
     github_cards = list(distinct_url(
-        (url, origin) for url, origin in code_pairs
+        (url, origin) for url, origin in code_urls
         if url not in deferred))[:MAX_GITHUB_CANDIDATES]
     reserved = len(github_cards)
     unique = list(distinct_url(
