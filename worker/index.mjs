@@ -13,20 +13,6 @@ function respond(body, status = 200, origin = '', allowedOrigin = '') {
   return new Response(status === 204 ? null : JSON.stringify(body), { status, headers });
 }
 
-async function verifyTurnstile(token, ip, secret) {
-  if (!token || !secret) return false;
-  const params = new URLSearchParams({ secret, response: token });
-  if (ip) params.set('remoteip', ip);
-  const check = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST', body: params, signal: AbortSignal.timeout(7000),
-  });
-  if (!check.ok) return false;
-  const data = await check.json();
-  return data.success === true;
-}
-
-
-
 /**
  * Durable, searchable index fed only by the scheduled crawler.
  * A failed or empty crawl never erases previously indexed agent records.

@@ -23,9 +23,3 @@ new_sqlite_classes = ["SearchResult"]
 tag = "v2"
 new_sqlite_classes = ["AgentRegistry"]
 
-[[ratelimits]]
-name = "SEARCH_RATE_LIMITER"
-namespace_id = "1001"
-[ratelimits.simple]
-limit = 5
-period = 60
