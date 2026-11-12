@@ -32,6 +32,23 @@ export class AgentRegistry {
       updated_at TEXT NOT NULL
     )`);
     this.sql.exec('CREATE TABLE IF NOT EXISTS registry_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
+    // Add governance columns to the already-deployed v2 registry without erasing records.
+    const columns = new Set(this.sql.exec('PRAGMA table_info(agents)').toArray().map(row => row.name));
+    if (!columns.has('listing_state')) {
+      this.sql.exec("ALTER TABLE agents ADD COLUMN listing_state TEXT NOT NULL DEFAULT 'active'");
+    }
+    if (!columns.has('review_status')) {
+      this.sql.exec("ALTER TABLE agents ADD COLUMN review_status TEXT NOT NULL DEFAULT 'unreviewed'");
+    }
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS registry_audit (
+      revision INTEGER PRIMARY KEY AUTOINCREMENT,
+      agent_id TEXT NOT NULL,
+      action TEXT NOT NULL,
+      listing_state TEXT NOT NULL,
+      review_status TEXT NOT NULL,
+      reason TEXT NOT NULL,
+      changed_at TEXT NOT NULL
+    )`);
   }
 
   async fetch(request) {
@@ -78,7 +95,51 @@ export class AgentRegistry {
           ON CONFLICT(key) DO UPDATE SET value=excluded.value`, updatedAt);
       });
       const count = this.sql.exec('SELECT COUNT(*) AS total FROM agents').one().total;
-      return respond({ status: 'stored', ingested: entries.length, total: count });
+      const marks = entries.map(() => '?').join(', ');
+      const suppressed = entries.length ? this.sql.exec(
+        `SELECT id FROM agents WHERE id IN (${marks})
+          AND (listing_state != 'active' OR review_status = 'rejected')`,
+        ...entries.map(agent => agent.id)).toArray().map(row => row.id) : [];
+      return respond({ status: 'stored', ingested: entries.length, total: count,
+        suppressed_ids: suppressed });
+    }
+
+    if (request.method === 'POST' && path === '/manage') {
+      let data;
+      try { data = await request.json(); } catch { return respond({ error: 'Invalid JSON' }, 400); }
+      const validActions = new Set(['approve', 'reject', 'reset_review', 'hide', 'deactivate', 'activate']);
+      if (!data || !/^[0-9a-f]{20}$/.test(data.id || '') ||
+          !validActions.has(data.action) || typeof data.reason !== 'string' ||
+          !data.reason.trim() || data.reason.length > 240 || /[\x00-\x1f]/.test(data.reason)) {
+        return respond({ error: 'Invalid management request' }, 400);
+      }
+      const before = this.sql.exec(
+        'SELECT listing_state, review_status FROM agents WHERE id=?', data.id).toArray()[0];
+      if (!before) return respond({ error: 'Agent unknown' }, 404);
+      const listing = ({ hide: 'hidden', deactivate: 'deactivated', activate: 'active' })[data.action]
+        || before.listing_state;
+      const review = ({ approve: 'approved', reject: 'rejected', reset_review: 'unreviewed' })[data.action]
+        || before.review_status;
+      const changedAt = new Date().toISOString();
+      this.ctx.storage.transactionSync(() => {
+        this.sql.exec('UPDATE agents SET listing_state=?, review_status=? WHERE id=?',
+          listing, review, data.id);
+        this.sql.exec(`INSERT INTO registry_audit
+          (agent_id, action, listing_state, review_status, reason, changed_at)
+          VALUES (?, ?, ?, ?, ?, ?)`,
+          data.id, data.action, listing, review, data.reason.trim(), changedAt);
+      });
+      return respond({ id: data.id, listing_state: listing, review_status: review, changed_at: changedAt });
+    }
+
+    const audit = path.match(/^\/audit\/([0-9a-f]{20})$/);
+    if (request.method === 'GET' && audit) {
+      const agent = this.sql.exec(
+        'SELECT listing_state, review_status FROM agents WHERE id=?', audit[1]).toArray()[0];
+      if (!agent) return respond({ error: 'Agent unknown' }, 404);
+      const history = this.sql.exec(`SELECT action, listing_state, review_status, reason, changed_at
+        FROM registry_audit WHERE agent_id=? ORDER BY revision DESC LIMIT 100`, audit[1]).toArray();
+      return respond({ id: audit[1], ...agent, history });
     }
 
     if (request.method === 'GET' && path === '/search') {
@@ -94,10 +155,11 @@ export class AgentRegistry {
 
       const terms = (query.toLowerCase().match(/[\p{L}\p{N}-]+/gu) || []).slice(0, 12);
       const filters = terms.map(() => 'search_text LIKE ?').join(' OR ');
-      const where = filters ? 'WHERE ' + filters : '';
+      const visible = "listing_state='active' AND review_status != 'rejected'";
+      const where = 'WHERE ' + visible + (filters ? ' AND (' + filters + ')' : '');
       const bindings = terms.map(term => '%' + term + '%');
       const matched = this.sql.exec(`SELECT COUNT(*) AS total FROM agents ${where}`, ...bindings).one().total;
-      const total = this.sql.exec('SELECT COUNT(*) AS total FROM agents').one().total;
+      const total = this.sql.exec(`SELECT COUNT(*) AS total FROM agents WHERE ${visible}`).one().total;
       const relevance = terms.map(() =>
         '(CASE WHEN name_search LIKE ? THEN 8 ELSE 0 END + ' +
         'CASE WHEN skills_search LIKE ? THEN 4 ELSE 0 END + ' +
@@ -105,22 +167,25 @@ export class AgentRegistry {
       const sort = relevance ? relevance + ' DESC, name_search ASC' : 'name_search ASC';
       const rankParams = terms.flatMap(term => ['%' + term + '%', '%' + term + '%', '%' + term + '%']);
       const rows = this.sql.exec(
-        `SELECT record FROM agents ${where} ORDER BY ${sort} LIMIT ? OFFSET ?`,
+        `SELECT record, review_status FROM agents ${where} ORDER BY ${sort} LIMIT ? OFFSET ?`,
         ...bindings, ...rankParams, limit, offset).toArray();
       const meta = this.sql.exec(
         "SELECT value FROM registry_meta WHERE key='last_ingested_at'").toArray()[0];
       return respond({
         query, count: matched, total, offset, limit,
         generated_at: meta ? meta.value : null,
-        results: rows.map(row => JSON.parse(row.record)),
+        results: rows.map(row => ({ ...JSON.parse(row.record), curation_status: row.review_status })),
         verified: 'Agent Card metadata only; endpoints are not actively probed',
       });
     }
 
     const idMatch = path.match(/^\/agent\/([0-9a-f]{20})$/);
     if (request.method === 'GET' && idMatch) {
-      const record = this.sql.exec('SELECT record FROM agents WHERE id=?', idMatch[1]).toArray()[0];
-      return record ? respond(JSON.parse(record.record)) : respond({ error: 'Agent unknown' }, 404);
+      const record = this.sql.exec(`SELECT record, review_status FROM agents
+        WHERE id=? AND listing_state='active' AND review_status != 'rejected'`, idMatch[1]).toArray()[0];
+      return record
+        ? respond({ ...JSON.parse(record.record), curation_status: record.review_status })
+        : respond({ error: 'Agent unknown' }, 404);
     }
     return respond({ error: 'Not found' }, 404);
   }
@@ -274,6 +339,26 @@ async function handle(request, env) {
       method: 'POST', body,
     }));
     return reply(await result.json(), result.status);
+  }
+  // Curation is deliberately separate from the crawler's ingestion credential.
+  if ((request.method === 'POST' && url.pathname === '/internal/registry/manage') ||
+      (request.method === 'GET' && /^\/internal\/registry\/audit\/[0-9a-f]{20}$/.test(url.pathname))) {
+    if (!env.REGISTRY_ADMIN_SECRET ||
+        request.headers.get('Authorization') !== `Bearer ${env.REGISTRY_ADMIN_SECRET}`) {
+      return reply({ error: 'Unauthorized' }, 401);
+    }
+    if (!env.REGISTRY) return reply({ error: 'Registry not configured' }, 503);
+    let path = '/audit/' + url.pathname.slice('/internal/registry/audit/'.length);
+    let body;
+    if (request.method === 'POST') {
+      path = '/manage';
+      body = await request.text();
+      if (body.length > 4096) return reply({ error: 'Management request too large' }, 413);
+    }
+    const managed = await registryStub(env).fetch(new Request('https://registry.internal' + path, {
+      method: request.method, ...(body === undefined ? {} : { body }),
+    }));
+    return reply(await managed.json(), managed.status);
   }
   const idMatch = url.pathname.match(/^\/api\/v1\/results\/([^/]+)$/);
   if (request.method === 'GET' && idMatch) {

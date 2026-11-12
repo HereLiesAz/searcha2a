@@ -49,13 +49,30 @@ def ingest(catalog: dict, base: str, secret: str, *, attempts: int = 18,
     raise RuntimeError("Registry sync failed")
 
 
+def filter_export_catalog(catalog: dict, ingest_response: dict) -> dict:
+    """Fail closed unless the registry confirms which IDs must stay unpublished."""
+    suppressed = ingest_response.get("suppressed_ids")
+    if (not isinstance(suppressed, list) or
+            any(not isinstance(item, str) or
+                len(item) != 20 or
+                any(ch not in "0123456789abcdef" for ch in item)
+                for item in suppressed)):
+        raise ValueError("Registry suppression manifest unavailable or invalid")
+    excluded = set(suppressed)
+    kept = [card for card in catalog["results"] if card["id"] not in excluded]
+    return {**catalog, "results": kept, "count": len(kept)}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--catalog", type=Path, required=True)
     args = parser.parse_args()
     data = json.loads(args.catalog.read_text(encoding="utf-8"))
     result = ingest(data, os.getenv("REGISTRY_API_URL", ""), os.getenv("REGISTRY_SYNC_SECRET", ""))
-    print(f"Registry now contains {result['total']} agents; ingested {result['ingested']} cards")
+    publishable = filter_export_catalog(data, result)
+    args.catalog.write_text(json.dumps(publishable, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"Registry now contains {result['total']} agents; ingested {result['ingested']} cards; "
+          f"published {publishable['count']} after curation")
 
 
 if __name__ == "__main__":

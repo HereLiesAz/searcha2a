@@ -3,9 +3,16 @@ import assert from 'node:assert/strict';
 import { DatabaseSync } from 'node:sqlite';
 import { AgentRegistry, handle } from '../worker/index.mjs';
 
-function registryEnvironment() {
+function registryEnvironment({ legacySchema = false } = {}) {
   // Use a real SQLite engine; expected results below are authored independently.
   const database = new DatabaseSync(':memory:');
+  if (legacySchema) {
+    database.exec(`CREATE TABLE agents (
+      id TEXT PRIMARY KEY, name_search TEXT NOT NULL, skills_search TEXT NOT NULL,
+      description_search TEXT NOT NULL, search_text TEXT NOT NULL,
+      record TEXT NOT NULL, updated_at TEXT NOT NULL
+    )`);
+  }
   const storage = {
     sql: {
       exec(query, ...args) {
@@ -41,6 +48,7 @@ function registryEnvironment() {
     env: {
       ALLOWED_ORIGIN: 'https://searcha2a.azphalt.store',
       RESULT_CALLBACK_SECRET: 'pipeline-secret',
+      REGISTRY_ADMIN_SECRET: 'admin-only-secret',
       REGISTRY: { idFromName: name => name, get: () => object },
     },
     close: () => database.close(),
@@ -157,4 +165,101 @@ test('search pagination and query limits are bounded without GitHub requests', a
     globalThis.fetch = savedFetch;
     state.close();
   }
+});
+
+const manage = (env, id, action, reason = 'Curator decision', authorization = 'Bearer admin-only-secret') =>
+  handle(request('/internal/registry/manage', {
+    method: 'POST',
+    headers: { Authorization: authorization },
+    body: JSON.stringify({ id, action, reason }),
+  }), env);
+const audit = (env, id, authorization = 'Bearer admin-only-secret') =>
+  handle(request('/internal/registry/audit/' + id, {
+    headers: { Authorization: authorization },
+  }), env);
+
+test('existing v2 tables migrate without deleting previously indexed agents', async () => {
+  const state = registryEnvironment({ legacySchema: true });
+  try {
+    assert.equal((await ingest(state.env, [weather])).status, 200);
+    const body = await (await lookup(state.env, 'forecast')).json();
+    assert.equal(body.count, 1);
+    assert.equal(body.results[0].curation_status, 'unreviewed');
+  } finally { state.close(); }
+});
+
+test('crawler secret cannot approve, hide, or read private audit history', async () => {
+  const state = registryEnvironment();
+  try {
+    await ingest(state.env, [weather]);
+    const id = weather.id;
+    assert.equal((await manage(state.env, id, 'approve', 'No', 'Bearer pipeline-secret')).status, 401);
+    assert.equal((await audit(state.env, id, 'Bearer pipeline-secret')).status, 401);
+    assert.equal((await audit({ ...state.env, REGISTRY_ADMIN_SECRET: undefined }, id)).status, 401);
+    const published = await (await lookup(state.env, 'weather')).json();
+    assert.equal(published.results[0].curation_status, 'unreviewed');
+  } finally { state.close(); }
+});
+
+test('review decisions and listing deactivation survive later scheduled crawls', async () => {
+  const state = registryEnvironment();
+  try {
+    await ingest(state.env, [weather, calendar]);
+    assert.equal((await manage(state.env, weather.id, 'approve', 'Reviewed Agent Card')).status, 200);
+    let visible = await (await lookup(state.env, 'weather')).json();
+    assert.equal(visible.results[0].curation_status, 'approved');
+    // Approval is metadata review. It never upgrades the card verification claim.
+    assert.equal(visible.results[0].verification, 'card_read_only');
+
+    assert.equal((await manage(state.env, weather.id, 'deactivate', 'Publisher asked to unlist')).status, 200);
+    visible = await (await lookup(state.env, 'weather')).json();
+    assert.equal(visible.count, 0);
+    assert.equal(visible.total, 1);
+    assert.equal((await handle(request('/api/v1/agents/' + weather.id), state.env)).status, 404);
+
+    // A newly fetched card cannot resurrect a curator-deactivated listing.
+    await ingest(state.env, [{ ...weather, description: 'Newly recrawled description' }]);
+    visible = await (await lookup(state.env, 'weather')).json();
+    assert.equal(visible.count, 0);
+    assert.equal((await manage(state.env, weather.id, 'activate', 'Publisher returned')).status, 200);
+    visible = await (await lookup(state.env, 'weather')).json();
+    assert.equal(visible.count, 1);
+    assert.equal(visible.results[0].description, 'Newly recrawled description');
+    assert.equal(visible.results[0].curation_status, 'approved');
+
+    const changes = await (await audit(state.env, weather.id)).json();
+    assert.deepEqual(changes.history.map(entry => entry.action),
+      ['activate', 'deactivate', 'approve']);
+    assert.equal(changes.history[1].reason, 'Publisher asked to unlist');
+  } finally { state.close(); }
+});
+
+test('rejected cards remain invisible even if a curator activates their listing', async () => {
+  const state = registryEnvironment();
+  try {
+    await ingest(state.env, [weather]);
+    assert.equal((await manage(state.env, weather.id, 'reject', 'Suspected injection')).status, 200);
+    assert.equal((await (await lookup(state.env)).json()).count, 0);
+    await ingest(state.env, [weather]);
+    assert.equal((await manage(state.env, weather.id, 'activate', 'Restored availability')).status, 200);
+    assert.equal((await (await lookup(state.env)).json()).total, 0);
+    assert.equal((await manage(state.env, weather.id, 'reset_review', 'Review reset')).status, 200);
+    const listed = await (await lookup(state.env)).json();
+    assert.equal(listed.total, 1);
+    assert.equal(listed.results[0].curation_status, 'unreviewed');
+  } finally { state.close(); }
+});
+
+test('invalid moderation requests cannot modify records or audit history', async () => {
+  const state = registryEnvironment();
+  try {
+    await ingest(state.env, [weather]);
+    assert.equal((await manage(state.env, weather.id, 'delete', 'Unrecognized')).status, 400);
+    assert.equal((await manage(state.env, weather.id, 'approve', '')).status, 400);
+    assert.equal((await manage(state.env, 'ffffffffffffffffffff', 'hide')).status, 404);
+    const result = await (await audit(state.env, weather.id)).json();
+    assert.equal(result.review_status, 'unreviewed');
+    assert.deepEqual(result.history, []);
+    assert.equal((await (await lookup(state.env)).json()).total, 1);
+  } finally { state.close(); }
 });
