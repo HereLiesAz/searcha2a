@@ -10,7 +10,27 @@
     "https://botmarket.bot/.well-known/agent-card.json",
     "https://alion.io/.well-known/agent-card.json",
     "https://agoragentic.com/.well-known/agent-card.json",
-    "https://api.berrergate.com/.well-known/agent-card.json"
+    "https://api.berrergate.com/.well-known/agent-card.json",
+    "https://registry-staging-145d.up.railway.app/.well-known/agent-card.json",
+    "https://aiagencies.fyi/.well-known/agent-card.json",
+    "https://mcpdirectory.fyi/.well-known/agent-card.json",
+    "https://agentsandboxes.fyi/.well-known/agent-card.json",
+    "https://itinagents.fyi/.well-known/agent-card.json",
+    "https://publicadjusters.fyi/.well-known/agent-card.json",
+    "https://quantumcompanies.fyi/.well-known/agent-card.json",
+    "https://robotaxis.fyi/.well-known/agent-card.json",
+    "https://doulas.fyi/.well-known/agent-card.json",
+    "https://privatewellnessrooms.fyi/.well-known/agent-card.json",
+    "https://surrogacyagencies.fyi/.well-known/agent-card.json",
+    "https://www.cloudflare.com/.well-known/agent.json",
+    "https://api.cdq.com/a2a/cdq-genius/.well-known/agent-card.json",
+    "https://councilof.ai/.well-known/agent-card.json",
+    "https://business.agentum.lat/.well-known/agent-card.json",
+    "https://deusproof.com/.well-known/agent-card.json",
+    "https://agent-contract-proof.mattskowronis.workers.dev/.well-known/agent-card.json",
+    "https://mydanktank.com/agent-card.json",
+    "https://readr.hatchagent.workers.dev/.well-known/agent-card.json",
+    "https://hello.a2aregistry.org/.well-known/agent-card.json"
   ],
   "registry_urls": [
     "https://agora.sovont.com/v1/agents"
