@@ -585,12 +585,17 @@ def erc8004_event_sources(config, post=post_chain_rpc):
                 raise DiscoveryError("Invalid log response")
             if len(logs) > MAX_ERC8004_LOGS:
                 warnings.append("ERC-8004 log window truncated")
+            # eth_getLogs returns logs in chain order. A later URIUpdated
+            # supersedes Registered for the same agent within this window.
+            latest_by_agent = {}
             for log in logs[:MAX_ERC8004_LOGS]:
                 uri = erc8004_event_uri(log, address)
                 link = (public_card_link(uri, rpc, explicit_card=True)
                         if uri.startswith("https://") else "")
                 if link:
-                    candidates.append((link, "erc8004-registration"))
+                    latest_by_agent[log["topics"][1].lower()] = link
+            candidates.extend((link, "erc8004-registration")
+                              for link in latest_by_agent.values())
         except (DiscoveryError, ValueError, TypeError):
             # RPC URLs may contain API keys. Never include them in warnings.
             warnings.append("ERC-8004 source unavailable")
