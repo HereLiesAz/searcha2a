@@ -1,38 +1,58 @@
 # Federated execution: bring your own compute
 
-SearchA2A remains a metadata-only, read-only discovery service. **The optional `federation/` Worker is an independent A2A endpoint that each fork owner deploys into their own Cloudflare account.** Search queries never invoke a Worker, dispatch GitHub Actions, or run agents. The central repository does not host, proxy or pay for agent execution.
+SearchA2A is a shared discovery and connection directory, **not a shared agent execution host**. Its optional `federation/` adapter can be deployed straight from the SearchA2A source to the **agent operator's own Cloudflare account**, without creating a fork or GitHub repository. Execution and inference remain with each agent owner. Existing A2A servers need no adapter: publish their native Agent Cards.
 
-## Fork and activate
+## Connect an agent without forking
 
-1. Fork SearchA2A (or copy the `federation/` directory and the federation workflow to your own repository). GitHub disables scheduled workflows on forks by default; use **Actions** to enable workflows as needed. Forks remain independent of the upstream SearchA2A registry.
-2. Edit [`federation/config.mjs`](../federation/config.mjs) with accurate public name, description, version and skills. These are declarations, **not inferred or verified capabilities**. Never put credentials in this file.
-3. Provide a reachable owner-operated HTTPS webhook. It accepts `POST` JSON `{ "message": "...", "contextId": "...", "messageId": "..." }`, returning UTF-8 text or JSON `{ "text": "..." }` / `{ "response": "..." }`. The webhook runs inference and tools on **your** hardware, service or account. A local-only service needs an owner-operated outbound tunnel (for example Cloudflare Tunnel); this repository does not run a shared relay.
-4. In your fork set **Actions variables** `FEDERATION_ENABLED=true` and `FEDERATION_PUBLIC_ORIGIN=https://<your-worker>.<your-subdomain>.workers.dev` (or your own custom Worker domain). Set **Actions secrets** `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `FEDERATION_UPSTREAM_URL`, `FEDERATION_GATEWAY_API_KEY` (random, at least 24 characters), and optionally `FEDERATION_UPSTREAM_BEARER_TOKEN`. The GitHub deployment credentials must belong to your account, not SearchA2A's central deployment.
-5. Manually run **Federated A2A gateway (fork-owned)**. Future changes to `federation/` on main redeploy that fork's Worker. Public metadata is immediately generated at `https://<your-worker>/.well-known/agent-card.json`; the JSON-RPC endpoint is `/a2a`. A test job runs even when deployment is disabled. Do **not** enable federation for the central SearchA2A deployment.
-6. To be found through the central registry, propose your public card URL for the curated [`sources.json`](../sources.json) seeds (or rely on an existing compatible registry). Discovery is independent of execution. A published listing does not prove ownership or availability. There is intentionally **no** public auto-registration write token.
+1. Supply an operator-controlled **public HTTPS webhook**. It accepts `POST` JSON `{ "message": "...", "contextId": "...", "messageId": "..." }` and returns UTF-8 text or JSON `{ "text": "..." }` / `{ "response": "..." }`. For a local-only agent, the operator must arrange their own outbound tunnel or hosting. SearchA2A does not run a relay.
+2. Download or clone [SearchA2A](https://github.com/HereLiesAz/searcha2a), then `cd federation`. No fork, GitHub Actions setup, or code edits are required. Log in with `npx wrangler@4 login` (or use your own Cloudflare API token).
+3. Deploy the adapter into **your** account, supplying public metadata as runtime variables. Replace the example Worker URL with the hostname assigned to your Worker, and set your own unique Worker name:
+
+```sh
+npx wrangler@4 deploy --name my-agent-a2a \
+  --var 'PUBLIC_ORIGIN:https://my-agent-a2a.YOUR_SUBDOMAIN.workers.dev' \
+  --var 'AGENT_NAME:My Agent' \
+  --var 'AGENT_DESCRIPTION:An agent running on my infrastructure' \
+  --var 'AGENT_VERSION:1.0.0' \
+  --var 'AGENT_SKILLS_JSON:[{"id":"text-chat","name":"Text conversation","description":"Replies to text","tags":["text"]}]'
+```
+
+4. Install secrets interactively against **the same Worker** (do not put them in GitHub, source code, or public metadata):
+
+```sh
+npx wrangler@4 secret put UPSTREAM_URL --name my-agent-a2a
+npx wrangler@4 secret put GATEWAY_API_KEY --name my-agent-a2a
+# Optional, if your webhook requires bearer authentication:
+npx wrangler@4 secret put UPSTREAM_BEARER_TOKEN --name my-agent-a2a
+```
+
+`UPSTREAM_URL` must be a public HTTPS URL for the operator's webhook. `GATEWAY_API_KEY` must be at least 24 random characters and must be shared with authorized A2A clients out of band. The Worker is unavailable until its metadata and mandatory secrets are set. In a multi-Worker account, choose a distinct `--name` for each adapter and use it consistently.
+
+5. Check the published card at `https://my-agent-a2a.YOUR_SUBDOMAIN.workers.dev/.well-known/agent-card.json`. Its supported interface points to `/a2a` on that same Worker. Clients call the Worker directly; SearchA2A never handles their task bodies or secrets.
+6. To enter the SearchA2A directory, submit the public card URL for inclusion in the curated [`sources.json`](../sources.json) or publish it through an indexed A2A registry. SearchA2A indexes metadata only, and a listed card is not proof of identity, authorization or runtime health. There is currently no unauthenticated auto-registration endpoint.
 
 ### Example A2A request
 
 ```sh
-curl -sS -X POST 'https://YOUR-WORKER.workers.dev/a2a' \
+curl -sS -X POST 'https://my-agent-a2a.YOUR_SUBDOMAIN.workers.dev/a2a' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer YOUR_CLIENT_GATEWAY_KEY' \
   --data '{"jsonrpc":"2.0","id":1,"method":"SendMessage","params":{"message":{"role":"ROLE_USER","messageId":"hello-1","parts":[{"text":"Hello"}]}}}'
 ```
 
-The response contains `result.message` with `ROLE_AGENT`, a new message ID, a context ID, and a text part. Give clients the gateway bearer key only through a secure channel. This is a shared key for the forked gateway, not SearchA2A account authentication.
+The response contains `result.message`, `ROLE_AGENT`, a new message ID, a context ID and a text part. The gateway bearer key is an operator-owned secret, not a SearchA2A account credential.
 
-## Supported scope and non-goals
+## Supported scope and limitations
 
-- **A2A 1.0 JSON-RPC `SendMessage`**, synchronous text only. The Worker emits a v1 Agent Card with `streaming: false`, `pushNotifications: false` and declared bearer authentication. No claims of Tasks, task cancellation, push, MCP translation, streaming or automatic local execution.
-- The upstream address is **operator-configured**, never chosen from client input or discovery results. HTTPS is mandatory; credentials, obvious local/private IP literals and local hostnames are rejected. Redirects are not followed. Network-level DNS rebinding protection is not provided; owners must trust the hostname they configure.
-- Requests require the fork-owned bearer token; no permissive CORS, client-controlled target URLs or proxying of request Authorization to the upstream. A separate upstream token may be configured. Request bodies are capped at 16 KiB, upstream responses at 64 KiB, and upstream work times out after 15 seconds. Remote agent failure returns a safe error without leaking upstream response text.
-- Cloudflare billing/usage, model inference, token sharing and webhook security belong to the fork operator. Free tiers and quota behavior can change. **This is not an assurance of zero operating cost.** To prevent paid usage, configure account-level limits and verify provider terms before activation.
-- If the upstream is already a working A2A server, publish its own Agent Card instead. This adapter is for **non-A2A synchronous HTTP webhook agents**. Other agent protocols require an owner-operated adapter; a card alone cannot make an unreachable agent callable.
-- The workflow removes the optional upstream bearer secret when its corresponding Actions secret is blank. Rotate the gateway key if it is leaked. Never expose Worker tokens in commit history, PRs, Pages, or registry cards.
+- **A2A 1.0 JSON-RPC `SendMessage`, synchronous text only.** Advertised capabilities intentionally set `streaming: false` and `pushNotifications: false`; tasks, task cancellation, push, streaming and MCP translation are not implemented.
+- The upstream is **operator-configured** and never supplied by clients or discovery results. HTTPS is mandatory; local/private IP literals and local hostnames are rejected, and redirects are not followed. DNS rebinding protections are not provided; only configure trusted hostnames.
+- Each request requires the operator's bearer key, with limits of 16 KiB input, 64 KiB upstream response and 15 seconds upstream processing. The caller's authorization header is not forwarded to the upstream. Errors do not disclose upstream response contents.
+- Cloudflare quota, webhook reliability, inference expenses and credential distribution belong to **each agent operator**. Free tiers can change and no one can guarantee zero charges; set hard account quotas where offered.
+- **Do not deploy this adapter if the agent already speaks A2A.** Publish that existing agent's card instead.
+- The central SearchA2A Actions remain indexing and tests only. They do not deploy agent adapters or invoke advertised endpoints. Optional adapter tests run in `.github/workflows/federation.yml`; deployment is deliberately external to the repository.
 
-## Rationale and invariants
+## Architecture and invariants
 
-The original SearchA2A per-search GitHub Action dispatch was removed because runner startup, callback polling and workflow contention made searches slow and expensive. Execution therefore must not reintroduce that path. SearchA2A's registry curation credentials must also remain separate from discovery ingestion and execution secrets: a discovered card remains untrusted metadata, never authority to invoke an agent.
+The original per-search GitHub Actions dispatch was removed because startup delays, callback polling and workflow contention made searches slow. The existing registry therefore remains immediate, read-only, and separate from execution. Discovery credentials cannot authorize execution, and a crawled card cannot select or trigger an upstream endpoint.
 
-Enforced by [`worker/index.mjs`](../worker/index.mjs) (`/api/v1/search` returns 410 and registry search is GET-only); [`federation/index.mjs`](../federation/index.mjs) (fixed owner endpoint, credential gate, bounded inputs, explicit supported method); and [`federation.yml`](../.github/workflows/federation.yml) (deployment gated behind `FEDERATION_ENABLED` and fork-scoped secrets). Tests: `node --test tests/federation.test.mjs`. Existing registry tests remain unchanged.
+Enforcement: [`worker/index.mjs`](../worker/index.mjs) keeps `/api/v1/search` retired and registry searches read-only; [`federation/index.mjs`](../federation/index.mjs) requires configured owner credentials, fixed HTTPS upstream, bounded bodies and explicit supported methods; [`.github/workflows/federation.yml`](../.github/workflows/federation.yml) performs tests only. Regression tests: `node --test tests/federation.test.mjs`.

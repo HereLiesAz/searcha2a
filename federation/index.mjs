@@ -1,7 +1,6 @@
-/** Fork-owned, synchronous A2A v1 JSON-RPC -> HTTPS webhook adapter.
+/** Independently deployed, synchronous A2A v1 JSON-RPC -> HTTPS webhook adapter.
  * Does not import or invoke the SearchA2A registry, and never runs inference.
  */
-import { agent } from './config.mjs';
 
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' };
 const REQUEST_LIMIT = 16_384;
@@ -24,18 +23,25 @@ function isPublicHttps(value, originOnly = false) {
 }
 
 function validConfig(env) {
-  return Boolean(env?.GATEWAY_API_KEY && env.GATEWAY_API_KEY.length >= 24 &&
-    isPublicHttps(env.UPSTREAM_URL) && isPublicHttps(env.PUBLIC_ORIGIN, true) &&
-    agent.name?.trim() && agent.description?.trim() && agent.version?.trim() &&
-    Array.isArray(agent.skills) && agent.skills.length > 0 && agent.skills.every(skill =>
-      skill.id && skill.name && skill.description && Array.isArray(skill.tags)));
+  if (!env?.GATEWAY_API_KEY || env.GATEWAY_API_KEY.length < 24 ||
+      !isPublicHttps(env.UPSTREAM_URL) || !isPublicHttps(env.PUBLIC_ORIGIN, true) ||
+      typeof env.AGENT_NAME !== 'string' || !env.AGENT_NAME.trim() ||
+      typeof env.AGENT_DESCRIPTION !== 'string' || !env.AGENT_DESCRIPTION.trim() ||
+      typeof env.AGENT_VERSION !== 'string' || !env.AGENT_VERSION.trim()) return false;
+  let skills;
+  try { skills = JSON.parse(env.AGENT_SKILLS_JSON); } catch { return false; }
+  return Array.isArray(skills) && skills.length > 0 && skills.length <= 40 &&
+    skills.every(skill => skill && typeof skill.id === 'string' && skill.id.trim() &&
+      typeof skill.name === 'string' && skill.name.trim() &&
+      typeof skill.description === 'string' && skill.description.trim() &&
+      Array.isArray(skill.tags) && skill.tags.every(tag => typeof tag === 'string'));
 }
 
 function agentCard(env) {
   return {
-    name: agent.name,
-    description: agent.description,
-    version: agent.version,
+    name: env.AGENT_NAME,
+    description: env.AGENT_DESCRIPTION,
+    version: env.AGENT_VERSION,
     supportedInterfaces: [{
       url: `${env.PUBLIC_ORIGIN.replace(/\/$/, '')}/a2a`,
       protocolBinding: 'JSONRPC',
@@ -44,7 +50,7 @@ function agentCard(env) {
     capabilities: { streaming: false, pushNotifications: false },
     defaultInputModes: ['text/plain'],
     defaultOutputModes: ['text/plain'],
-    skills: agent.skills,
+    skills: JSON.parse(env.AGENT_SKILLS_JSON),
     securitySchemes: { gatewayBearer: { httpAuthSecurityScheme: { scheme: 'Bearer' } } },
     securityRequirements: [{ gatewayBearer: [] }],
   };

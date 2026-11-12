@@ -7,6 +7,12 @@ const env = {
   UPSTREAM_URL: 'https://agent.example.com/invoke',
   GATEWAY_API_KEY: '0123456789abcdefghijklmnopqrstuvwxyz',
   UPSTREAM_BEARER_TOKEN: 'upstream-secret',
+  AGENT_NAME: 'Test Agent',
+  AGENT_DESCRIPTION: 'An owner-operated chat adapter.',
+  AGENT_VERSION: '2026.11',
+  AGENT_SKILLS_JSON: JSON.stringify([{
+    id: 'text-chat', name: 'Text conversation', description: 'Reply to text', tags: ['text'],
+  }]),
 };
 const validRpc = {
   jsonrpc: '2.0', id: 9, method: 'SendMessage',
@@ -39,6 +45,8 @@ test('published card advertises only implemented A2A v1 JSON-RPC and bearer secu
   assert.deepEqual(card.securityRequirements, [{ gatewayBearer: [] }]);
   assert.deepEqual(card.defaultInputModes, ['text/plain']);
   assert.deepEqual(card.defaultOutputModes, ['text/plain']);
+  assert.equal(card.name, 'Test Agent');
+  assert.equal(card.version, '2026.11');
   assert.equal(card.skills[0].id, 'text-chat');
   assert.ok(!JSON.stringify(card).includes('upstream-secret'));
   assert.ok(!JSON.stringify(card).includes('agent.example.com'));
@@ -143,4 +151,13 @@ test('plain-text upstream and absent context are supported', async () => {
   const body = await response.json();
   assert.equal(body.result.message.parts[0].text, 'Pong');
   assert.ok(body.result.message.contextId.length > 10);
+});
+
+test('operator metadata is required and never inferred from repository defaults', async () => {
+  for (const bad of [{ AGENT_NAME: '' }, { AGENT_SKILLS_JSON: '[broken' },
+      { AGENT_SKILLS_JSON: '[]' }, { AGENT_SKILLS_JSON: '[{"name":"missing-id"}]' }]) {
+    const response = await handle(new Request('https://owner.workers.dev/.well-known/agent-card.json'),
+      { ...env, ...bad });
+    assert.equal(response.status, 503);
+  }
 });

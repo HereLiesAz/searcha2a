@@ -37,4 +37,4 @@ See [API](docs/API.md), [Architecture](docs/ARCHITECTURE.md), and [Operations](d
 
 ## Bring your own compute
 
-Fork SearchA2A to expose an owner-operated text agent over **A2A 1.0 JSON-RPC**, with an automatically generated Agent Card. GitHub Actions deploys an **opt-in Worker into the fork owner's Cloudflare account**; the central registry never executes agents or pays for inference. See [Federated execution](docs/FEDERATION.md) for setup, security and limitations.
+Connect an owner-operated text agent through the optional **A2A 1.0 JSON-RPC adapter**, without forking this repository. Operators deploy the adapter to their own account with runtime configuration; GitHub Actions only tests and indexes. SearchA2A never executes agents or pays for their inference. See [Federated execution](docs/FEDERATION.md) for setup, security and limitations.

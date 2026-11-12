@@ -1,4 +1,4 @@
-name: Federated A2A gateway (fork-owned)
+name: Check optional A2A adapter
 
 on:
   push:
@@ -26,69 +26,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node --check federation/index.mjs
       - run: node --test tests/federation.test.mjs
-
-  deploy:
-    needs: test
-    # Never deploy from the central repo or a newly-created fork by default.
-    if: github.event_name != 'pull_request' && vars.FEDERATION_ENABLED == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    environment: federation
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Validate owner-controlled configuration
-        env:
-          FEDERATION_PUBLIC_ORIGIN: ${{ vars.FEDERATION_PUBLIC_ORIGIN }}
-          UPSTREAM_URL: ${{ secrets.FEDERATION_UPSTREAM_URL }}
-          GATEWAY_API_KEY: ${{ secrets.FEDERATION_GATEWAY_API_KEY }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          node - <<'NODE'
-          for (const key of ['FEDERATION_PUBLIC_ORIGIN', 'UPSTREAM_URL', 'GATEWAY_API_KEY',
-                             'CLOUDFLARE_API_TOKEN', 'CLOUDFLARE_ACCOUNT_ID']) {
-            if (!process.env[key]) throw new Error(`Required federation setting missing: ${key}`);
-          }
-          if (process.env.GATEWAY_API_KEY.length < 24) throw new Error('Gateway key must be >=24 chars');
-          NODE
-      - name: Deploy in fork owner's Cloudflare account
-        working-directory: federation
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          FEDERATION_PUBLIC_ORIGIN: ${{ vars.FEDERATION_PUBLIC_ORIGIN }}
-        run: |
-          set -euo pipefail
-          node -e 'require("fs").appendFileSync("wrangler.toml", "\n[vars]\nPUBLIC_ORIGIN = " + JSON.stringify(process.env.FEDERATION_PUBLIC_ORIGIN) + "\n")'
-          npx --yes wrangler@4 deploy
-      - name: Install owner-only runtime secrets
-        working-directory: federation
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          UPSTREAM_URL: ${{ secrets.FEDERATION_UPSTREAM_URL }}
-          GATEWAY_API_KEY: ${{ secrets.FEDERATION_GATEWAY_API_KEY }}
-          UPSTREAM_BEARER_TOKEN: ${{ secrets.FEDERATION_UPSTREAM_BEARER_TOKEN }}
-        run: |
-          set -euo pipefail
-          node -e 'process.stdout.write(JSON.stringify({
-            UPSTREAM_URL: process.env.UPSTREAM_URL,
-            GATEWAY_API_KEY: process.env.GATEWAY_API_KEY,
-            UPSTREAM_BEARER_TOKEN: process.env.UPSTREAM_BEARER_TOKEN || null,
-          }))' | npx --yes wrangler@4 secret bulk
-      - name: Verify published A2A card (no execution)
-        env:
-          FEDERATION_PUBLIC_ORIGIN: ${{ vars.FEDERATION_PUBLIC_ORIGIN }}
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --retry 4 --retry-delay 2 \
-            "${FEDERATION_PUBLIC_ORIGIN%/}/.well-known/agent-card.json" \
-            | jq -e '.supportedInterfaces[0].protocolBinding == "JSONRPC" and
-                .supportedInterfaces[0].protocolVersion == "1.0" and
-                .capabilities.streaming == false and
-                .securityRequirements[0].gatewayBearer != null' >/dev/null
