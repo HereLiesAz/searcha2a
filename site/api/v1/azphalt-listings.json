@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "source": "searcha2a",
-  "generated_at": "2026-11-12T15:08:44.261410+00:00",
+  "generated_at": "2026-11-12T15:13:04.867686+00:00",
   "count": 150,
   "listings": [
     {
@@ -1874,7 +1874,7 @@
         },
         {
           "name": "Watch",
-          "description": "Free email watch. Same limits as watch_free and POST /v1/alerts/subscribe: 1 covered host, email only, 30 days, up to 3 active watches per client. The confirmation email is the existing alerts email. No x402 payment.",
+          "description": "Free email watch. Same limits as watch_free and POST /v1/alerts/subscribe: 1 covered host, email only, 30 days, up to 3 active watches per client. Optional A2A push config on the message; pushes are change-only. The confirmation email is the existing alerts email. No x402 payment.",
           "tags": [
             "watch",
             "email"
@@ -1946,7 +1946,7 @@
       "security_schemes": [],
       "capabilities": {
         "streaming": false,
-        "pushNotifications": false
+        "pushNotifications": true
       },
       "verification": "card_read_only",
       "installable": false,
@@ -9842,6 +9842,61 @@
       "source": "searcha2a"
     },
     {
+      "id": "external.a2a.002ba424c6a577941a78",
+      "kind": "a2a-agent",
+      "name": "Tenantback CAM Audit Agent",
+      "description": "Audits a commercial landlord's CAM / operating expense reconciliation against the tenant's lease and returns every overcharge with the lease clause, the statement line and the arithmetic. Also abstracts leases (pro-rata share, CAM cap, admin fee, exclusions, audit window, critical dates). Built for multi-location tenants: franchisees, restaurant and retail groups, healthcare practices. Never contacts a landlord without the tenant's approval.",
+      "endpoint": "https://tenantback.com/a2a",
+      "source_url": "https://tenantback.com/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/002ba424c6a577941a78.json",
+      "skills": [
+        {
+          "name": "Audit a CAM reconciliation",
+          "description": "Send the lease (and amendments) plus the landlord's annual CAM / operating expense reconciliation as file parts (raw bytes or HTTPS URLs). Returns a task; poll GetTask. The completed task carries a JSON artifact with totals, findings, lease citations and calculations. Without an API key, include a data part {\"contactEmail\": \"...\", \"contactName\": \"...\"} for the business the documents belong to: a free workspace is opened for them and the artifact includes a sign-in link. Limits: 10 files, 20 MB e",
+          "tags": [
+            "cam",
+            "lease",
+            "audit",
+            "commercial real estate",
+            "tenant",
+            "overcharge",
+            "recovery"
+          ]
+        },
+        {
+          "name": "Abstract a commercial lease",
+          "description": "Send only a lease. The completed task returns key terms with verified citations: pro-rata share, CAM cap, admin fee, cost exclusions, audit window and critical dates. Same contact rules as the audit skill.",
+          "tags": [
+            "lease abstraction",
+            "critical dates",
+            "commercial lease"
+          ]
+        },
+        {
+          "name": "Portfolio status",
+          "description": "With an API key: money claimable, in dispute and recovered, open findings, and deadlines in the next 60 days. Send a data part {\"skill\": \"portfolio_status\"}.",
+          "tags": [
+            "portfolio",
+            "deadlines",
+            "recoveries"
+          ]
+        }
+      ],
+      "protocols": [
+        "JSONRPC"
+      ],
+      "security_schemes": [
+        "tenantbackApiKey"
+      ],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a"
+    },
+    {
       "id": "external.a2a.5331d9c11a24b7b9cec2",
       "kind": "a2a-agent",
       "name": "The Agent Forge",
@@ -10822,88 +10877,6 @@
       ],
       "security_schemes": [
         "creditsKey"
-      ],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a"
-    },
-    {
-      "id": "external.a2a.a33764d54c2e6e153839",
-      "kind": "a2a-agent",
-      "name": "方法论专家服务",
-      "description": "连锁品牌与餐饮运营方法论交付服务。基于 885 篇真实方法论知识库（11 篇旗舰专家包 + 874 篇专项方法论），覆盖品牌战略、餐饮门店运营、内容增长、办公效率、数据分析五大赛道，输出可直接落地的成品方案。",
-      "endpoint": "https://methodology-a2a-335986-8-1255559199.sh.run.tcloudbase.com/a2a",
-      "source_url": "https://methodology-a2a-335986-8-1255559199.sh.run.tcloudbase.com/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/a33764d54c2e6e153839.json",
-      "skills": [
-        {
-          "name": "品牌战略与年度营销",
-          "description": "连锁品牌定位、品牌架构、年度营销全案、危机公关与预算分配方法论。命中旗舰专家包（品牌策划顾问、年度营销 93KB）与品牌类方法论库。",
-          "tags": [
-            "brand_strategy",
-            "方法论",
-            "营销",
-            "连锁"
-          ]
-        },
-        {
-          "name": "餐饮门店运营与选址",
-          "description": "连锁餐饮门店经营诊断、选址模型、菜单工程、新店开业与保本线测算方法论。",
-          "tags": [
-            "restaurant_ops",
-            "方法论",
-            "营销",
-            "连锁"
-          ]
-        },
-        {
-          "name": "内容营销与增长投放",
-          "description": "小红书/抖音/视频号/公众号内容打法、爆款脚本、投流与私域增长方法论。",
-          "tags": [
-            "content_growth",
-            "方法论",
-            "营销",
-            "连锁"
-          ]
-        },
-        {
-          "name": "办公效率与职场交付",
-          "description": "PPT、汇报、合同、复盘、周报月报、招聘绩效等职场交付方法论。",
-          "tags": [
-            "office_efficiency",
-            "方法论",
-            "营销",
-            "连锁"
-          ]
-        },
-        {
-          "name": "数据分析与经营诊断",
-          "description": "AB 测试、漏斗、留存、ROI、异常检测、经营看板等数据分析方法论。",
-          "tags": [
-            "data_analysis",
-            "方法论",
-            "营销",
-            "连锁"
-          ]
-        },
-        {
-          "name": "通用方法论工具箱",
-          "description": "全库 885 篇方法论兜底检索，覆盖品牌/餐饮/内容/办公/数据全场景。",
-          "tags": [
-            "general_method",
-            "方法论",
-            "营销",
-            "连锁"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [
-        "bearerAuth"
       ],
       "capabilities": {
         "streaming": false,
