@@ -18,6 +18,7 @@ test('ANS claims require a valid explicitly matched hostname', () => {
   assert.equal(parseAnsClaim('ans://release.attacker.example', 'weather.example.com'), null);
   assert.equal(parseAnsClaim('ans://release.weather.example.com', ''), null);
   assert.equal(parseAnsClaim('ans://release.weather.local', 'weather.local'), null);
+  assert.equal(parseAnsClaim('ans://release.127.0.0.1', '127.0.0.1'), null);
   assert.equal(parseAnsClaim('ans://release.weather.example.com/path', 'weather.example.com'), null);
   assert.equal(parseAnsClaim('https://release.weather.example.com', 'weather.example.com'), null);
   assert.equal(normalizeAnsName('ans://1.0.0.weather.example.com'), 'ans://1.0.0.weather.example.com');
