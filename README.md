@@ -22,7 +22,7 @@ Publisher Agent Cards may supply `ansName` and `agentHost`, e.g.
 `ans://release-2026.11.weather.example.com`. Versions are preserved as
 provided, without SemVer rules or an inserted `v`.
 `GET /api/v1/ans/resolve?name=...` looks up stored name claims, never
-confusing them with proof of identity. DNA, certificates and signed
+confusing them with proof of identity. DNS, certificates and signed
 transparency evidence require a separate verifier.
 
 ## Interfaces
