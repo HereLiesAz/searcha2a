@@ -326,3 +326,23 @@ test('unified ANS capability directory ranks durable curated records without fet
     state.close();
   }
 });
+
+test('ANS resolution exposes duplicate publisher claims without selecting an identity', async () => {
+  const state = registryEnvironment();
+  try {
+    const name = 'ans://2026-Q4.agents.example.com';
+    await ingest(state.env, [
+      { ...weather, ans_name: name, ans_host: 'agents.example.com' },
+      { ...calendar, ans_name: name, ans_host: 'agents.example.com' },
+    ]);
+    const response = await handle(request('/api/v1/ans/resolve?name=' +
+      encodeURIComponent(name)), state.env);
+    assert.equal(response.status, 200);
+    const data = await response.json();
+    assert.equal(data.count, 2);
+    assert.equal(data.ambiguous, true);
+    assert.equal(data.truncated, false);
+    assert.equal(data.identity_verified, false);
+    assert.deepEqual(data.results.map(item => item.name), ['Calendar Helper', 'Weather Expert']);
+  } finally { state.close(); }
+});
