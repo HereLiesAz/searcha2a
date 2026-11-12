@@ -2,7 +2,7 @@
 
 Public discovery for A2A Agent Cards, powered by **GitHub Actions**.
 
-**Search button → Cloudflare request gateway → GitHub Actions search → result callback → searchable page and JSON API.** Every user query launches its own bounded workflow run. The Worker only authenticates and dispatches the work, then holds its results. A separate daily Actions workflow publishes a fresh static catalog to GitHub Pages.
+**Search button → Cloudflare request gateway → GitHub Actions search → result callback → searchable page and JSON API.** Every user query launches its own bounded workflow run. The Worker authenticates and dispatches the work. Each search's SQLite-backed Durable Object stores its strongly consistent result. A separate daily Actions workflow publishes a fresh static catalog to GitHub Pages.
 
 ## Interfaces
 
@@ -10,7 +10,7 @@ Public discovery for A2A Agent Cards, powered by **GitHub Actions**.
 |---|---|
 | GitHub Pages `https://searcha2a.azphalt.store/` | Search Agent Cards by natural-language keywords, skills and capabilities. |
 | `POST /api/v1/search` (Worker) | Trigger a new Actions run; JSON `{"query":"forecast","turnstile":"<challenge-token>"}`. Returns HTTP 202 with request ID. |
-| `GET /api/v1/results/{id}` (Worker) | Poll queued search and retrieve full results JSON. Results expire after 7 days. |
+| `GET /api/v1/results/{id}` (Worker) | Poll queued search and retrieve full results JSON. Results expire after 7 days via a storage alarm, without KV propagation delays. |
 | GitHub Pages `https://searcha2a.azphalt.store/api/v1/catalog.json` | Read-only, daily-generated public catalog snapshot; no token required. |
 | GitHub Pages `https://searcha2a.azphalt.store/api/v1/azphalt-listings.json` | Automatically generated, read-only external-agent listings for Azphalt Store. |
 
