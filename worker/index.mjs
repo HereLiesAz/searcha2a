@@ -1,5 +1,6 @@
 /** Scheduled-crawl registry search, legacy semantic directory and result mailboxes. */
 import { searchIndexedAgents } from './semantic.mjs';
+import { normalizeAnsName, parseAnsClaim } from './ans.mjs';
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -40,6 +41,10 @@ export class AgentRegistry {
     if (!columns.has('review_status')) {
       this.sql.exec("ALTER TABLE agents ADD COLUMN review_status TEXT NOT NULL DEFAULT 'unreviewed'");
     }
+    if (!columns.has('ans_name')) {
+      this.sql.exec('ALTER TABLE agents ADD COLUMN ans_name TEXT');
+    }
+    this.sql.exec('CREATE INDEX IF NOT EXISTS idx_agents_ans_name ON agents(ans_name)');
     this.sql.exec(`CREATE TABLE IF NOT EXISTS registry_audit (
       revision INTEGER PRIMARY KEY AUTOINCREMENT,
       agent_id TEXT NOT NULL,
@@ -81,15 +86,19 @@ export class AgentRegistry {
             skill && typeof skill.description === 'string' ? skill.description : '',
             ...(skill && Array.isArray(skill.tags) ? skill.tags.filter(tag => typeof tag === 'string') : []),
           ].join(' ')).join(' ').toLowerCase();
-          const search = [name, description, skills, agent.endpoint || ''].join(' ').toLowerCase();
+          const claim = parseAnsClaim(agent.ans_name, agent.ans_host);
+          const { ans, ans_name, ans_host, ...metadata } = agent;
+          const record = { ...metadata, ...(claim ? { ans: claim } : {}) };
+          const search = [name, description, skills, agent.endpoint || '', claim?.name || ''].join(' ').toLowerCase();
           this.sql.exec(`INSERT INTO agents
-            (id, name_search, skills_search, description_search, search_text, record, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            (id, name_search, skills_search, description_search, search_text, record, updated_at, ans_name)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
               name_search=excluded.name_search, skills_search=excluded.skills_search,
               description_search=excluded.description_search, search_text=excluded.search_text,
-              record=excluded.record, updated_at=excluded.updated_at`,
-              agent.id, name, skills, description, search, JSON.stringify(agent), updatedAt);
+              record=excluded.record, updated_at=excluded.updated_at, ans_name=excluded.ans_name`,
+              agent.id, name, skills, description, search, JSON.stringify(record), updatedAt,
+              claim ? normalizeAnsName(claim.name) : null);
         }
         if (entries.length) this.sql.exec(`INSERT INTO registry_meta (key, value) VALUES ('last_ingested_at', ?)
           ON CONFLICT(key) DO UPDATE SET value=excluded.value`, updatedAt);
@@ -179,6 +188,19 @@ export class AgentRegistry {
       });
     }
 
+    if (request.method === 'GET' && path === '/ans') {
+      const raw = url.searchParams.get('name');
+      const name = normalizeAnsName(raw);
+      if (!name) return respond({ error: 'Invalid ANS name' }, 400);
+      const rows = this.sql.exec(`SELECT record, review_status FROM agents
+        WHERE ans_name=? AND listing_state='active' AND review_status != 'rejected'
+        ORDER BY name_search ASC LIMIT 21`, name).toArray();
+      return rows.length
+        ? respond({ name: raw, count: rows.length, results: rows.map(row => ({
+            ...JSON.parse(row.record), curation_status: row.review_status,
+          })), identity_verified: false })
+        : respond({ error: 'ANS name not found in registry' }, 404);
+    }
     const idMatch = path.match(/^\/agent\/([0-9a-f]{20})$/);
     if (request.method === 'GET' && idMatch) {
       const record = this.sql.exec(`SELECT record, review_status FROM agents
@@ -300,7 +322,8 @@ async function handle(request, env) {
   }
   // Read-only registry endpoints are public APIs, including to other web apps.
   const isPublic = url.pathname === '/api/v1/agents' ||
-    url.pathname.startsWith('/api/v1/agents/');
+    url.pathname.startsWith('/api/v1/agents/') ||
+    url.pathname === '/api/v1/ans/resolve';
   const publicReply = (body, status) => {
     const result = respond(body, status);
     result.headers.set('Access-Control-Allow-Origin', '*');
@@ -322,7 +345,9 @@ async function handle(request, env) {
     if (!env.REGISTRY) return publicReply({ error: 'Registry not configured' }, 503);
     const path = url.pathname === '/api/v1/agents'
       ? '/search' + url.search
-      : '/agent/' + url.pathname.slice('/api/v1/agents/'.length);
+      : url.pathname === '/api/v1/ans/resolve'
+        ? '/ans' + url.search
+        : '/agent/' + url.pathname.slice('/api/v1/agents/'.length);
     const result = await registryStub(env).fetch(new Request('https://registry.internal' + path));
     return publicReply(await result.json(), result.status);
   }
