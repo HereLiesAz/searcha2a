@@ -17,6 +17,19 @@ class ANSDiscoveryTests(unittest.TestCase):
         self.assertEqual(result["ans_host"], "weather.example.com")
         self.assertEqual(result["verification"], "card_read_only")
 
+    def test_maximum_length_ans_claim_is_not_truncated(self):
+        version = ".".join(["a" * 63, "b" * 63, "c" * 63, "d" * 49])
+        name = "ans://" + version + ".example.com"
+        self.assertEqual(len(name), 259)
+        card = {"name": "Weather", "url": "https://example.com/a2a",
+                "skills": [{"name": "Forecast"}], "agentHost": "example.com",
+                "ansName": name}
+        normalized = normalize_card(card, "https://example.com/card.json", "test")
+        self.assertEqual(normalized["ans_name"], name)
+        card["ansName"] = name + "e"
+        normalized = normalize_card(card, "https://example.com/card.json", "test")
+        self.assertNotIn("ans_name", normalized)
+
     def test_claim_without_host_is_not_inferred_from_endpoint(self):
         card = {"name": "Weather", "url": "https://weather.example.com/a2a",
                 "skills": [{"name": "forecast"}], "ansName": "ans://3.weather.example.com"}
