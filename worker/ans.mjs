@@ -16,7 +16,7 @@ export function normalizeAnsName(raw) {
 
 export function parseAnsClaim(rawName, rawHost) {
   const key = normalizeAnsName(rawName);
-  if (!key || typeof rawHost !== 'string' || rawHost.length > 237) return null;
+  if (!key || typeof rawHost !== 'string' || rawHost.length > 251) return null;
   const host = rawHost.toLowerCase();
   const labels = host.split('.');
   if (labels.length < 2 || labels.some(label => !LABEL.test(label)) ||
