@@ -20,7 +20,7 @@ export function parseAnsClaim(rawName, rawHost) {
   const host = rawHost.toLowerCase();
   const labels = host.split('.');
   if (labels.length < 2 || labels.some(label => !LABEL.test(label)) ||
-      /^\\d+$/.test(labels.at(-1)) ||
+      /^\d+$/.test(labels.at(-1)) ||
       host.endsWith('.local') || host.endsWith('.internal') || host.endsWith('.localhost')) return null;
   const suffix = '.' + host;
   if (!key.slice(6).endsWith(suffix)) return null;
