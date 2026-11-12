@@ -70,6 +70,7 @@ test('semantic embeddings rank non-keyword matches without connecting or dispatc
   assert.equal(response.headers.get('Access-Control-Allow-Origin'), '*');
   const result = await response.json();
   assert.equal(result.match_mode, 'semantic');
+  assert.equal(result.candidate_count, 2);
   assert.equal(result.results[0].name, 'Weather Forecaster');
   assert.equal(result.results.length, 1);
   assert.equal(result.verification, 'card_read_only');
