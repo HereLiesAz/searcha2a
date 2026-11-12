@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlsplit
+import ipaddress
 
 
 PROOF_PATH = "/.well-known/azphalt-a2a-verification.json"
@@ -37,6 +38,15 @@ def _public_origin(value: str):
             return None
         if parsed.username or parsed.password or parsed.query or parsed.fragment:
             return None
+        host = parsed.hostname.lower()
+        if host == "localhost" or host.endswith((".localhost", ".local", ".internal")):
+            return None
+        try:
+            if not ipaddress.ip_address(host).is_global:
+                return None
+        except ValueError:
+            if "." not in host:
+                return None
         return "https://" + parsed.hostname.lower()
     except ValueError:
         return None
@@ -70,7 +80,7 @@ def verify_publisher(record: dict, card: dict, *, fetch, now: datetime | None = 
     proof_url = origin + PROOF_PATH
     try:
         proof = fetch(proof_url)
-    except (OSError, ValueError, TypeError, KeyError):
+    except Exception:  # Public proof can disappear, exceed limits, or become malformed.
         return None
     if not isinstance(proof, dict) or proof.get("schema") != 1 or not (
         proof.get("listing") == "azphalt-external-a2a"
