@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { handle } from '../worker/index.mjs';
-import { keywordScore, cosineSimilarity, searchIndexedAgents } from '../worker/semantic.mjs';
+import { keywordScore, cosineSimilarity, searchIndexedAgents, readPublishedAgents } from '../worker/semantic.mjs';
 
 const weather = {
   kind: 'a2a-agent', installable: false, verification: 'card_read_only',
@@ -126,6 +126,26 @@ test('reject malformed catalog and private or credential-bearing Agent Cards', a
     searchIndexedAgents('weather', {}, async () => new Response('{"agents":[]}')),
     /Unexpected catalog schema/,
   );
+});
+
+test('catalog read has a hard byte limit even without a Content-Length header', async () => {
+  const oversized = new Uint8Array(900_001);
+  oversized.fill(65);
+  const factory = async () => new Response(new ReadableStream({
+    start(controller) {
+      controller.enqueue(oversized);
+      controller.close();
+    },
+  }));
+  await assert.rejects(readPublishedAgents(factory), /Catalog too large/);
+});
+
+test('unexpected skill metadata cannot crash catalog matching', async () => {
+  const malformed = { ...weather, skills: [{ name: 'Meteorology', tags: { key: 'not-an-array' } }] };
+  const catalog = JSON.stringify({ schema: 1, source: 'searcha2a', listings: [malformed] });
+  const result = await searchIndexedAgents('weather', {}, async () => new Response(catalog));
+  assert.equal(result.results[0].name, 'Weather Forecaster');
+  assert.equal(result.match_mode, 'keyword-fallback');
 });
 
 test('vector similarity is independent of keyword fallback', () => {
