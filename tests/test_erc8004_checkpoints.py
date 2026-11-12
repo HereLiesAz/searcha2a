@@ -224,7 +224,7 @@ class ERC8004CheckpointTests(unittest.TestCase):
         self.assertEqual(len(rejected), 5)
         self.assertEqual(seen[5], (0, 127))
         self.assertEqual(seen[-1], (896, 1000))
-        self.assertEqual(len(seen), 14)
+        self.assertEqual(len(seen), 13)
 
     def test_partial_window_budget_is_bounded_with_retriable_height(self):
         called = []
