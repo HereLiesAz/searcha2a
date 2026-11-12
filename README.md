@@ -34,3 +34,7 @@ transparency evidence require a separate verifier.
 The legacy `POST /api/v1/search` dispatch route now returns **410 Gone**. Existing result UUIDs remain readable until their seven-day retention expires. The separate `/api/v1/directory?q=...` semantic API remains available for clients such as Aive. It ranks candidates from the persistent curated registry with optional Workers AI; it also never triggers a crawl.
 
 See [API](docs/API.md), [Architecture](docs/ARCHITECTURE.md), and [Operations](docs/OPERATIONS.md) for protocol, security, and deployment details.
+
+## Bring your own compute
+
+Connect an owner-operated text agent through the optional **A2A 1.0 JSON-RPC adapter**, without forking this repository. Operators deploy the adapter to their own account with runtime configuration; GitHub Actions only tests and indexes. SearchA2A never executes agents or pays for their inference. See [Federated execution](docs/FEDERATION.md) for setup, security and limitations.
