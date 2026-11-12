@@ -222,17 +222,17 @@ export class AgentRegistry {
         LIMIT 101 OFFSET ?`, offset).toArray();
       const page = rows.slice(0, 100);
       const entries = page.map(row => JSON.parse(row.record));
-      const missing = page.flatMap((row, i) => {
-        const text = descriptionOf(entries[i]);
-        return row.vector && row.model === EMBEDDING_MODEL && row.input_text === text
-          ? [] : [{ id: row.id, text }];
+      const cached = page.map((row, i) => {
+        if (row.model !== EMBEDDING_MODEL || row.input_text !== descriptionOf(entries[i])) return null;
+        try {
+          const vector = JSON.parse(row.vector);
+          return validEmbeddings([vector], 1) ? vector : null;
+        } catch { return null; }
       });
+      const missing = page.flatMap((row, i) => cached[i] === null
+        ? [{ id: row.id, text: descriptionOf(entries[i]) }] : []);
       const indexed = await this.indexMissingEmbeddings(missing);
-      const vectors = page.map((row, i) => {
-        const text = descriptionOf(entries[i]);
-        return row.model === EMBEDDING_MODEL && row.input_text === text
-          ? JSON.parse(row.vector) : indexed.get(row.id) || null;
-      });
+      const vectors = cached.map((vector, i) => vector || indexed.get(page[i].id) || null);
       const meta = this.sql.exec(
         "SELECT value FROM registry_meta WHERE key='last_ingested_at'").toArray()[0];
       return respond({ entries, vectors, next_offset: rows.length > 100 ? offset + 100 : null,
