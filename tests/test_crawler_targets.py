@@ -150,5 +150,76 @@ class CrawlerTargetsTests(unittest.TestCase):
         self.assertEqual(calls, [seed])
 
 
+    def test_rotating_feed_window_wraps_without_repeating_entries(self):
+        rows = [{"name": str(i)} for i in range(7)]
+        self.assertEqual([x["name"] for x in discover.extract_registry_items(
+            rows, offset=5, limit=3)], ["5", "6", "0"])
+        self.assertEqual([x["name"] for x in discover.extract_registry_items(
+            {"data": {"agents": rows}}, offset=6, limit=2)], ["6", "0"])
+        self.assertEqual(len(discover.extract_registry_items(rows, offset=6, limit=100)), 7)
+
+    def test_rotating_bulk_registry_accumulates_new_cards_without_query_execution(self):
+        base = "https://registry.example.com/agents.json"
+        agents = [{**CARD, "name": f"Agent {i:03d}",
+                   "url": f"https://agent{i}.example.com/a2a"}
+                  for i in range(200)]
+        visited = []
+        def get(url):
+            visited.append(url)
+            self.assertEqual(url, base)
+            return {"agents": agents}
+        result = discover.discover("", {
+            "registry_urls": [base],
+            "card_urls": [],
+            "rotate_registry_feeds": True,
+            "rotation_index": 1,
+        }, fetch=get, github=lambda *_: ([], []))
+        self.assertEqual(result["count"], 150)
+        names = {row["name"] for row in result["results"]}
+        self.assertIn("Agent 150", names)
+        self.assertIn("Agent 000", names)
+        self.assertNotIn("Agent 149", names)
+        self.assertEqual(visited, [base])
+
+    def test_rotating_paginated_api_uses_total_and_never_guesses_links(self):
+        from urllib.parse import parse_qs, urlsplit
+        offsets = []
+        def get(url):
+            if "/api/agents?" in url:
+                offset = int(parse_qs(urlsplit(url).query)["offset"][0])
+                offsets.append(offset)
+                return {"total": 690, "agents": [
+                    {"wellKnownURI": f"https://agent{i}.example.com/card"}
+                    for i in range(offset, min(offset + 30, 690))
+                ]}
+            index = int(url.split("agent", 1)[1].split(".", 1)[0])
+            return {**CARD, "url": f"https://agent{index}.example.com/a2a"}
+        result = discover.discover("", {
+            "registry_urls": [], "card_urls": [],
+            "paginated_registry_urls": ["https://registry.example.com/api/agents"],
+            "rotate_paginated_registry": True, "rotation_index": 1,
+        }, fetch=get, github=lambda *_: ([], []))
+        self.assertEqual(offsets, [0, 150, 180, 210, 240, 270])
+        self.assertEqual(result["count"], 150)
+        self.assertTrue(all(row["source_url"].startswith("https://agent")
+                            for row in result["results"]))
+
+    def test_unreported_total_falls_back_to_existing_first_page_behavior(self):
+        offsets = []
+        def get(url):
+            from urllib.parse import parse_qs, urlsplit
+            offset = int(parse_qs(urlsplit(url).query)["offset"][0])
+            offsets.append(offset)
+            return {"agents": [{"wellKnownURI": "https://agent.example.com/card"}]}
+        result = discover.discover("", {
+            "registry_urls": [], "card_urls": [],
+            "paginated_registry_urls": ["https://registry.example.com/api/agents"],
+            "rotate_paginated_registry": True, "rotation_index": 52,
+        }, fetch=get, github=lambda *_: ([], []))
+        self.assertEqual(offsets, [0])
+        self.assertEqual(result["count"], 0)  # Card lookup unavailable and ignored.
+
+
+
 if __name__ == "__main__":
     unittest.main()
