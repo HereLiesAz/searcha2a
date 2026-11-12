@@ -55,5 +55,15 @@
   "assistant_ids": {},
   "rotate_registry_feeds": true,
   "rotate_paginated_registry": true,
-  "webfinger_accounts": {}
+  "webfinger_accounts": {},
+  "dns_domains": [
+    "www.cloudflare.com",
+    "allagents.app",
+    "agentgalaxy.dev",
+    "aiagencies.fyi",
+    "mcpdirectory.fyi",
+    "agentsandboxes.fyi",
+    "robotaxis.fyi",
+    "doulas.fyi"
+  ]
 }
