@@ -157,17 +157,50 @@ class ERC8004CheckpointTests(unittest.TestCase):
         self.assertEqual(state["erc8004"], {})
 
     def test_invalid_cursor_stops_before_rpc(self):
+        # Precomputed independently for the fixed RPC locator and contract.
         state = {"version": 1, "erc8004": {
-            "0" * 32: {"next_block": "100", "window": 10},
+            "4d50994a8bbdcb94798d8d08e05fe4ba":
+                {"next_block": "100", "window": 10},
         }}
-        # The source key must match before the invalid value is consulted.
-        key = discover.hashlib.sha256(
-            (RPC + "|" + CONTRACT.lower()).encode()).hexdigest()[:32]
-        state["erc8004"] = {key: {"next_block": "100", "window": 10}}
         with self.assertRaises(discover.DiscoveryError):
             discover.erc8004_checkpointed_sources(
                 config(), state,
                 post=lambda *_: (_ for _ in ()).throw(AssertionError()))
+
+    def test_exactly_full_log_budget_does_not_misclassify_complete_range(self):
+        seen = []
+        def rpc(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x1"}
+            seen.append((int(params[0]["fromBlock"], 16),
+                         int(params[0]["toBlock"], 16)))
+            return {"result": [EVENT] * 120 if len(seen) == 1 else []}
+        state = {"version": 1, "erc8004": {}}
+        cards, warnings = discover.erc8004_checkpointed_sources(
+            config(start_block=0, window_blocks=2), state, post=rpc)
+        self.assertEqual(seen, [(0, 1), (0, 0), (1, 1)])
+        self.assertEqual(cursor(state)["next_block"], 2)
+        self.assertEqual(cards, [])
+        self.assertEqual(warnings, [])
+
+    def test_provider_block_range_error_shrinks_then_retries(self):
+        seen = []
+        def rpc(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x8"}
+            begin = int(params[0]["fromBlock"], 16)
+            end = int(params[0]["toBlock"], 16)
+            seen.append((begin, end))
+            if end - begin >= 8:
+                raise discover.DiscoveryError("provider refuses wide range")
+            return {"result": []}
+        state = {"version": 1, "erc8004": {}}
+        cards, warnings = discover.erc8004_checkpointed_sources(
+            config(start_block=0, window_blocks=16), state, post=rpc)
+        self.assertEqual(seen, [(0, 8), (0, 7), (8, 8)])
+        self.assertEqual(cursor(state)["next_block"], 9)
+        self.assertEqual(cards, [])
+        self.assertEqual(warnings, [])
 
     def test_partial_window_budget_is_bounded_with_retriable_height(self):
         called = []
