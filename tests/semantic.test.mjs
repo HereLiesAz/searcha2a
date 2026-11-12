@@ -24,12 +24,13 @@ const feed = JSON.stringify({
 const request = (query, options = {}) =>
   new Request('https://searcha2a-api.example.org/api/v1/directory?q=' + encodeURIComponent(query), options);
 
-function registryFixture(entries = [finance, weather]) {
+function registryFixture(entries = [finance, weather], vectors = null) {
   return {
     idFromName: name => name,
     get: () => ({
       fetch: async () => new Response(JSON.stringify({
-        entries, generated_at: '2026-11-12T11:12:20Z', truncated: false,
+        entries, ...(vectors ? { vectors } : {}),
+        generated_at: '2026-11-12T11:12:20Z', truncated: false,
       })),
     }),
   };
@@ -50,15 +51,15 @@ test('semantic embeddings rank non-keyword matches without connecting or dispatc
   const calls = withCatalog(t);
   const invoked = [];
   const env = {
-    REGISTRY: registryFixture(),
+    REGISTRY: registryFixture([finance, weather], [[0, 1], [1, 0]]),
     SEARCH_RATE_LIMITER: { limit: async ({ key }) => {
       assert.equal(key, 'directory:192.0.2.4');
       return { success: true };
     } },
     AI: { run: async (model, input) => {
       invoked.push({ model, input });
-      assert.equal(input.text.length, 3);
-      return { data: [[1, 0], [0, 1], [1, 0]] };
+      assert.equal(input.text.length, 1);
+      return { data: [[1, 0]] };
     } },
   };
   // No overlap: "sky" and "outlook" never appear in either card's name or skills.
@@ -89,6 +90,22 @@ test('missing embedding entitlement falls back to explicitly labeled keyword mat
   assert.equal(response.status, 200);
   assert.equal(result.match_mode, 'keyword-fallback');
   assert.deepEqual(result.results.map(x => x.name), ['Weather Forecaster']);
+});
+
+test('cached vectors require no per-agent inference and fail closed to lexical matching', async () => {
+  const inputCalls = [];
+  const env = { AI: { run: async (_, input) => {
+    inputCalls.push(input.text);
+    return { data: [[1, 0]] };
+  } } };
+  const cached = await rankAgentCandidates('rain', env, [finance, weather], null,
+    [[0, 1], [1, 0]]);
+  assert.equal(cached.match_mode, 'semantic');
+  assert.deepEqual(inputCalls.map(call => call.length), [1]);
+  const missing = await rankAgentCandidates('rain', env, [finance, weather], null,
+    [[0, 1], null]);
+  assert.equal(missing.match_mode, 'keyword-fallback');
+  assert.deepEqual(inputCalls.map(call => call.length), [1]);
 });
 
 test('invalid embedding response is not advertised as semantic ranking', async () => {
