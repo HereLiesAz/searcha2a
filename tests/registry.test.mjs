@@ -374,5 +374,32 @@ test('partial A2A cards are indexed with empty skills without accepting generic 
     assert.equal((await ingest(state.env, [{ ...partial, id: 'ffffffffffffffffffff',
       endpoint: '' }])).status, 400);
     assert.equal((await (await lookup(state.env)).json()).total, 1);
+test('ANS collision pagination exposes every claimant in deterministic order', async () => {
+  const state = registryEnvironment();
+  try {
+    const name = 'ans://nightly.agent.example.org';
+    const claimants = Array.from({ length: 23 }, (_, i) => ({
+      ...card(i.toString(16).padStart(20, '0'),
+        'Claim ' + i.toString().padStart(2, '0'), 'Forecast'),
+      ans_name: name, ans_host: 'agent.example.org',
+    }));
+    assert.equal((await ingest(state.env, claimants)).status, 200);
+    const url = '/api/v1/ans/resolve?name=' + encodeURIComponent(name);
+    const first = await (await handle(request(url), state.env)).json();
+    assert.equal(first.count, 23);
+    assert.equal(first.results.length, 20);
+    assert.equal(first.offset, 0);
+    assert.equal(first.limit, 20);
+    assert.equal(first.truncated, true);
+    assert.equal(first.identity_verified, false);
+    assert.equal(first.ambiguous, true);
+    const last = await (await handle(request(url + '&offset=20&limit=3'), state.env)).json();
+    assert.equal(last.count, 23);
+    assert.equal(last.results.length, 3);
+    assert.equal(last.truncated, false);
+    assert.deepEqual(last.results.map(a => a.name), ['Claim 20', 'Claim 21', 'Claim 22']);
+    assert.equal((await handle(request(url + '&limit=21'), state.env)).status, 400);
+    assert.equal((await handle(request(url + '&offset=-1'), state.env)).status, 400);
+    assert.equal((await handle(request(url + '&offset=100001'), state.env)).status, 400);
   } finally { state.close(); }
 });

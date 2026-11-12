@@ -91,7 +91,7 @@ DNS, certificate, transparency-log, or live endpoint requests. On a match,
 returns `{"name":"...","count":1,"results":[...],"identity_verified":false}`.
 Each matching record contains `ans: {name,agent_host,version,verification:"unverified"}`.
 It returns 404 for unknown or suppressed names, and 400 for invalid syntax.
-Multiple claimed matches are returned without asserting which is authoritative. The response includes `count` (all matches), `ambiguous` (more than one claimant), and at most 20 `results` with `truncated` when the name has more claimants.
+Multiple claimed matches are returned without asserting which is authoritative. The response includes `count` (all matches), `ambiguous` (more than one claimant), and bounded `results`. Optional `limit` (1–20, default 20) and `offset` (0–100000, default 0) allow deterministic pagination through collisions. `truncated` is true when more matches follow this page. Invalid pagination returns 400.
 
 A future independent DNS identity verifier must check DNSSEC, certificates,
 transparency proofs, trust anchors and freshness before any identity claim
