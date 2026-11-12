@@ -202,6 +202,16 @@ def _existing_manifest(folder: Path):
         raise ValueError("Refusing unrecognized setup payload: " + str(folder))
     if any((setup / p).is_symlink() for p in ("agent.json", "setup.sh")):
         raise ValueError("Refusing symlink setup payload: " + str(folder))
+    if (folder / "LICENSE").read_text(encoding="utf-8") != LICENSE:
+        raise ValueError("Automated package license was modified: " + str(folder))
+    if (setup / "setup.sh").read_text(encoding="utf-8") != SETUP_SCRIPT:
+        raise ValueError("Automated setup script was modified: " + str(folder))
+    try:
+        signed_data = json.loads((setup / "agent.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        raise ValueError("Automated connection metadata is invalid: " + str(folder))
+    if signed_data != _connection(manifest):
+        raise ValueError("Automated connection metadata was modified: " + str(folder))
     return manifest
 
 
