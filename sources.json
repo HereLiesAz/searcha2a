@@ -5,5 +5,8 @@
   ],
   "registry_urls": [
     "https://agora.sovont.com/v1/agents"
+  ],
+  "paginated_registry_urls": [
+    "https://a2aregistry.org/api/agents"
   ]
 }

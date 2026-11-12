@@ -20,6 +20,10 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_DOCUMENT = 524288
 MAX_CANDIDATES = 90
 MAX_RESULTS = 70
+# Paginated registries are explicit, trusted configuration, never crawler-discovered links.
+MAX_REGISTRY_PAGES = 2
+REGISTRY_PAGE_SIZE = 30
+MAX_REGISTRY_CARD_URLS = 60
 USER_AGENT = "SearchA2A/0.1 (+https://github.com/HereLiesAz/searcha2a)"
 
 
@@ -225,7 +229,6 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     candidates = candidate_sources(config)
     code_urls, search_warnings = github(query, token)
     warnings.extend(search_warnings)
-    candidates.extend(code_urls)
     # Registry URLs are explicit curated seeds, not arbitrary user-provided URLs.
     for url in config.get("registry_urls", [])[:10]:
         try:
@@ -243,6 +246,41 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
                         candidates.append((card_url, "registry"))
         except DiscoveryError:
             warnings.append(f"Registry unavailable: {urllib.parse.urlsplit(url).hostname}")
+    # Public A2A registries expose Agent Card URLs through a paginated API.
+    # Only request URLs derived from configured HTTPS registry origins, never
+    # untrusted pagination links or an agent endpoint. Every card is fetched
+    # and normalized through the same safety gate as the existing sources.
+    for url in config.get("paginated_registry_urls", [])[:2]:
+        if not isinstance(url, str):
+            continue
+        seen = 0
+        for page in range(MAX_REGISTRY_PAGES):
+            if seen >= MAX_REGISTRY_CARD_URLS:
+                break
+            params = {"limit": REGISTRY_PAGE_SIZE, "offset": page * REGISTRY_PAGE_SIZE}
+            if query:
+                params["search"] = query
+            separator = "&" if urllib.parse.urlsplit(url).query else "?"
+            page_url = url + separator + urllib.parse.urlencode(params)
+            try:
+                records = extract_registry_items(fetch(page_url))
+            except (DiscoveryError, ValueError, TypeError):
+                warnings.append(f"Registry unavailable: {urllib.parse.urlsplit(url).hostname}")
+                break
+            for record in records[:REGISTRY_PAGE_SIZE]:
+                if not isinstance(record, dict):
+                    continue
+                card_url = record.get("wellKnownURI")
+                if isinstance(card_url, str) and card_url.startswith("https://"):
+                    candidates.append((card_url, "registry"))
+                    seen += 1
+                    if seen >= MAX_REGISTRY_CARD_URLS:
+                        break
+            if len(records) < REGISTRY_PAGE_SIZE:
+                break
+    # Reserve remaining candidate slots for GitHub. Repositories cannot
+    # displace explicit, read-only card sources when search returns many hits.
+    candidates.extend(code_urls)
     # Fetch cards concurrently so a handful of slow hosts cannot stall the
     # whole interactive search. The list, worker count and per-fetch timeout
     # are bounded; cards are only read, never invoked.
