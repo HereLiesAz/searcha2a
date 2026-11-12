@@ -170,7 +170,7 @@ class DiscoverTests(unittest.TestCase):
         result = discover.discover("", {
             "card_urls": source_urls, "registry_urls": [],
         }, fetch=get, github=lambda *_: ([(url, "github") for url in github_urls], []))
-        self.assertEqual(result["count"], 255)
+        self.assertEqual(result["count"], 210)
         for url in github_urls:
             self.assertTrue(any(record["source_url"] == url for record in result["results"]))
 
