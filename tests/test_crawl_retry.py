@@ -134,7 +134,7 @@ class CrawlRetryTests(unittest.TestCase):
         self.assertEqual(state["pending"][0]["failures"], 8)
         self.assertEqual(state["pending"][0]["retry_day"], 1039)
         with self.assertRaises(retry.RetryStateError):
-            retry.record_outcomes(state, [], 1009)
+            retry.record_outcomes(state, [], 1008)
 
     def test_load_missing_file_defaults_to_empty_state(self):
         with patch.object(retry.crawl_checkpoint, "github_api", return_value=None) as api:
