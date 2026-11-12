@@ -29,11 +29,17 @@ MAX_DOMAIN_SEEDS = 12
 MAX_MANIFEST_ITEMS = 150
 MAX_FOLLOWUP_CARD_URLS = 100
 MAX_RAW_CARD_BYTES = 4096
+MAX_PRIVATE_CATALOGS = 5
+MAX_INLINE_NESTED_CATALOGS = 8
+MAX_WEBFINGER_ACCOUNTS = 8
+A2A_CATALOG_TYPES = {'application/a2a-agent-card+json', 'application/a2a+json'}
 # Paths are literal; unknown assistant identifiers are never enumerated.
 PROBE_PATHS = (
     '/.well-known/agent-card.json', '/.well-known/agent.json',
     '/.well-known/agents.json', '/agents.json', '/agent.json',
     '/a2a/.well-known/agent.json', '/.wellknown/agent-card.json',
+    '/agent-card.json', '/.well-known/ai-catalog.json',
+    '/.well-known/ard.json', '/.well-known/agent-registration.json',
 )
 # Paginated registries are explicit, trusted configuration, never crawler-discovered links.
 MAX_REGISTRY_PAGES = 5
@@ -82,13 +88,22 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 OPENER = urllib.request.build_opener(NoRedirect(), urllib.request.ProxyHandler({}))
 
 
-def fetch_json(url: str, token: str = "", *, max_bytes: int = MAX_DOCUMENT):
+def fetch_json(url: str, token: str = "", *, max_bytes: int = MAX_DOCUMENT, private_auth=None):
     """Fetch a bounded JSON document. Larger limits are only for fixed aggregate feeds."""
     if max_bytes < 1 or max_bytes > MAX_CATALOG_DOCUMENT:
         raise DiscoveryError("Invalid document size bound")
     require_public_https(url)
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
-    if token and urllib.parse.urlsplit(url).hostname == "api.github.com":
+    if private_auth is not None:
+        # Credentials are used for precisely this configured URL. Redirects
+        # are disabled and no authenticated follow-up/spider requests occur.
+        scheme, secret = private_auth
+        if (scheme not in ("bearer", "api_key") or not isinstance(secret, str)
+                or not secret or len(secret) > 4096 or "\r" in secret or "\n" in secret):
+            raise DiscoveryError("Invalid authorized catalog credential")
+        headers["Authorization" if scheme == "bearer" else "X-API-Key"] = (
+            "Bearer " + secret if scheme == "bearer" else secret)
+    elif token and urllib.parse.urlsplit(url).hostname == "api.github.com":
         headers["Authorization"] = f"Bearer {token}"
         headers["X-GitHub-Api-Version"] = "2022-11-28"
     try:
@@ -247,12 +262,75 @@ def card_references(item, source_url: str):
     return list(dict.fromkeys(urls))
 
 
-def unpack_cards(document, source_url: str, source: str, *, offset: int = 0):
-    """Read a single card or bounded multi-agent manifest; collect one-hop card links."""
+def unpack_cards(document, source_url: str, source: str, *, offset: int = 0,
+                 inline_depth: int = 0):
+    """Index A2A cards from manifests, typed catalogs, WebFinger, and ERC-8004.
+
+    Typed non-A2A artifacts must never be misclassified as cards. Nested inline
+    catalogs are strictly bounded; external document traversal remains one hop.
+    """
     direct = normalize_card(document, source_url, source)
     if direct:
         return [direct], []
     cards, links = [], []
+    if isinstance(document, dict):
+        # AI Catalog 1.0 is typed. Only A2A entries, not MCP/model/skill
+        # artifacts, contribute Agent Cards or card URLs.
+        entries = document.get("entries")
+        if isinstance(entries, list):
+            nested = 0
+            for entry in entries[:MAX_MANIFEST_ITEMS]:
+                if not isinstance(entry, dict):
+                    continue
+                media = clean_text(entry.get("mediaType"), 100).lower()
+                if media in A2A_CATALOG_TYPES:
+                    embedded = entry.get("data")
+                    card = normalize_card(embedded, source_url, source)
+                    if card:
+                        cards.append(card)
+                    ref = public_card_link(entry.get("url"), source_url,
+                                           explicit_card=True)
+                    if ref:
+                        links.append(ref)
+                elif media == "application/ai-catalog+json":
+                    ref = public_card_link(entry.get("url"), source_url,
+                                           explicit_card=True)
+                    if ref:
+                        links.append(ref)
+                    elif (inline_depth == 0 and nested < MAX_INLINE_NESTED_CATALOGS
+                          and isinstance(entry.get("data"), dict)):
+                        nested += 1
+                        child_cards, child_links = unpack_cards(
+                            entry["data"], source_url, source, inline_depth=1)
+                        cards.extend(child_cards)
+                        links.extend(child_links)
+
+        # Only operator-configured WebFinger account queries are sent. A JRD
+        # may advertise cards via self links; arbitrary hrefs are ignored.
+        wf_links = document.get("links")
+        if isinstance(wf_links, list) and isinstance(document.get("subject"), str):
+            for link in wf_links[:MAX_MANIFEST_ITEMS]:
+                if not isinstance(link, dict):
+                    continue
+                if (link.get("rel") == "self" and
+                        clean_text(link.get("type"), 100).lower() in A2A_CATALOG_TYPES):
+                    ref = public_card_link(link.get("href"), source_url,
+                                           explicit_card=True)
+                    if ref:
+                        links.append(ref)
+
+        # ERC-8004 registration documents are *not* Agent Cards. Their
+        # service pointers are followed only for the explicit A2A service.
+        if document.get("type") == "https://eips.ethereum.org/EIPS/eip-8004#registration-v1":
+            services = document.get("services")
+            if isinstance(services, list):
+                for service in services[:MAX_MANIFEST_ITEMS]:
+                    if isinstance(service, dict) and service.get("name") == "A2A":
+                        ref = public_card_link(service.get("endpoint"), source_url,
+                                               explicit_card=True)
+                        if ref:
+                            links.append(ref)
+
     for item in extract_registry_items(document, offset=offset, limit=MAX_MANIFEST_ITEMS):
         if not isinstance(item, dict):
             continue
@@ -261,7 +339,7 @@ def unpack_cards(document, source_url: str, source: str, *, offset: int = 0):
         if normalized:
             cards.append(normalized)
         links.extend(card_references(item, source_url))
-    return cards, list(dict.fromkeys(links))
+    return cards, list(dict.fromkeys(links))[:MAX_MANIFEST_ITEMS]
 
 
 def domain_sources(config):
@@ -270,6 +348,9 @@ def domain_sources(config):
     assistants = config.get("assistant_ids", {})
     if not isinstance(assistants, dict):
         assistants = {}
+    webfinger = config.get("webfinger_accounts", {})
+    if not isinstance(webfinger, dict):
+        webfinger = {}
     for base in config.get("domain_urls", [])[:MAX_DOMAIN_SEEDS]:
         if not isinstance(base, str):
             continue
@@ -289,6 +370,14 @@ def domain_sources(config):
                 if isinstance(assistant_id, str) and re.fullmatch(r"[A-Za-z0-9_-]{1,80}", assistant_id):
                     sources.append((origin + "/.well-known/agent-card.json?assistant_id=" +
                                     urllib.parse.quote(assistant_id), "assistant-probe"))
+        names = webfinger.get(origin, [])
+        if isinstance(names, list):
+            for name in names[:MAX_WEBFINGER_ACCOUNTS]:
+                if isinstance(name, str) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.+-]{0,60}", name):
+                    resource = "acct:" + name + "@" + parsed.hostname
+                    sources.append((origin + "/.well-known/webfinger?" +
+                                    urllib.parse.urlencode({"resource": resource}),
+                                    "webfinger"))
     return sources
 
 
@@ -358,7 +447,8 @@ def rank(record, query: str) -> int:
     return sum(8 * (w in name) + 4 * (w in skill_text) + 1 * (w in description) for w in words)
 
 
-def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github=github_sources):
+def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github=github_sources,
+             private_fetch=fetch_json):
     results = {}
     warnings = []
     candidates = candidate_sources(config)
@@ -380,6 +470,38 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
             candidates.extend((link, "registry") for link in links)
         except DiscoveryError:
             warnings.append(f"Registry unavailable: {urllib.parse.urlsplit(url).hostname}")
+    # Explicitly authorized feeds are opt-in for publication. Credentials are
+    # delivered only to the configured feed URL and never passed to any linked
+    # Agent Card, proxy, redirect or untrusted registry. The default is private.
+    private_sources = config.get("private_catalogs", [])
+    if isinstance(private_sources, list):
+        for entry in private_sources[:MAX_PRIVATE_CATALOGS]:
+            if not isinstance(entry, dict) or entry.get("publish") is not True:
+                continue
+            url = entry.get("url")
+            scheme = entry.get("auth_type")
+            secret = entry.get("token")
+            if (not isinstance(url, str) or scheme not in ("bearer", "api_key")
+                    or not isinstance(secret, str) or not secret):
+                warnings.append("Authorized catalog configuration missing")
+                continue
+            try:
+                if private_fetch is fetch_json:
+                    document = private_fetch(url, max_bytes=MAX_PUBLIC_REGISTRY_JSON,
+                                             private_auth=(scheme, secret))
+                else:
+                    document = private_fetch(url, scheme, secret)
+                embedded, links = unpack_cards(document, url, "authorized-catalog")
+                for record in embedded:
+                    # Private raw metadata (potentially including credentials,
+                    # prompts, or internal paths) must not be republished.
+                    record.pop("raw_card", None)
+                    results.setdefault(record["id"], record)
+                candidates.extend((link, "authorized-catalog") for link in links)
+            except (DiscoveryError, ValueError, TypeError):
+                # Do not put private feed URLs or credentials into public warnings.
+                warnings.append("Authorized catalog unavailable")
+
     # Public A2A registries expose Agent Card URLs through a paginated API.
     # Only request URLs derived from configured HTTPS registry origins, never
     # untrusted pagination links or an agent endpoint. Every card is fetched
@@ -513,6 +635,15 @@ def main():
     if len(args.query) > 120:
         parser.error("query exceeds 120 characters")
     config = json.loads((ROOT / "sources.json").read_text())
+    private_sources = os.environ.get("SEARCHA2A_AUTHORIZED_CATALOGS_JSON", "")
+    if private_sources:
+        try:
+            sources = json.loads(private_sources)
+        except ValueError as exc:
+            raise SystemExit("Invalid authorized catalog configuration JSON") from exc
+        if not isinstance(sources, list):
+            raise SystemExit("Authorized catalog configuration must be a JSON array")
+        config["private_catalogs"] = sources
     data = discover(args.query.strip(), config, token=os.environ.get("GITHUB_TOKEN", ""))
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
