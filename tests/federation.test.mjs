@@ -42,7 +42,7 @@ test('published card advertises only implemented A2A v1 JSON-RPC and bearer secu
   assert.deepEqual(card.securitySchemes, {
     gatewayBearer: { httpAuthSecurityScheme: { scheme: 'Bearer' } },
   });
-  assert.deepEqual(card.securityRequirements, [{ gatewayBearer: [] }]);
+  assert.deepEqual(card.securityRequirements, [{ schemes: { gatewayBearer: { list: [] } } }]);
   assert.deepEqual(card.defaultInputModes, ['text/plain']);
   assert.deepEqual(card.defaultOutputModes, ['text/plain']);
   assert.equal(card.name, 'Test Agent');

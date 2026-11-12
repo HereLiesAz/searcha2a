@@ -52,7 +52,7 @@ function agentCard(env) {
     defaultOutputModes: ['text/plain'],
     skills: JSON.parse(env.AGENT_SKILLS_JSON),
     securitySchemes: { gatewayBearer: { httpAuthSecurityScheme: { scheme: 'Bearer' } } },
-    securityRequirements: [{ gatewayBearer: [] }],
+    securityRequirements: [{ schemes: { gatewayBearer: { list: [] } } }],
   };
 }
 
