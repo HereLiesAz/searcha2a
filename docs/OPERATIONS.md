@@ -16,6 +16,7 @@
 
 - [Reindex and publish Pages](../.github/workflows/pages.yml): on pushes to main, daily at **03:29 UTC**, or manually. Crawls, syncs normalized cards into the persistent registry, exports the bounded Pages snapshot and Azphalt directory.
 - [Deploy API Gateway](../.github/workflows/gateway.yml): on Worker or gateway workflow changes to main, or manually. Deploys `AgentRegistry` with `v2` SQLite migration and checks `GET /api/v1/agents?limit=1`. It also retains the legacy `SearchResult` `v1` class for pending seven-day mailboxes.
+- **Persistent embedding cache.** The registry stores model-versioned agent vectors separately from moderated metadata. Scheduled ingestion invalidates only changed text. Background updates and read-time backfills process missing vectors in batches; established vectors are reused across searches. AI failures fall back to keyword search, never bypassing moderation.
 - **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410. The separate semantic `/api/v1/directory` endpoint ranks all visible records from the persistent registry using 100-record pages with optional Workers AI, not Actions. It fails closed if the registry binding is absent and returns `truncated: false` only after complete candidate pagination.
 
 ## Settings and credentials
