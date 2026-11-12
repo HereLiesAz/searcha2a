@@ -30,6 +30,19 @@ pages.yml -> discover.py (empty query)
 
 The live search does not rewrite the static catalog. The Azphalt Store feed is a non-installable metadata export, not an agent registry that executes code.
 
+The **indexed capability search** is distinct from Actions-backed live discovery:
+
+```text
+Aive Providers / SearchA2A website
+   -> GET /api/v1/directory?q=... (public Worker, separate per-IP rate-limit key)
+   -> fixed GitHub raw-CDN agent-feed snapshot
+   -> Workers AI @cf/baai/bge-small-en-v1.5 embeddings
+   -> top 20 ranked metadata-only results
+   -> explicitly labelled keyword fallback if inference is unavailable
+```
+
+This route performs no live crawling, credential exchange or task invocation. The Cloudflare AI binding may consume inference quota. The published snapshot is a discovery lead, not a verified global identity or live endpoint. There is no unattended route from matching to agent invocation.
+
 ## Decisions and reasons
 
 - **GitHub Actions for live discovery.** External-source discovery is bounded and uses GitHub search permissions; keeping it in Actions avoids leaking a write-authorized dispatch token to the browser. The Worker only authorizes requests and dispatches jobs.
