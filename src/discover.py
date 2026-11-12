@@ -269,7 +269,10 @@ def unpack_cards(document, source_url: str, source: str, *, offset: int = 0,
     Typed non-A2A artifacts must never be misclassified as cards. Nested inline
     catalogs are strictly bounded; external document traversal remains one hop.
     """
-    direct = normalize_card(document, source_url, source)
+    special_document = (isinstance(document, dict) and
+                        (document.get("type") == "https://eips.ethereum.org/EIPS/eip-8004#registration-v1"
+                         or isinstance(document.get("entries"), list)))
+    direct = None if special_document else normalize_card(document, source_url, source)
     if direct:
         return [direct], []
     cards, links = [], []
@@ -331,14 +334,17 @@ def unpack_cards(document, source_url: str, source: str, *, offset: int = 0,
                         if ref:
                             links.append(ref)
 
-    for item in extract_registry_items(document, offset=offset, limit=MAX_MANIFEST_ITEMS):
-        if not isinstance(item, dict):
-            continue
-        embedded = item.get("card") or item.get("agentCard") or item
-        normalized = normalize_card(embedded, source_url, source)
-        if normalized:
-            cards.append(normalized)
-        links.extend(card_references(item, source_url))
+    # AI Catalog entries are typed and must never be treated as arbitrary
+    # registry rows (which might accidentally publish non-A2A artifacts).
+    if not (isinstance(document, dict) and isinstance(document.get("entries"), list)):
+        for item in extract_registry_items(document, offset=offset, limit=MAX_MANIFEST_ITEMS):
+            if not isinstance(item, dict):
+                continue
+            embedded = item.get("card") or item.get("agentCard") or item
+            normalized = normalize_card(embedded, source_url, source)
+            if normalized:
+                cards.append(normalized)
+            links.extend(card_references(item, source_url))
     return cards, list(dict.fromkeys(links))[:MAX_MANIFEST_ITEMS]
 
 
