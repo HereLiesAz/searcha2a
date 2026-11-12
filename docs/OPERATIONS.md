@@ -43,7 +43,7 @@ A curator may POST `{"id":"<20 hex characters>","action":"deactivate","reason":"
 
 Newly ingested records default to active/unreviewed. Existing records are upgraded in place on Worker rollout; records and their original IDs remain intact. Public registry GETs hide deactivated, hidden, and rejected records, including direct-ID lookups. An ordinary scheduled crawl **cannot** reactivate a deactivated record or reverse a rejection. Approval is metadata-only review, not a signed Azphalt Store listing or proof of agent ownership.
 
-**Boundary:** this first lifecycle step governs the live registry API only. The Pages snapshot and `agent-feed` remain independent exports and must not be used to infer approval status; propagating curator removal and signed publisher attestations needs a separate coordinated publishing step.
+**Publishing:** curation takes effect immediately in the live registry. The next Pages reindex retrieves suppression IDs from the authenticated registry ingestion response and removes those cards from the static catalog, per-agent records, and Azphalt export. The job fails closed if the response does not contain a valid suppression manifest, preventing a rollout race from republishing a hidden card. A curator can manually run **Reindex and publish Pages** to propagate a decision sooner; no ordinary search triggers any Action. Approved cards remain metadata-only and are **not** signed publisher attestations.
 
 ## Automated verification
 

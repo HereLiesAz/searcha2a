@@ -56,6 +56,7 @@ In parallel, the Pages job publishes the latest **bounded crawl snapshot** as `/
 | --- | --- |
 | No search can start a GitHub workflow | `worker/index.mjs`: `POST /api/v1/search` returns 410; `site/app.js` only uses GET |
 | Only a separately authenticated administrator can approve, reject or deactivate a listing | `worker/index.mjs`: `REGISTRY_ADMIN_SECRET` check, `AgentRegistry.fetch` moderation and audit endpoints |
+| Static Pages and Azphalt publication cannot reintroduce suppressed entries | `AgentRegistry.fetch` scheduled ingest response `suppressed_ids`; `src/registry_sync.py`: `filter_export_catalog` before export |
 | Hidden, deactivated and rejected cards cannot appear in public live search or direct detail | `AgentRegistry.fetch`: active/non-rejected query filter and agent lookup |
 | Only authorized scheduled crawls can mutate the registry | `worker/index.mjs`: `POST /internal/registry/ingest` checks shared secret |
 | A batch is all-or-nothing and does not delete unseen agents | `AgentRegistry.fetch`: input validation before `storage.transactionSync`, `INSERT ... ON CONFLICT DO UPDATE` |
@@ -66,7 +67,7 @@ In parallel, the Pages job publishes the latest **bounded crawl snapshot** as `/
 
 ## Limits and caveats
 
-The current scheduled collector reads up to 90 card candidates and publishes up to 70 normalized cards per run. It also reads up to two pages of 30 agents from each explicitly configured paginated registry, including a2aregistry.org. Those are **per-crawl** limits, not a cap on accumulated registry records. The persistent registry retains IDs across runs. A new crawl does not invalidate a card it fails to rediscover, so stale entries are possible; curator hide/reject/deactivate decisions persist across crawls. The separate Pages/Azphalt exported snapshots are not yet governed by those statuses; there is no health probe, verified ownership, explicit self-registration, global search-engine crawl, or automatic removal policy yet.
+The current scheduled collector reads up to 90 card candidates and publishes up to 70 normalized cards per run. It also reads up to two pages of 30 agents from each explicitly configured paginated registry, including a2aregistry.org. Those are **per-crawl** limits, not a cap on accumulated registry records. The persistent registry retains IDs across runs. A new crawl does not invalidate a card it fails to rediscover, so stale entries are possible; curator hide/reject/deactivate decisions persist across crawls. Publishing filters the static Pages catalog and Azphalt export using the signed-in crawler's authenticated suppression manifest (and fails closed if it is missing); statuses propagate to the snapshots on the next index run, not immediately; there is no health probe, verified ownership, explicit self-registration, global search-engine crawl, or automatic removal policy yet.
 
 SQL keyword search scans stored normalized name/skill/description/endpoint text and ranks by name, skill and description hits. It is not semantic embedding search. A single Durable Object coordinates the registry; future high-traffic growth may require sharding or migrating to Cloudflare D1.
 

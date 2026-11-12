@@ -95,7 +95,13 @@ export class AgentRegistry {
           ON CONFLICT(key) DO UPDATE SET value=excluded.value`, updatedAt);
       });
       const count = this.sql.exec('SELECT COUNT(*) AS total FROM agents').one().total;
-      return respond({ status: 'stored', ingested: entries.length, total: count });
+      const marks = entries.map(() => '?').join(', ');
+      const suppressed = entries.length ? this.sql.exec(
+        `SELECT id FROM agents WHERE id IN (${marks})
+          AND (listing_state != 'active' OR review_status = 'rejected')`,
+        ...entries.map(agent => agent.id)).toArray().map(row => row.id) : [];
+      return respond({ status: 'stored', ingested: entries.length, total: count,
+        suppressed_ids: suppressed });
     }
 
     if (request.method === 'POST' && path === '/manage') {

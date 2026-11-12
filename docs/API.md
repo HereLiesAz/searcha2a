@@ -73,7 +73,7 @@ A 200 response includes `id`, `listing_state`, `review_status`, and `changed_at`
 
 Requires the same administrator secret. Returns the current listing and review states plus the 100 most recent state changes, newest first. Audit records are private and independent of crawler metadata.
 
-**Public visibility:** `GET /api/v1/agents` and `GET /api/v1/agents/{id}` include only active, non-rejected entries. Visible Agent Cards include a `curation_status` of `unreviewed` or `approved`; the underlying `verification` remains `card_read_only`. Reingesting a card updates its metadata but preserves curator-controlled states. The static Pages snapshot and Azphalt feed remain independently published crawler snapshots until their governance integration is implemented.
+**Public visibility:** `GET /api/v1/agents` and `GET /api/v1/agents/{id}` include only active, non-rejected entries. Visible Agent Cards include a `curation_status` of `unreviewed` or `approved`; the underlying `verification` remains `card_read_only`. Reingesting a card updates its metadata but preserves curator-controlled states. The static Pages snapshot and Azphalt feed are filtered against the registry's suppression manifest on the next scheduled, push-triggered, or manual index publication. An administrator decision takes effect immediately on the live registry, and on the static feeds after publication. A crawler sync fails closed if suppression information is missing.
 
 ## Static GitHub Pages endpoints
 
