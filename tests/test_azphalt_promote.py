@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from azphalt_promote import PREFIX, _id, promote
+from azphalt_promote import CATALOG_URL, PREFIX, _id, promote
 from verify_agent import PROOF_PATH, verify_publisher
 
 CARD_URL = "https://weather.example.org/.well-known/agent-card.json"
