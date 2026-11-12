@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import binascii
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 import hashlib
@@ -37,6 +39,9 @@ MAX_DNS_TXT_ANSWERS = 8
 MAX_ERC8004_RPC_SOURCES = 4
 MAX_ERC8004_BLOCK_WINDOW = 512
 MAX_ERC8004_LOGS = 120
+MAX_OCI_SOURCES = 4
+MAX_OCI_LAYERS = 6
+MAX_OCI_DOCUMENT = 524288
 REGISTERED_TOPIC = "0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a"
 URI_UPDATED_TOPIC = "0x3a2c7fffc2cba7582c690e3b82c453ea02a308326a98a3ad7576c606336409fb"
 A2A_CATALOG_TYPES = {'application/a2a-agent-card+json', 'application/a2a+json'}
@@ -602,6 +607,154 @@ def erc8004_event_sources(config, post=post_chain_rpc):
     return list(dict.fromkeys(candidates)), warnings
 
 
+def fetch_oci_bytes(url: str, auth: str = "") -> bytes:
+    """GET a bounded OCI JSON artifact without redirects or credential leakage."""
+    require_public_https(url)
+    if not isinstance(auth, str) or len(auth) > 4096 or "\n" in auth or "\r" in auth:
+        raise DiscoveryError("Invalid OCI credential")
+    headers = {"User-Agent": USER_AGENT, "Accept": "application/json, application/*+json"}
+    if auth:
+        headers["Authorization"] = "Bearer " + auth
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with OPENER.open(req, timeout=7) as response:
+            if response.status != 200:
+                raise DiscoveryError("OCI source unavailable")
+            media = response.headers.get("Content-Type", "").split(";", 1)[0].lower()
+            if media != "application/json" and not (
+                    media.startswith("application/") and media.endswith("+json")):
+                raise DiscoveryError("OCI response not JSON")
+            data = response.read(MAX_OCI_DOCUMENT + 1)
+            if len(data) > MAX_OCI_DOCUMENT:
+                raise DiscoveryError("Oversized OCI artifact")
+            return data
+    except (ValueError, urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise DiscoveryError("OCI source unavailable") from exc
+
+
+def oasf_a2a_cards(record, source_url: str):
+    """Only typed integration/a2a artifacts in AGNTCY OASF records are indexed."""
+    cards, links = [], []
+    if not isinstance(record, dict) or not isinstance(record.get("modules"), list):
+        return cards, links
+    for module in record["modules"][:MAX_OCI_LAYERS * 4]:
+        if not isinstance(module, dict):
+            continue
+        meta = module.get("module") if isinstance(module.get("module"), dict) else module
+        if meta.get("name") != "integration/a2a":
+            continue
+        artifact = module.get("artifact") or meta.get("artifact")
+        if isinstance(artifact, dict) and (
+                artifact.get("media_type") or artifact.get("mediaType")) in A2A_CATALOG_TYPES:
+            inline = artifact.get("json")
+            if not isinstance(inline, dict):
+                data = artifact.get("data")
+                if isinstance(data, str) and len(data) <= MAX_OCI_DOCUMENT:
+                    try:
+                        decoded = base64.b64decode(data, validate=True)
+                        if len(decoded) <= MAX_DOCUMENT:
+                            inline = json.loads(decoded)
+                    except (ValueError, binascii.Error, UnicodeError):
+                        inline = None
+            card = normalize_card(inline, source_url, "agntcy-oci")
+            if card:
+                card.pop("raw_card", None)
+                cards.append(card)
+            link = public_card_link(artifact.get("url"), source_url, explicit_card=True)
+            if link:
+                links.append(link)
+        # Backward-compatibility for deprecated OASF inline a2a_card_data.
+        data = module.get("data")
+        if isinstance(data, dict) and isinstance(data.get("a2a_card_data"), dict):
+            card = normalize_card(data["a2a_card_data"], source_url, "agntcy-oci")
+            if card:
+                card.pop("raw_card", None)
+                cards.append(card)
+    return cards, list(dict.fromkeys(links))
+
+
+def agntcy_oci_sources(config, read=fetch_oci_bytes):
+    """Read configured, digest-checked OCI Directory manifests and OASF layers.
+
+    Only explicitly approved repositories publish normalized agent metadata.
+    Tags, OCI authentication discovery, DHT gossip and untrusted container
+    execution are intentionally out of scope.
+    """
+    sources = config.get("agntcy_oci_sources", [])
+    cards, links, warnings = [], [], []
+    if not isinstance(sources, list):
+        return cards, links, warnings
+    for entry in sources[:MAX_OCI_SOURCES]:
+        if not isinstance(entry, dict) or entry.get("publish") is not True:
+            continue
+        origin = entry.get("registry_origin")
+        repo = entry.get("repository")
+        digest = entry.get("manifest_digest")
+        auth = entry.get("token", "")
+        if not all(isinstance(x, str) for x in (origin, repo, digest, auth)):
+            warnings.append("AGNTCY OCI source misconfigured")
+            continue
+        try:
+            parsed = urllib.parse.urlsplit(origin)
+            if (parsed.scheme != "https" or not parsed.hostname or parsed.username
+                    or parsed.password or parsed.port not in (None, 443)
+                    or parsed.path not in ("", "/") or parsed.query or parsed.fragment
+                    or not 1 <= len(repo) <= 200 or not re.fullmatch(
+                        r"[a-z0-9]+(?:[._-]+[a-z0-9]+)*(?:/[a-z0-9]+(?:[._-]+[a-z0-9]+)*)*",
+                        repo)
+                    or not re.fullmatch(r"sha256:[0-9a-f]{64}", digest)):
+                raise DiscoveryError("Unsupported OCI source")
+            base = origin.rstrip("/") + "/v2/" + repo
+            manifest_url = base + "/manifests/" + digest
+            raw = read(manifest_url, auth)
+            if not isinstance(raw, bytes) or len(raw) > MAX_OCI_DOCUMENT:
+                raise DiscoveryError("Invalid OCI manifest")
+            if hashlib.sha256(raw).hexdigest() != digest[7:]:
+                raise DiscoveryError("OCI manifest digest mismatch")
+            manifest = json.loads(raw)
+            if (not isinstance(manifest, dict) or manifest.get("schemaVersion") != 2
+                    or manifest.get("artifactType") !=
+                    "application/vnd.agntcy.dir.record.v1+json"
+                    or not isinstance(manifest.get("layers"), list)):
+                raise DiscoveryError("Not an AGNTCY Directory artifact")
+            source_cards, source_links = [], []
+            for layer in manifest["layers"][:MAX_OCI_LAYERS]:
+                if not isinstance(layer, dict):
+                    continue
+                media = layer.get("mediaType")
+                if (not isinstance(media, str) or not
+                        media.startswith("application/vnd.agntcy.oasf.types.")
+                        or not media.endswith(".Record+json")):
+                    continue
+                layer_digest = layer.get("digest")
+                if not isinstance(layer_digest, str) or not re.fullmatch(
+                        r"sha256:[0-9a-f]{64}", layer_digest):
+                    raise DiscoveryError("Invalid OCI layer digest")
+                inline = layer.get("data")
+                if inline is not None:
+                    if not isinstance(inline, str) or len(inline) > MAX_OCI_DOCUMENT:
+                        raise DiscoveryError("Oversized inline OCI layer")
+                    try:
+                        body = base64.b64decode(inline, validate=True)
+                    except (ValueError, binascii.Error) as exc:
+                        raise DiscoveryError("Invalid inline OCI layer") from exc
+                else:
+                    body = read(base + "/blobs/" + layer_digest, auth)
+                if not isinstance(body, bytes) or len(body) > MAX_OCI_DOCUMENT:
+                    raise DiscoveryError("Invalid OCI layer")
+                if hashlib.sha256(body).hexdigest() != layer_digest[7:]:
+                    raise DiscoveryError("OCI layer digest mismatch")
+                embedded, refs = oasf_a2a_cards(json.loads(body), manifest_url)
+                source_cards.extend(embedded)
+                source_links.extend(refs)
+            cards.extend(source_cards)
+            links.extend(source_links)
+        except (DiscoveryError, ValueError, TypeError, OverflowError, UnicodeError):
+            # A private registry URL, repository and token are not public data.
+            warnings.append("AGNTCY OCI source unavailable")
+    return cards, list(dict.fromkeys(links))[:MAX_FOLLOWUP_CARD_URLS], warnings
+
+
 def candidate_sources(config):
     candidates = []
     for url in config.get("card_urls", []):
@@ -669,7 +822,8 @@ def rank(record, query: str) -> int:
 
 
 def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github=github_sources,
-             private_fetch=fetch_json, dns_fetch=fetch_json, chain_rpc=post_chain_rpc):
+             private_fetch=fetch_json, dns_fetch=fetch_json, chain_rpc=post_chain_rpc,
+             oci_read=fetch_oci_bytes):
     results = {}
     warnings = []
     candidates = candidate_sources(config)
@@ -681,6 +835,11 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
     chain_cards, chain_warnings = erc8004_event_sources(config, post=chain_rpc)
     candidates.extend(chain_cards)
     warnings.extend(chain_warnings)
+    oci_cards, oci_links, oci_warnings = agntcy_oci_sources(config, read=oci_read)
+    for record in oci_cards:
+        results.setdefault(record["id"], record)
+    candidates.extend((link, "agntcy-oci") for link in oci_links)
+    warnings.extend(oci_warnings)
     rotation = config.get('rotation_index')
     if type(rotation) is not int or rotation < 0:
         rotation = datetime.now(timezone.utc).date().toordinal()
@@ -905,6 +1064,15 @@ def main():
         if not isinstance(sources, list):
             raise SystemExit("ERC-8004 source configuration must be a JSON array")
         config["erc8004_rpc_sources"] = sources
+    oci_sources = os.environ.get("SEARCHA2A_AGNTCY_OCI_SOURCES_JSON", "")
+    if oci_sources:
+        try:
+            sources = json.loads(oci_sources)
+        except ValueError as exc:
+            raise SystemExit("Invalid AGNTCY OCI source configuration JSON") from exc
+        if not isinstance(sources, list):
+            raise SystemExit("AGNTCY OCI sources configuration must be a JSON array")
+        config["agntcy_oci_sources"] = sources
     data = discover(args.query.strip(), config, token=os.environ.get("GITHUB_TOKEN", ""))
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
