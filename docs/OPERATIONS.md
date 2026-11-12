@@ -64,7 +64,11 @@ node --check site/app.js
 node --check worker/index.mjs
 ```
 
-New tests cover SQL persistence, atomic rejection of bad ingest batches, authorization, pagination, query matching, no workflow dispatch and HTTP sync retries. The gateway smoke test verifies the registry binding responds but not the number of cards; a Pages ingest run and subsequent public GET prove data actually reached storage.
+New tests cover SQL persistence, atomic rejection of bad ingest batches, authorization, pagination, query matching, no workflow dispatch, HTTP sync retries, manifest deduplication, safe domain paths, HTML fallback rejection, non-strict card handling, and bounded one-hop discovery. The gateway smoke test verifies the registry binding responds but not the number of cards; a Pages ingest run and subsequent public GET prove data actually reached storage.
+
+## Public crawler targets
+
+[`sources.json`](../sources.json) defines `card_urls` (direct single cards or JSON manifests), `domain_urls` (explicit HTTPS origins probed at seven canonical/legacy paths), `assistant_ids` (optional known assistant IDs keyed by exactly matching HTTPS origin), `registry_urls` (bounded JSON feeds) and `paginated_registry_urls` (offset-based public REST feeds). Invalid, missing, non-JSON or forbidden sources are skipped; unavailable registries contribute warnings but cannot erase accumulated records. Credentials, private enterprise catalogs, paid task invocations, A2A/MCP POST discovery and ERC-8004 event scraping are deliberately excluded. If a source exposes only HTML or requires login, add a reviewed read-only JSON adapter rather than scraping arbitrary pages.
 
 ## Troubleshooting
 
@@ -83,4 +87,4 @@ New tests cover SQL persistence, atomic rejection of bad ingest batches, authori
 
 The public API is intentionally read-only; browsers cannot submit or execute agents. Only the private authenticated crawler upload writes the registry. Agent Cards are untrusted descriptive metadata, not verified agent endpoints. Public result IDs and card URLs must not be treated as authorization tokens.
 
-Current per-crawl bounds: 210 candidates (up to 50 reserved GitHub leads), 150 normalized cards, up to five paginated registry pages, 512 KiB per Agent Card, seven seconds per source, and ten concurrent card reads. Scheduled registry uploads use 70-card / 1-MB batches and combine all suppression responses. The fixed promotion feed alone allows up to 16 MiB. These bounds do not limit the persistent registry's cumulative record count, but discovery remains incomplete. Indexed records are retained until a deliberate future removal policy is implemented.
+Current per-crawl bounds: 350 initial candidates (up to 50 reserved GitHub leads), 100 one-hop manifest links, 150 normalized cards, at most 12 configured probe domains with seven standard paths each and up to ten explicitly listed assistant IDs per domain, up to five paginated registry pages, 512 KiB per Agent Card, seven seconds per source, and ten concurrent card reads. Scheduled registry uploads use 70-card / 1-MB batches and combine all suppression responses. The fixed promotion feed alone allows up to 16 MiB. These bounds do not limit the persistent registry's cumulative record count, but discovery remains incomplete. Indexed records are retained until a deliberate future removal policy is implemented.
