@@ -201,13 +201,24 @@ export class AgentRegistry {
       const raw = url.searchParams.get('name');
       const name = normalizeAnsName(raw);
       if (!name) return respond({ error: 'Invalid ANS name' }, 400);
+      const limitText = url.searchParams.get('limit') || '20';
+      const offsetText = url.searchParams.get('offset') || '0';
+      if (!/^\d{1,2}$/.test(limitText) || !/^\d{1,6}$/.test(offsetText)) {
+        return respond({ error: 'Invalid ANS pagination' }, 400);
+      }
+      const limit = Number(limitText), offset = Number(offsetText);
+      if (limit < 1 || limit > 20 || offset > 100000) {
+        return respond({ error: 'Invalid ANS pagination' }, 400);
+      }
       const visible = "ans_name=? AND listing_state='active' AND review_status != 'rejected'";
       const count = this.sql.exec(
         `SELECT COUNT(*) AS total FROM agents WHERE ${visible}`, name).one().total;
       if (!count) return respond({ error: 'ANS name not found in registry' }, 404);
       const rows = this.sql.exec(`SELECT record, review_status FROM agents
-        WHERE ${visible} ORDER BY name_search ASC LIMIT 20`, name).toArray();
-      return respond({ name: raw, count, truncated: count > 20,
+        WHERE ${visible} ORDER BY name_search ASC, id ASC LIMIT ? OFFSET ?`,
+        name, limit, offset).toArray();
+      return respond({ name: raw, count, limit, offset,
+        truncated: offset + rows.length < count,
         ambiguous: count > 1, identity_verified: false,
         results: rows.map(row => ({ ...JSON.parse(row.record),
           curation_status: row.review_status })) });
