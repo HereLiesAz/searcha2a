@@ -111,19 +111,21 @@ class CrawlRetryTests(unittest.TestCase):
         self.assertEqual(due[-1][0], "https://agent15.example.org/card.json")
         self.assertEqual(len(skipped), 4)
 
-    def test_queue_full_never_silently_loses_chain_retries(self):
+    def test_queue_full_keeps_chain_retries_and_reports_eviction(self):
         state = empty()
         for i in range(retry.MAX_PENDING):
             retry.record_outcomes(state, [
                 (f"https://agent{i:02d}.example.org/card.json", "registry", "unavailable"),
             ], 1000)
-        original = json.loads(json.dumps(state))
-        with self.assertRaisesRegex(retry.RetryStateError, "Unpersisted chain"):
-            retry.record_outcomes(state, [(OTHER, "erc8004-registration", "unavailable")],
-                                  1001)
-        self.assertEqual(state, original)
         metrics = retry.record_outcomes(state, [
-            (OTHER, "public-directory", "unavailable")], 1001)
+            (OTHER, "erc8004-registration", "unavailable")], 1001)
+        self.assertEqual(metrics["queue_full"], 1)
+        self.assertEqual(len(state["pending"]), retry.MAX_PENDING)
+        self.assertTrue(any(item["url"] == OTHER and
+                            item["source"] == "erc8004-registration"
+                            for item in state["pending"]))
+        metrics = retry.record_outcomes(state, [
+            (CARD, "public-directory", "unavailable")], 1001)
         self.assertEqual(metrics["queue_full"], 1)
         self.assertEqual(len(state["pending"]), retry.MAX_PENDING)
 
@@ -198,6 +200,16 @@ class CrawlRetryTests(unittest.TestCase):
             retry.record_outcomes(state, [(CARD, "erc8004-registration",
                                            "unavailable")], 1001)
         self.assertEqual(state, original)
+
+    def test_existing_registry_retry_is_promoted_to_chain_provenance(self):
+        state = empty()
+        retry.record_outcomes(state, [(CARD, "registry", "unavailable")], 1000)
+        retry.record_outcomes(state, [
+            (CARD, "erc8004-registration", "unavailable")], 1001)
+        self.assertEqual(state["pending"], [{
+            "url": CARD, "source": "erc8004-registration",
+            "failures": 2, "retry_day": 1003,
+        }])
 
     def test_monotonic_date_and_backoff_bounds(self):
         state = empty()
