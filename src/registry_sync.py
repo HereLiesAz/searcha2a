@@ -13,7 +13,6 @@ import urllib.request
 
 MAX_BATCH_BYTES = 1_000_000
 MAX_BATCH_CARDS = 70
-MAX_CATALOG_CARDS = 150
 
 
 def ingest(catalog: dict, base: str, secret: str, *, attempts: int = 18,
@@ -29,8 +28,6 @@ def ingest(catalog: dict, base: str, secret: str, *, attempts: int = 18,
     if catalog.get("query") != "" or not isinstance(catalog.get("results"), list):
         raise ValueError("Expected scheduled crawler catalog, not a per-query result")
     records = catalog["results"]
-    if len(records) > MAX_CATALOG_CARDS:
-        raise ValueError("Crawler catalog exceeds 150 cards")
     if attempts < 1:
         raise ValueError("At least one ingest attempt is required")
     metadata = {key: value for key, value in catalog.items()
