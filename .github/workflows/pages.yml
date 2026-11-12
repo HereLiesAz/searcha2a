@@ -33,6 +33,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           SEARCHA2A_AUTHORIZED_CATALOGS_JSON: ${{ secrets.SEARCHA2A_AUTHORIZED_CATALOGS_JSON }}
           SEARCHA2A_ERC8004_RPC_SOURCES_JSON: ${{ secrets.SEARCHA2A_ERC8004_RPC_SOURCES_JSON }}
+          SEARCHA2A_AGNTCY_OCI_SOURCES_JSON: ${{ secrets.SEARCHA2A_AGNTCY_OCI_SOURCES_JSON }}
         run: |
           mkdir -p dist
           cp -R site/. dist/

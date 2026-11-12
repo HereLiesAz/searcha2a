@@ -79,5 +79,6 @@
       "registry_address": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
       "lookback_blocks": 512
     }
-  ]
+  ],
+  "agntcy_oci_sources": []
 }
