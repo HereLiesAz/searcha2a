@@ -154,11 +154,11 @@ export class AgentRegistry {
     if (request.method === 'GET' && path === '/candidates') {
       const rows = this.sql.exec(`SELECT record FROM agents
         WHERE listing_state='active' AND review_status != 'rejected'
-        ORDER BY updated_at DESC, name_search ASC LIMIT 101`).toArray();
+        ORDER BY updated_at DESC, name_search ASC LIMIT 151`).toArray();
       const meta = this.sql.exec(
         "SELECT value FROM registry_meta WHERE key='last_ingested_at'").toArray()[0];
-      return respond({ entries: rows.slice(0, 100).map(row => JSON.parse(row.record)),
-        truncated: rows.length > 100, generated_at: meta?.value || null });
+      return respond({ entries: rows.slice(0, 150).map(row => JSON.parse(row.record)),
+        truncated: rows.length > 150, generated_at: meta?.value || null });
     }
     if (request.method === 'GET' && path === '/search') {
       const query = (url.searchParams.get('query') || '').trim().replace(/\s+/g, ' ');

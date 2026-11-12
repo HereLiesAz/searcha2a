@@ -1,5 +1,6 @@
 import importlib.util
 import io
+import json
 from pathlib import Path
 import unittest
 import urllib.error
@@ -101,10 +102,61 @@ class RegistrySyncTests(unittest.TestCase):
             registry_sync.ingest(
                 {'query': 'weather', 'results': [GOOD_CARD]},
                 'https://api.example', 'private', opener=opener)
-        with self.assertRaisesRegex(ValueError, '70'):
+        with self.assertRaisesRegex(ValueError, '150'):
             registry_sync.ingest(
-                {'query': '', 'results': [GOOD_CARD] * 71},
+                {'query': '', 'results': [GOOD_CARD] * 151},
                 'https://api.example', 'private', opener=opener)
+
+
+    def test_150_card_catalog_splits_by_count_and_union_suppression(self):
+        cards = [{**GOOD_CARD, 'id': format(i, '020x'),
+                  'name': 'Agent ' + str(i)} for i in range(150)]
+        requests = []
+        def opener(request, timeout):
+            payload = json.loads(request.data)
+            requests.append(payload)
+            ids = [item["id"] for item in payload["results"]]
+            excluded = [i for i in ids if i in ("00000000000000000001", "00000000000000000063")]
+            return Response(json.dumps({"status": "stored", "ingested": len(ids),
+                "total": 150, "suppressed_ids": excluded}).encode())
+
+        result = registry_sync.ingest({"query": "", "count": 150, "results": cards},
+            "https://api.example", "private", opener=opener,
+            sleep=lambda _: self.fail("unexpected retry"))
+        self.assertEqual(len(requests), 3)
+        self.assertEqual([len(req["results"]) for req in requests], [70, 70, 10])
+        self.assertEqual(result["ingested"], 150)
+        self.assertEqual(result["suppressed_ids"], [
+            "00000000000000000001", "00000000000000000063"])
+        self.assertEqual(registry_sync.filter_export_catalog(
+            {"query": "", "results": cards}, result)["count"], 148)
+
+    def test_large_valid_catalog_is_split_by_encoded_byte_length(self):
+        cards = [{**GOOD_CARD, "id": format(i, "020x"),
+                  "skills": [{"name": "s", "description": "x" * 500} for _ in range(40)]}
+                 for i in range(70)]
+        payloads = []
+        def opener(request, timeout):
+            payloads.append(request.data)
+            batch = json.loads(request.data)["results"]
+            return Response(json.dumps({"status": "stored", "ingested": len(batch),
+                "total": 70, "suppressed_ids": []}).encode())
+        result = registry_sync.ingest({"query": "", "results": cards},
+            "https://api.example", "private", opener=opener,
+            sleep=lambda _: self.fail("unexpected retry"))
+        self.assertGreater(len(payloads), 1)
+        self.assertTrue(all(len(raw) <= 1_000_000 for raw in payloads))
+        self.assertEqual(sum(len(json.loads(raw)["results"]) for raw in payloads), 70)
+        self.assertEqual(result["ingested"], 70)
+
+    def test_oversized_single_card_fails_before_external_io(self):
+        huge = {**GOOD_CARD, "description": "oversized" * 150000}
+        def forbidden(*_args, **_kwargs):
+            self.fail("An oversized card must not be uploaded")
+        with self.assertRaisesRegex(ValueError, "One Agent Card"):
+            registry_sync.ingest({"query": "", "results": [huge]},
+                "https://api.example", "private", opener=forbidden)
+
 
 
 if __name__ == '__main__':

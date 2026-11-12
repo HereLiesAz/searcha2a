@@ -6,8 +6,8 @@
  */
 const CATALOG_URL = 'https://raw.githubusercontent.com/HereLiesAz/searcha2a/agent-feed/site/api/v1/azphalt-listings.json';
 const EMBEDDING_MODEL = '@cf/baai/bge-small-en-v1.5';
-const MAX_CATALOG_BYTES = 900_000;
-const MAX_CANDIDATES = 70;
+const MAX_CATALOG_BYTES = 16_777_216;
+const MAX_CANDIDATES = 150;
 const MAX_RESULTS = 20;
 const STOP_WORDS = new Set(['a', 'an', 'and', 'at', 'by', 'can', 'find', 'for', 'from', 'in', 'me', 'of', 'on', 'or', 'the', 'to', 'who', 'with']);
 

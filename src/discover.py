@@ -12,18 +12,22 @@ import os
 from pathlib import Path
 import re
 import socket
+from verify_agent import verify_publisher
 import urllib.error
 import urllib.parse
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 MAX_DOCUMENT = 524288
-MAX_CANDIDATES = 90
-MAX_RESULTS = 70
+# The aggregate Azphalt listings feed can contain up to 150 bounded Agent Cards.
+MAX_CATALOG_DOCUMENT = 16_777_216
+MAX_CANDIDATES = 210
+MAX_RESULTS = 150
+MAX_GITHUB_CANDIDATES = 50
 # Paginated registries are explicit, trusted configuration, never crawler-discovered links.
-MAX_REGISTRY_PAGES = 2
+MAX_REGISTRY_PAGES = 5
 REGISTRY_PAGE_SIZE = 30
-MAX_REGISTRY_CARD_URLS = 60
+MAX_REGISTRY_CARD_URLS = 150
 USER_AGENT = "SearchA2A/0.1 (+https://github.com/HereLiesAz/searcha2a)"
 
 
@@ -67,7 +71,10 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 OPENER = urllib.request.build_opener(NoRedirect(), urllib.request.ProxyHandler({}))
 
 
-def fetch_json(url: str, token: str = ""):
+def fetch_json(url: str, token: str = "", *, max_bytes: int = MAX_DOCUMENT):
+    """Fetch a bounded JSON document. Larger limits are only for fixed aggregate feeds."""
+    if max_bytes < 1 or max_bytes > MAX_CATALOG_DOCUMENT:
+        raise DiscoveryError("Invalid document size bound")
     require_public_https(url)
     headers = {"User-Agent": USER_AGENT, "Accept": "application/json"}
     if token and urllib.parse.urlsplit(url).hostname == "api.github.com":
@@ -77,8 +84,8 @@ def fetch_json(url: str, token: str = ""):
         with OPENER.open(urllib.request.Request(url, headers=headers), timeout=7) as response:
             if response.status != 200:
                 raise DiscoveryError(f"HTTP {response.status}")
-            data = response.read(MAX_DOCUMENT + 1)
-            if len(data) > MAX_DOCUMENT:
+            data = response.read(max_bytes + 1)
+            if len(data) > max_bytes:
                 raise DiscoveryError("Oversized JSON")
             return json.loads(data)
     except (ValueError, urllib.error.URLError, TimeoutError, OSError) as exc:
@@ -284,20 +291,36 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
                         break
             if len(records) < REGISTRY_PAGE_SIZE:
                 break
-    # Reserve remaining candidate slots for GitHub. Repositories cannot
-    # displace explicit, read-only card sources when search returns many hits.
-    candidates.extend(code_urls)
-    # Fetch cards concurrently so a handful of slow hosts cannot stall the
-    # whole interactive search. The list, worker count and per-fetch timeout
-    # are bounded; cards are only read, never invoked.
-    unique = list(dict.fromkeys(candidates[:MAX_CANDIDATES]))
+    # Preserve bounded GitHub discovery even when explicit registries are crowded.
+    # Dedupe by the actual card URL, independently of the originating registry.
+    def distinct_url(items):
+        seen = set()
+        for url, origin in items:
+            if url not in seen:
+                seen.add(url)
+                yield url, origin
+
+    github_cards = list(distinct_url(code_urls))[:MAX_GITHUB_CANDIDATES]
+    reserved = len(github_cards)
+    unique = list(distinct_url(candidates))[:MAX_CANDIDATES - reserved]
+    existing_urls = {url for url, _ in unique}
+    unique.extend((url, origin) for url, origin in github_cards if url not in existing_urls)
+    unique = unique[:MAX_CANDIDATES]
+    # Fetch Agent Cards read-only. A publisher opt-in is independently checked
+    # against a same-origin HTTPS proof and is not a cryptographic ANS identity.
     def pull(pair):
         url, origin = pair
         try:
-            return normalize_card(fetch(url), url, origin)
-        except (DiscoveryError, ValueError, TypeError):
+            card = fetch(url)
+            record = normalize_card(card, url, origin)
+            if record:
+                evidence = verify_publisher(record, card, fetch=fetch)
+                if evidence:
+                    record["publisher_verification"] = evidence
+            return record
+        except (DiscoveryError, ValueError, TypeError, OverflowError):
             return None
-    with ThreadPoolExecutor(max_workers=8) as pool:
+    with ThreadPoolExecutor(max_workers=10) as pool:
         for record in pool.map(pull, unique):
             if record:
                 results.setdefault(record["id"], record)

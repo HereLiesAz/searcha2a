@@ -140,7 +140,7 @@ test('reject malformed catalog and private or credential-bearing Agent Cards', a
 });
 
 test('catalog read has a hard byte limit even without a Content-Length header', async () => {
-  const oversized = new Uint8Array(900_001);
+  const oversized = new Uint8Array(16_777_217);
   oversized.fill(65);
   const factory = async () => new Response(new ReadableStream({
     start(controller) {
@@ -149,6 +149,20 @@ test('catalog read has a hard byte limit even without a Content-Length header', 
     },
   }));
   await assert.rejects(readPublishedAgents(factory), /Catalog too large/);
+});
+
+test('all 150 scheduled catalog entries remain eligible for semantic ranking', async () => {
+  const entries = Array.from({ length: 150 }, (_, i) => ({
+    ...weather,
+    name: 'Agent ' + i,
+    description: i === 149 ? 'starlingcapability' : 'routine description',
+    source_url: 'https://agent' + i + '.example.org/card',
+  }));
+  const raw = JSON.stringify({ schema: 1, source: 'searcha2a', listings: entries });
+  const indexed = await readPublishedAgents(async () => new Response(raw));
+  assert.equal(indexed.entries.length, 150);
+  const found = await searchIndexedAgents('starlingcapability', {}, async () => new Response(raw));
+  assert.deepEqual(found.results.map(x => x.name), ['Agent 149']);
 });
 
 test('unexpected skill metadata cannot crash catalog matching', async () => {

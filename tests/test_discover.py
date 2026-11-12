@@ -1,6 +1,9 @@
 import importlib.util
 from pathlib import Path
+import sys
 import unittest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location('discover', Path(__file__).parents[1] / 'src/discover.py')
@@ -96,6 +99,41 @@ class DiscoverTests(unittest.TestCase):
             'https://registry.example.com/api/agents?limit=30&offset=30',
         ])
         self.assertNotIn('https://private.example/agents', requested)
+
+    def test_scheduled_crawl_indexes_five_pages_up_to_150_distinct_cards(self):
+        from urllib.parse import parse_qs, urlsplit
+        requests = []
+        def get(url):
+            requests.append(url)
+            if "/api/agents?" in url:
+                offset = int(parse_qs(urlsplit(url).query)["offset"][0])
+                return {"agents": [{"wellKnownURI": f"https://agent{i}.example.org/card"}
+                                   for i in range(offset, offset + 30)]}
+            i = url.split("agent", 1)[1].split(".", 1)[0]
+            return {**CARD, "url": f"https://agent{i}.example.org/a2a"}
+        result = discover.discover("", {
+            "card_urls": [], "registry_urls": [],
+            "paginated_registry_urls": ["https://registry.example.org/api/agents"],
+        }, fetch=get, github=lambda *_: ([], []))
+        self.assertEqual(result["count"], 150)
+        self.assertEqual(len(result["results"]), 150)
+        pages = [url for url in requests if "/api/agents?" in url]
+        self.assertEqual(len(pages), 5)
+        self.assertIn("offset=120", pages[4])
+        self.assertNotIn("offset=150", " ".join(pages))
+
+    def test_github_discovery_keeps_reserved_slots_when_registry_is_crowded(self):
+        source_urls = [f"https://seed{i}.example.org/card" for i in range(205)]
+        github_urls = [f"https://github{i}.example.org/card" for i in range(5)]
+        def get(url):
+            return {**CARD, "name": "A Github" if url in github_urls else "Z Seed",
+                    "url": url.replace("/card", "/a2a")}
+        result = discover.discover("", {
+            "card_urls": source_urls, "registry_urls": [],
+        }, fetch=get, github=lambda *_: ([(url, "github") for url in github_urls], []))
+        self.assertEqual(result["count"], 150)
+        for url in github_urls:
+            self.assertTrue(any(record["source_url"] == url for record in result["results"]))
 
     def test_live_search_uses_only_one_registry_page(self):
         cards = [{'wellKnownURI': f'https://agent{i}.example/card.json'} for i in range(30)]

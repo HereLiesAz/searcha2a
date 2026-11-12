@@ -11,42 +11,92 @@ import urllib.error
 import urllib.request
 
 
+MAX_BATCH_BYTES = 1_000_000
+MAX_BATCH_CARDS = 70
+MAX_CATALOG_CARDS = 150
+
+
 def ingest(catalog: dict, base: str, secret: str, *, attempts: int = 18,
            opener=urllib.request.urlopen, sleep=time.sleep) -> dict:
+    """Upsert bounded batches, returning the union of every curation suppression.
+
+    The registry validates each batch atomically. Earlier successful batches remain
+    stored if a later batch fails; publication fails closed and the next scheduled
+    crawl retries idempotent upserts. No interactive query triggers this path.
+    """
     if not base.startswith("https://") or not secret:
         raise ValueError("Registry HTTPS URL and sync secret are required")
     if catalog.get("query") != "" or not isinstance(catalog.get("results"), list):
         raise ValueError("Expected scheduled crawler catalog, not a per-query result")
-    if len(catalog["results"]) > 70:
-        raise ValueError("Crawler batch exceeds 70 cards")
-    payload = json.dumps(catalog, ensure_ascii=False).encode("utf-8")
-    if len(payload) > 1000000:
-        raise ValueError("Crawl batch exceeds registry size limit")
+    records = catalog["results"]
+    if len(records) > MAX_CATALOG_CARDS:
+        raise ValueError("Crawler catalog exceeds 150 cards")
+    if attempts < 1:
+        raise ValueError("At least one ingest attempt is required")
+    metadata = {key: value for key, value in catalog.items()
+                if key not in ("results", "count")}
+    batches: list[list] = []
+    current: list = []
+    for agent in records:
+        proposed = current + [agent]
+        payload = json.dumps({**metadata, "results": proposed, "count": len(proposed)},
+                             ensure_ascii=False).encode("utf-8")
+        if len(proposed) > MAX_BATCH_CARDS or len(payload) > MAX_BATCH_BYTES:
+            if not current:
+                raise ValueError("One Agent Card exceeds the registry upload size limit")
+            batches.append(current)
+            current = [agent]
+            single = json.dumps({**metadata, "results": current, "count": 1},
+                                ensure_ascii=False).encode("utf-8")
+            if len(single) > MAX_BATCH_BYTES:
+                raise ValueError("One Agent Card exceeds the registry upload size limit")
+        else:
+            current = proposed
+    if current or not batches:
+        batches.append(current)
+
     endpoint = base.rstrip("/") + "/internal/registry/ingest"
-    for attempt in range(attempts):
-        request = urllib.request.Request(endpoint, data=payload, method="POST", headers={
-            "Authorization": "Bearer " + secret,
-            "Content-Type": "application/json",
-            "User-Agent": "SearchA2A-Crawler",
-        })
-        try:
-            with opener(request, timeout=15) as response:
-                if response.status != 200:
-                    raise RuntimeError(f"Registry HTTP {response.status}")
-                result = json.load(response)
-                if result.get("status") != "stored":
-                    raise RuntimeError("Registry did not confirm ingestion")
-                return result
-        except urllib.error.HTTPError as exc:
-            if exc.code in (400, 401, 403, 413):
-                raise RuntimeError(f"Registry rejected crawl (HTTP {exc.code})") from exc
-            if attempt == attempts - 1:
-                raise RuntimeError(f"Registry unavailable after {attempts} attempts") from exc
-        except (urllib.error.URLError, TimeoutError) as exc:
-            if attempt == attempts - 1:
-                raise RuntimeError(f"Registry unavailable after {attempts} attempts") from exc
-        sleep(4)
-    raise RuntimeError("Registry sync failed")
+    suppressed: set[str] = set()
+    ingested = 0
+    total = 0
+    for batch in batches:
+        payload = json.dumps({**metadata, "results": batch, "count": len(batch)},
+                             ensure_ascii=False).encode("utf-8")
+        for attempt in range(attempts):
+            request = urllib.request.Request(endpoint, data=payload, method="POST", headers={
+                "Authorization": "Bearer " + secret,
+                "Content-Type": "application/json",
+                "User-Agent": "SearchA2A-Crawler",
+            })
+            try:
+                with opener(request, timeout=15) as response:
+                    if response.status != 200:
+                        raise RuntimeError(f"Registry HTTP {response.status}")
+                    result = json.load(response)
+                    if result.get("status") != "stored" or result.get("ingested") != len(batch):
+                        raise RuntimeError("Registry did not confirm complete ingestion")
+                    manifest = result.get("suppressed_ids")
+                    if not isinstance(manifest, list) or any(
+                        not isinstance(i, str) or len(i) != 20 or
+                        any(ch not in "0123456789abcdef" for ch in i)
+                        for i in manifest
+                    ):
+                        raise ValueError("Registry suppression manifest unavailable or invalid")
+                    suppressed.update(manifest)
+                    total = result["total"]
+                    ingested += len(batch)
+                    break
+            except urllib.error.HTTPError as exc:
+                if exc.code in (400, 401, 403, 413):
+                    raise RuntimeError(f"Registry rejected crawl (HTTP {exc.code})") from exc
+                if attempt == attempts - 1:
+                    raise RuntimeError(f"Registry unavailable after {attempts} attempts") from exc
+            except (urllib.error.URLError, TimeoutError) as exc:
+                if attempt == attempts - 1:
+                    raise RuntimeError(f"Registry unavailable after {attempts} attempts") from exc
+            sleep(4)
+    return {"status": "stored", "ingested": ingested, "total": total,
+            "suppressed_ids": sorted(suppressed)}
 
 
 def filter_export_catalog(catalog: dict, ingest_response: dict) -> dict:
