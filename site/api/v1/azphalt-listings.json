@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "source": "searcha2a",
-  "generated_at": "2026-11-12T12:52:46.094090+00:00",
+  "generated_at": "2026-11-12T14:34:42.690760+00:00",
   "count": 61,
   "listings": [
     {
@@ -4634,7 +4634,7 @@
       "id": "external.a2a.38768a9e2cbd80fcbaa4",
       "kind": "a2a-agent",
       "name": "x402 Pay-Precheck",
-      "description": "Pay-per-call x402 toolkit for AI agents: find which paid service to call (live-ranked), pre-check a seller's 402 terms + OFAC screen, verify settlements, Solana mint launch-config safety check, and web page to Markdown. Swap/bridge quotes via LI.FI. HTTP free tier: 5 free calls per day per IP on each /v1 endpoint (no payment header). MCP: 20 free tool calls per client per day (first call always free; invalid arguments not counted). Then x402 pay-per-call or X-API-Key credits. Prepaid credits: pay once (from 0.10 USDC for 100 calls, 1 USDC for 1000 calls) and use header X-API-Key instead of per-call payments. Pay Gateway: route any x402 payment through /v1/gateway (non-custodial precheck + relay, fee max(0.5%, $0.001) from credits, only on seller success). Referral program: 20% of net revenue on every paid endpoint.",
+      "description": "Call before paying any x402 seller: checks the seller's 402 terms (scheme, network, asset, amount, payTo) and OFAC-screens payTo (ok|warn|block|not_402). Also ranks live x402 services for a task, verifies settlements, checks Solana mint launch-config, converts a web page to Markdown, and offers a non-custodial Pay Gateway (fee only if the seller answers 2xx). Swap/bridge quotes via LI.FI. Then x402 pay-per-call or X-API-Key credits. Referral: 20% of net revenue on every paid endpoint.",
       "endpoint": "https://x402-pay-precheck.moneytools.workers.dev/a2a",
       "source_url": "https://x402-pay-precheck.moneytools.workers.dev/.well-known/agent-card.json",
       "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/38768a9e2cbd80fcbaa4.json",
