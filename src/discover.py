@@ -10,6 +10,7 @@ import ipaddress
 import json
 import os
 from pathlib import Path
+from verify_agent import verify_publisher
 import re
 import socket
 import urllib.error
@@ -302,8 +303,9 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
             card = fetch(url)
             record = normalize_card(card, url, origin)
             if record:
-                from verify_agent import verify_publisher
-                record["publisher_verification"] = verify_publisher(record, fetch=fetch)
+                evidence = verify_publisher(record, card, fetch=fetch)
+                if evidence:
+                    record["publisher_verification"] = evidence
             return record
         except (DiscoveryError, ValueError, TypeError):
             return None
