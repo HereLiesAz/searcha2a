@@ -32,6 +32,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 src/crawl_checkpoint.py load .crawl-state/previous.json
+      - name: Load public Agent Card retry state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 src/crawl_retry.py load .crawl-state/public-retries.json
       - name: Build public catalog
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -44,12 +48,21 @@ jobs:
           cp -R site/. dist/
           python3 src/discover.py --output dist/api/v1/catalog.json \
             --checkpoint-in .crawl-state/previous.json \
-            --checkpoint-out .crawl-state/staged.json
+            --checkpoint-out .crawl-state/staged.json \
+            --retry-in .crawl-state/public-retries.json \
+            --retry-out .crawl-state/public-retries-staged.json \
+            --health-output dist/api/v1/crawler-health.json
       - name: Ingest scheduled crawl into persistent registry
         env:
           REGISTRY_API_URL: ${{ vars.SEARCHA2A_API_URL }}
           REGISTRY_SYNC_SECRET: ${{ secrets.RESULT_CALLBACK_SECRET }}
         run: python3 src/registry_sync.py --catalog dist/api/v1/catalog.json
+      # Persist failed off-chain public cards before confirming on-chain
+      # progress. If the queue write fails, the chain cursor remains unchanged.
+      - name: Persist public Agent Card retries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 src/crawl_retry.py save .crawl-state/public-retries-staged.json
       # Never advance on a failed/unconfirmed ingest. An interrupted crawl
       # retries the previous numeric block range on the next scheduled run.
       - name: Commit durable ERC-8004 checkpoint
