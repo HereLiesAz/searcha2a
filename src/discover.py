@@ -15,6 +15,7 @@ from pathlib import Path
 import re
 import socket
 from verify_agent import verify_publisher
+import crawl_retry
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -1292,7 +1293,8 @@ def rank(record, query: str) -> int:
 def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github=github_sources,
              private_fetch=fetch_json, dns_fetch=fetch_json, chain_rpc=post_chain_rpc,
              oci_read=fetch_oci_bytes, mcp_post=post_mcp_metadata,
-             public_discover=post_public_directory_discover, chain_state=None):
+             public_discover=post_public_directory_discover, chain_state=None,
+             retry_state=None, health_report=None, retry_day=None):
     results = {}
     warnings = []
     candidates = candidate_sources(config)
@@ -1456,9 +1458,28 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
                 seen.add(url)
                 yield url, origin
 
-    github_cards = list(distinct_url(code_urls))[:MAX_GITHUB_CANDIDATES]
+    # Retry queues are public-only. Never save an authenticated catalog/OCI/MCP
+    # URL or followup. Their source details may be commercially confidential.
+    scheduled_retries = retry_state is not None and not query
+    retry_outcomes = []
+    eligible_public = {}
+    retry_prefix, deferred = [], set()
+    if scheduled_retries:
+        crawl_retry.validate_retry_state(retry_state)
+        today = (retry_day if retry_day is not None
+                 else datetime.now(timezone.utc).date().toordinal())
+        retry_prefix, deferred = crawl_retry.due_retries(retry_state, today)
+        for url, origin in [*retry_prefix, *candidates, *code_urls]:
+            if (origin in crawl_retry.PUBLIC_ORIGINS and
+                    crawl_retry.safe_public_card_url(url)):
+                eligible_public.setdefault(url, origin)
+    github_cards = list(distinct_url(
+        (url, origin) for url, origin in code_urls
+        if url not in deferred))[:MAX_GITHUB_CANDIDATES]
     reserved = len(github_cards)
-    unique = list(distinct_url(candidates))[:MAX_CANDIDATES - reserved]
+    unique = list(distinct_url(
+        (url, origin) for url, origin in [*retry_prefix, *candidates]
+        if url not in deferred or origin not in crawl_retry.PUBLIC_ORIGINS))[:MAX_CANDIDATES - reserved]
     existing_urls = {url for url, _ in unique}
     unique.extend((url, origin) for url, origin in github_cards if url not in existing_urls)
     unique = unique[:MAX_CANDIDATES]
@@ -1473,9 +1494,16 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
                 evidence = verify_publisher(cards[0], document, fetch=fetch)
                 if evidence:
                     cards[0]["publisher_verification"] = evidence
-            return cards, links
-        except (DiscoveryError, ValueError, TypeError, OverflowError, RecursionError):
-            return [], []
+            return cards, links, "accepted" if cards or links else "invalid", pair
+        except DiscoveryError as exc:
+            # An HTML fallback or malformed JSON is not a transient offline
+            # Agent Card. Don't keep retrying permanent non-card responses.
+            malformed = (
+                str(exc) in ("Non-JSON response Content-Type", "Oversized JSON") or
+                str(exc).endswith(": JSONDecodeError"))
+            return [], [], "invalid" if malformed else "unavailable", pair
+        except (ValueError, TypeError, OverflowError, RecursionError):
+            return [], [], "invalid", pair
 
     def prefer_verified(card):
         """Preserve a fresh publisher proof over an unverified registry copy.
@@ -1491,25 +1519,45 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
 
     discovered = []
     with ThreadPoolExecutor(max_workers=10) as pool:
-        for cards, links in pool.map(pull, unique):
+        for cards, links, outcome, pair in pool.map(pull, unique):
             for record in cards:
                 prefer_verified(record)
-            discovered.extend(links)
+            discovered.extend((link, pair[1]) for link in links)
+            if scheduled_retries and pair[0] in eligible_public:
+                retry_outcomes.append((pair[0], eligible_public[pair[0]], outcome))
 
     # At most one further GET hop. Do not spider arbitrary links, invoke A2A
     # tasks/MCP tools, or let manifests override a publisher's own card.
     visited = {url for url, _ in unique}
     followups = []
-    for url in discovered:
+    for url, parent_origin in discovered:
+        if (url in deferred and parent_origin in crawl_retry.PUBLIC_ORIGINS):
+            continue
         if url not in visited:
             visited.add(url)
             followups.append((url, "manifest"))
+            # Private catalog descendants are not eligible for public persistence.
+            if (scheduled_retries and parent_origin in crawl_retry.PUBLIC_ORIGINS
+                    and crawl_retry.safe_public_card_url(url)):
+                eligible_public.setdefault(url, "manifest")
             if len(followups) >= MAX_FOLLOWUP_CARD_URLS:
                 break
     with ThreadPoolExecutor(max_workers=10) as pool:
-        for cards, _links in pool.map(pull, followups):
+        for cards, _links, outcome, pair in pool.map(pull, followups):
             for record in cards:
                 prefer_verified(record)
+            if scheduled_retries and pair[0] in eligible_public:
+                retry_outcomes.append((pair[0], eligible_public[pair[0]], outcome))
+    if scheduled_retries:
+        metrics = crawl_retry.record_outcomes(retry_state, retry_outcomes, today)
+        if health_report is not None:
+            health_report.update({
+                "generated_at": datetime.now(timezone.utc).isoformat(),
+                "scope": "public-card-fetches-only",
+                "due_selected": len(retry_prefix),
+                "retry_deferred": len(deferred),
+                **metrics,
+            })
     ordered = sorted(results.values(), key=lambda r: (-rank(r, query), r["name"].lower()))
     if query:
         ordered = [r for r in ordered if rank(r, query) > 0]
@@ -1529,6 +1577,9 @@ def main():
     parser.add_argument("--output", required=True)
     parser.add_argument("--checkpoint-in")
     parser.add_argument("--checkpoint-out")
+    parser.add_argument("--retry-in")
+    parser.add_argument("--retry-out")
+    parser.add_argument("--health-output")
     args = parser.parse_args()
     if len(args.query) > 120:
         parser.error("query exceeds 120 characters")
@@ -1583,8 +1634,22 @@ def main():
         if (not isinstance(chain_state, dict) or chain_state.get("version") != 1
                 or not isinstance(chain_state.get("erc8004"), dict)):
             parser.error("Unsupported checkpoint schema")
+    if any((args.retry_in, args.retry_out, args.health_output)) and not all(
+            (args.retry_in, args.retry_out, args.health_output)):
+        parser.error("--retry-in, --retry-out and --health-output must be provided together")
+    if args.query and args.retry_in:
+        parser.error("Public retry state is only updated by scheduled indexing")
+    retry_state, health = None, None
+    if args.retry_in:
+        try:
+            retry_state = json.loads(Path(args.retry_in).read_text(encoding="utf-8"))
+            crawl_retry.validate_retry_state(retry_state)
+        except (ValueError, OSError, crawl_retry.RetryStateError):
+            parser.error("Invalid public retry state")
+        health = {}
     data = discover(args.query.strip(), config, token=os.environ.get("GITHUB_TOKEN", ""),
-                    chain_state=chain_state)
+                    chain_state=chain_state, retry_state=retry_state,
+                    health_report=health)
     if args.checkpoint_out:
         output_state = Path(args.checkpoint_out)
         output_state.parent.mkdir(parents=True, exist_ok=True)
@@ -1593,6 +1658,14 @@ def main():
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+    if retry_state is not None:
+        staged = Path(args.retry_out)
+        staged.parent.mkdir(parents=True, exist_ok=True)
+        staged.write_bytes(crawl_retry.validate_retry_state(retry_state))
+        report = Path(args.health_output)
+        report.parent.mkdir(parents=True, exist_ok=True)
+        report.write_text(json.dumps(health, indent=2, sort_keys=True) + "\n",
+                          encoding="utf-8")
     print(f"Found {data['count']} Agent Cards, {len(data['warnings'])} warnings")
 
 
