@@ -68,6 +68,17 @@ New tests cover SQL persistence, atomic rejection of bad ingest batches, authori
 
 ## Public crawler targets
 
+MCP 2026-07-28 metadata catalogs can be enabled through the Actions secret `SEARCHA2A_MCP_SOURCES_JSON`, containing up to four entries, for example:
+
+```json
+[{"endpoint":"https://directory.example.org/mcp","publish":true,"allow_resource_read":false}]
+```
+
+Only stateless `resources/list` metadata POST requests run by default on explicitly permitted sources. Setting `allow_resource_read: true` also permits up to ten `resources/read` calls for typed, opaque A2A resource URIs. Public HTTPS Agent Card pointers are fetched separately through the existing unauthenticated GET protections. Listings are limited to three pages of up to 50 resources, and accepted MIME types are `application/a2a+json` and `application/a2a-agent-card+json`. The crawler rejects `tools/call`, other MCP methods, filesystem URIs, SSE responses, and unapproved resource types.
+
+An optional `token` is sent as Bearer only to the configured MCP endpoint; put it inside the Actions secret, never in `sources.json`. `publish: true` is required. Normalized names, descriptions, endpoints and MCP source URLs become public; raw private cards and secrets do not. No MCP sources are enabled by default, and legacy stateful MCP endpoints are not yet supported. A2A `message/send` discovery remains disabled because it can create billable tasks, defeating SearchA2A's bring-your-own-compute boundary.
+
+
 AGNTCY Directory’s OCI artifacts can be imported from explicitly configured digest-pinned repositories. Configure an Actions secret `SEARCHA2A_AGNTCY_OCI_SOURCES_JSON` containing up to four JSON entries such as:
 
 ```json
