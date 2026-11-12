@@ -47,7 +47,7 @@ version-to-domain boundary is never guessed.
 `worker/ans.mjs` checks only DNS-name syntax and that the claimed host
 matches the explicit host. `AgentRegistry` retains the untrusted claim
 beside its stable record ID, indexes it, and exposes read-only
-`GET /api/v1/ans/resolve`. Curation and suppression apply identically
+`GET /api/v1/ans/resolve`, with bounded results and explicit ambiguity reporting. Curation and suppression apply identically
 to keyword search and name lookup. No read makes external network calls;
 claims never become `verified` by ingest or moderation.
 
