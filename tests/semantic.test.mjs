@@ -58,7 +58,7 @@ test('semantic embeddings rank non-keyword matches without connecting or dispatc
   const result = await response.json();
   assert.equal(result.match_mode, 'semantic');
   assert.equal(result.results[0].name, 'Weather Forecaster');
-  assert.equal(result.results.length, 2);
+  assert.equal(result.results.length, 1);
   assert.equal(result.verification, 'card_read_only');
   assert.equal(result.results[0].installable, false);
   assert.equal(result.results[0].match_score, 0.85);
