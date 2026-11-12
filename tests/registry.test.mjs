@@ -349,6 +349,7 @@ test('ANS resolution exposes duplicate publisher claims without selecting an ide
 
 test('semantic directory paginates every persisted card and honors moderation beyond 150', async () => {
   const state = registryEnvironment();
+  state.env.SEARCH_RATE_LIMITER = { limit: async () => ({ success: true }) };
   try {
     const records = Array.from({ length: 205 }, (_, i) => card(
       i.toString(16).padStart(20, '0'),
