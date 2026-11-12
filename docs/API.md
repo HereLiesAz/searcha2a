@@ -126,6 +126,6 @@ The callback can complete only a still-queued record whose UUID and query match.
 
 ## Data and verification limits
 
-SearchA2A fetches public Agent Cards over HTTPS with public-DNS checks, redirects disabled, a seven-second per-source timeout, a 512 KiB JSON-document ceiling, and at most 90 card candidates. Discovery uses up to eight concurrent card fetches. Search is bounded and incomplete by design: GitHub API search availability, rate limits, source failures and registry formats all affect coverage.
+SearchA2A fetches public Agent Cards over HTTPS with public-DNS checks, redirects disabled, a seven-second per-source timeout, a 512 KiB JSON-document ceiling, and at most 90 card candidates. Discovery uses up to eight concurrent card fetches. The crawler takes explicit seeds and JSON registries, including up to two pages of 30 records from each configured paginated registry. For live searches it passes the query as the registry's `search` parameter; metadata-only registry rows are resolved through their original `wellKnownURI` rather than exposed directly. Results remain bounded and incomplete: GitHub API search availability, rate limits, source failures and registry formats all affect coverage.
 
 A published card is **metadata read only**, not proof of identity, runtime availability, or A2A conformance.

@@ -27,4 +27,4 @@ Each card shows an agent's description, advertised skills and discovery source. 
 
 The [API reference](docs/API.md) explains how to read public data and how the live search API works. The live API requires a valid Cloudflare verification token; the static catalog does not.
 
-[Operations](docs/OPERATIONS.md) covers setup and troubleshooting. [Architecture](docs/ARCHITECTURE.md) documents implementation and security boundaries. [Source configuration](sources.json) lists the curated discovery inputs.
+[Operations](docs/OPERATIONS.md) covers setup and troubleshooting. [Architecture](docs/ARCHITECTURE.md) documents implementation and security boundaries. [Source configuration](sources.json) lists the curated discovery inputs, including a bounded paginated A2A Registry feed. The crawler fetches each listed agent's original public Agent Card; directory metadata alone is not treated as a verified card.
