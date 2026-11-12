@@ -1,47 +1,30 @@
 # SearchA2A
 
-Public discovery for A2A Agent Cards, powered by **GitHub Actions**.
+Find AI agents by what they do. SearchA2A discovers publicly listed A2A Agent Cards, skills and endpoints without requiring you to register an account.
 
-**Search button → Cloudflare request gateway → GitHub Actions search → result callback → searchable page and JSON API.** Every user query launches its own bounded workflow run. The Worker authenticates and dispatches the work. Each search's SQLite-backed Durable Object stores its strongly consistent result. A separate daily Actions workflow publishes a fresh static catalog to GitHub Pages.
+**[Search for agents](https://searcha2a.azphalt.store/)**
 
-## Interfaces
+## Search
 
-| Interface | Purpose |
-|---|---|
-| GitHub Pages `https://searcha2a.azphalt.store/` | Search Agent Cards by natural-language keywords, skills and capabilities. |
-| `POST /api/v1/search` (Worker) | Trigger a new Actions run; JSON `{"query":"forecast","turnstile":"<challenge-token>"}`. Returns HTTP 202 with request ID. |
-| `GET /api/v1/results/{id}` (Worker) | Poll queued search and retrieve full results JSON. Results expire after 7 days via a storage alarm, without KV propagation delays. |
-| GitHub Pages `https://searcha2a.azphalt.store/api/v1/catalog.json` | Read-only, daily-generated public catalog snapshot; no token required. |
-| GitHub Pages `https://searcha2a.azphalt.store/api/v1/azphalt-listings.json` | Automatically generated, read-only external-agent listings for Azphalt Store. |
+1. Enter a skill, capability or agent name, such as **weather**, **code review** or **translation**.
+2. Complete the Cloudflare verification when prompted and select **Search agents**.
+3. The page starts a fresh search. Once it finishes, the results below the search box update automatically.
 
-Card results provide agent name, description, skills/tags, protocol bindings, endpoint, source, timestamp and verification level. Card validation isn't proof of a functioning remote agent. No invocation or execution of third-party agents is performed.
+A live search takes time to run. The page shows its progress and checks for results automatically. Until the new results arrive, cards from the recently indexed catalog may remain on screen. A search can also return no matches.
 
-## Azphalt Store integration
+## Read the results
 
-The daily Pages workflow generates `api/v1/azphalt-listings.json` from the same crawl, one listing per valid deduplicated Agent Card. It mirrors this snapshot to the `agent-feed` branch at `site/api/v1/azphalt-listings.json`, served via `raw.githubusercontent.com` so Azphalt's Cloudflare Worker need not fetch another hostname in its own zone. Azphalt Store consumes this via its read-only `/api/a2a/agents` proxy and `/agents` directory. Listings are explicitly `kind: "a2a-agent"`, `installable: false`, and `verification: "card_read_only"`. They are **not** signed `.azp` packages, LLMs, advertised free purchases, or first-party trusted agents. The Store never downloads or runs third-party agents.
+Each card shows an agent's description, advertised skills and discovery source. Select **Agent Card** to inspect its published metadata or **Endpoint** to open its advertised URL.
 
+**Listings are not endorsements or availability checks.** An agent card can be outdated, inaccurate or unreachable. SearchA2A reads metadata; it does not run, install or authenticate the advertised agents.
 
-## Domain
+## Browse without searching
 
-The public hostname is `https://searcha2a.azphalt.store/`; its DNS-only CNAME must point to `hereliesaz.github.io`, **not** to the repository path. The GitHub Pages custom domain must also be registered in Pages settings. The repository-local **Configure searcha2a.azphalt.store** Action can perform both operations after its credentials are configured; it refuses to overwrite conflicting DNS records. GitHub Actions Pages deployments do not use a repository `CNAME` file.
+- [Recently indexed agents](https://searcha2a.azphalt.store/api/v1/catalog.json): public JSON catalog, no verification needed.
+- [Azphalt A2A Agents](https://azphalt.store/agents): browse discovered external agents in the Azphalt Store. These entries are informational, not installable Azphalt packages.
 
-The Actions-dispatch API remains on a separate Cloudflare Worker hostname, configured via the repository variable `SEARCHA2A_API_URL`. No credentials are published by the static site.
+## API and other documentation
 
-## Setup
+The [API reference](docs/API.md) explains how to read public data and how the live search API works. The live API requires a valid Cloudflare verification token; the static catalog does not.
 
-See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the deployment configuration, security boundaries, secrets, and local tests. Deploying the Cloudflare Worker requires the owner's Cloudflare account; a static GitHub Page cannot hold the write-authorized GitHub token necessary to dispatch workflows.
-
-## Sources
-
-Edit [sources.json](sources.json) to add public Agent Card URLs and compatible public JSON registry endpoints. GitHub code search contributes additional A2A card candidates. The crawler understands current `/.well-known/agent-card.json` and legacy `/.well-known/agent.json` metadata, including GitHub-hosted JSON files. Registry formats are not standardized, so unfamiliar APIs need dedicated adapters.
-
-- [A2A Agent Card specification](https://a2a-protocol.org/latest/specification/agent-card/)
-- [Solo.io: Agent Discovery, Naming, and Resolution](https://www.solo.io/blog/agent-discovery-naming-and-resolution---the-missing-pieces-to-a2a)
-- [GitHub workflow dispatch API](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)
-
-## Local tests
-
-```sh
-python3 -m unittest discover -s tests -p 'test_*.py'
-node --test tests/*.test.mjs
-```
+[Operations](docs/OPERATIONS.md) covers setup and troubleshooting. [Architecture](docs/ARCHITECTURE.md) documents implementation and security boundaries. [Source configuration](sources.json) lists the curated discovery inputs.
