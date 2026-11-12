@@ -37,6 +37,23 @@ class CatalogConnectorTests(unittest.TestCase):
         self.assertEqual([card["name"] for card in cards], ["Weather Agent"])
         self.assertEqual(urls, [])
 
+    def test_typed_ai_catalog_registry_rotation_reaches_beyond_first_page(self):
+        rows = [
+            {"mediaType": AI, "data": {
+                **CARD, "name": f"Agent {i:03d}", "url": f"https://a{i}.example.org/a2a",
+            }} for i in range(200)
+        ]
+        catalog = {"specVersion": "1.0", "entries": rows}
+        selected, links = discover.unpack_cards(
+            catalog, "https://catalog.example.org/.well-known/ai-catalog.json",
+            "registry", offset=150)
+        self.assertEqual(len(selected), 150)
+        self.assertEqual(selected[0]["name"], "Agent 150")
+        self.assertEqual(selected[49]["name"], "Agent 199")
+        self.assertEqual(selected[50]["name"], "Agent 000")
+        self.assertEqual(selected[-1]["name"], "Agent 099")
+        self.assertEqual(links, [])
+
     def test_inline_ai_catalog_nesting_is_bounded_and_ignores_untyped_branches(self):
         nested = {"specVersion": "1.0", "entries": [
             {"mediaType": AI, "data": CARD},
