@@ -226,6 +226,57 @@ class ERC8004CheckpointTests(unittest.TestCase):
         self.assertEqual(seen[-1], (896, 1000))
         self.assertEqual(len(seen), 13)
 
+    def test_failed_bootstrap_keeps_initial_height_across_new_chain_tips(self):
+        state = {"version": 1, "erc8004": {}}
+        def failure(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x3e8"}  # 1000
+            raise discover.DiscoveryError("RPC range unavailable")
+        found, warnings = discover.erc8004_checkpointed_sources(
+            config(start_block=None, finality_blocks=0,
+                   lookback_blocks=512, window_blocks=512),
+            state, post=failure)
+        self.assertEqual(found, [])
+        self.assertEqual(warnings, ["ERC-8004 source unavailable"])
+        self.assertEqual(cursor(state)["next_block"], 489)
+
+        first_requested = []
+        def recovery(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x7d0"}  # 2000
+            first_requested.append(int(params[0]["fromBlock"], 16))
+            return {"result": []}
+        found, warnings = discover.erc8004_checkpointed_sources(
+            config(start_block=None, finality_blocks=0,
+                   lookback_blocks=512, window_blocks=512),
+            state, post=recovery)
+        self.assertEqual(first_requested[0], 489)
+        self.assertEqual(cursor(state)["next_block"], 2001)
+        self.assertEqual(found, [])
+        self.assertEqual(warnings, [])
+
+    def test_budget_reduced_window_recovers_on_next_quiet_run(self):
+        state = {"version": 1, "erc8004": {
+            "4d50994a8bbdcb94798d8d08e05fe4ba":
+                {"next_block": 40, "window": 1},
+        }}
+        requested = []
+        def rpc(_, method, params):
+            if method == "eth_blockNumber":
+                return {"result": "0x186a0"}  # 100000
+            requested.append((int(params[0]["fromBlock"], 16),
+                              int(params[0]["toBlock"], 16)))
+            return {"result": []}
+        found, warnings = discover.erc8004_checkpointed_sources(
+            config(start_block=0, window_blocks=4096), state, post=rpc)
+        self.assertEqual(found, [])
+        self.assertEqual(requested[0], (40, 40))
+        self.assertEqual(requested[1], (41, 42))
+        self.assertEqual(cursor(state)["window"], 4096)
+        self.assertGreater(cursor(state)["next_block"], 10000)
+        self.assertEqual(len(requested), 16)
+        self.assertEqual(warnings, ["ERC-8004 backfill continues at saved cursor"])
+
     def test_partial_window_budget_is_bounded_with_retriable_height(self):
         called = []
         def rpc(_, method, params):
