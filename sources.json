@@ -81,5 +81,11 @@
     }
   ],
   "agntcy_oci_sources": [],
-  "mcp_sources": []
+  "mcp_sources": [],
+  "public_directory_apis": [
+    {
+      "endpoint": "https://allagents.app/discover",
+      "enabled": true
+    }
+  ]
 }
