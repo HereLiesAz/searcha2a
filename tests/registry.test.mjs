@@ -52,6 +52,7 @@ function registryEnvironment({ legacySchema = false, ai = undefined } = {}) {
       ...(ai ? { AI: ai } : {}),
       REGISTRY: { idFromName: name => name, get: () => object },
     },
+    sql: storage.sql,
     close: () => database.close(),
   };
 }
@@ -404,6 +405,13 @@ test('incremental embeddings reuse persisted vectors and invalidate only changed
     const again = await (await find()).json();
     assert.equal(again.match_mode, 'semantic');
     assert.deepEqual(calls.map(batch => batch.length), [1]);
+
+    // Invalid cached JSON is treated as a missing vector, never a 502 or an
+    // opportunity to serve unmoderated records.
+    state.sql.exec('UPDATE agent_embeddings SET vector=? WHERE id=?', '{invalid', weather.id);
+    calls.length = 0;
+    assert.equal((await (await find()).json()).match_mode, 'semantic');
+    assert.deepEqual(calls.map(batch => batch.length), [1, 1]);
 
     // Re-ingesting identical semantic input must not trigger candidate inference.
     await ingest(state.env, [{ ...target, version: '2' }]);
