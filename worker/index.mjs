@@ -1,4 +1,4 @@
-/** Scheduled-crawl registry search, legacy semantic directory and result mailboxes. */
+/** Scheduled registry, unified semantic ANS search, and legacy result mailboxes. */
 import { rankAgentCandidates } from './semantic.mjs';
 import { normalizeAnsName, parseAnsClaim } from './ans.mjs';
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
@@ -201,14 +201,16 @@ export class AgentRegistry {
       const raw = url.searchParams.get('name');
       const name = normalizeAnsName(raw);
       if (!name) return respond({ error: 'Invalid ANS name' }, 400);
+      const visible = "ans_name=? AND listing_state='active' AND review_status != 'rejected'";
+      const count = this.sql.exec(
+        `SELECT COUNT(*) AS total FROM agents WHERE ${visible}`, name).one().total;
+      if (!count) return respond({ error: 'ANS name not found in registry' }, 404);
       const rows = this.sql.exec(`SELECT record, review_status FROM agents
-        WHERE ans_name=? AND listing_state='active' AND review_status != 'rejected'
-        ORDER BY name_search ASC LIMIT 21`, name).toArray();
-      return rows.length
-        ? respond({ name: raw, count: rows.length, results: rows.map(row => ({
-            ...JSON.parse(row.record), curation_status: row.review_status,
-          })), identity_verified: false })
-        : respond({ error: 'ANS name not found in registry' }, 404);
+        WHERE ${visible} ORDER BY name_search ASC LIMIT 20`, name).toArray();
+      return respond({ name: raw, count, truncated: count > 20,
+        ambiguous: count > 1, identity_verified: false,
+        results: rows.map(row => ({ ...JSON.parse(row.record),
+          curation_status: row.review_status })) });
     }
     const idMatch = path.match(/^\/agent\/([0-9a-f]{20})$/);
     if (request.method === 'GET' && idMatch) {
