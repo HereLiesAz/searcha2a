@@ -6,8 +6,7 @@
     "https://agentgalaxy.dev/.well-known/agent-card.json"
   ],
   "registry_urls": [
-    "https://agora.sovont.com/v1/agents",
-    "https://www.a2aregistry.org/registry.json"
+    "https://agora.sovont.com/v1/agents"
   ],
   "paginated_registry_urls": [
     "https://a2aregistry.org/api/agents"
@@ -22,5 +21,7 @@
     "https://publicadjusters.fyi",
     "https://agentgalaxy.dev"
   ],
-  "assistant_ids": {}
+  "assistant_ids": {},
+  "rotate_registry_feeds": true,
+  "rotate_paginated_registry": true
 }
