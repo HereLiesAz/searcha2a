@@ -47,6 +47,16 @@ MAX_MCP_PAGES = 3
 MAX_MCP_RESOURCES_PER_PAGE = 50
 MAX_MCP_RESOURCE_READS = 10
 MAX_MCP_DOCUMENT = 262144
+MAX_PUBLIC_DISCOVERY_APIS = 2
+MAX_PUBLIC_DISCOVERY_TOPICS_PER_RUN = 3
+MAX_PUBLIC_DISCOVERY_ROWS = 25
+MAX_PUBLIC_DISCOVERY_BYTES = 262144
+PUBLIC_DISCOVERY_TOPICS = (
+    'research', 'coding', 'legal', 'automation', 'memory',
+    'identity', 'commerce', 'monitoring', 'security', 'translation',
+    'finance', 'media', 'marketing', 'trading', 'travel',
+)
+PUBLIC_DISCOVERY_ENDPOINTS = frozenset({'https://allagents.app/discover'})
 MCP_PROTOCOL_VERSION = "2026-07-28"
 REGISTERED_TOPIC = "0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a"
 URI_UPDATED_TOPIC = "0x3a2c7fffc2cba7582c690e3b82c453ea02a308326a98a3ad7576c606336409fb"
@@ -268,7 +278,7 @@ def card_references(item, source_url: str):
     urls = []
     for key in ("wellKnownURI", "card_url", "cardUrl", "agentCardUrl",
                 "agentCardURI", "agentURI", "agentUri", "agent_card_url",
-                "agent_card_uri", "card"):
+                "agent_card_uri", "agent_card", "card"):
         value = item.get(key)
         if isinstance(value, str):
             link = public_card_link(value, source_url, explicit_card=True)
@@ -969,6 +979,105 @@ def mcp_metadata_sources(config, post=post_mcp_metadata):
     return cards, list(dict.fromkeys(links))[:MAX_FOLLOWUP_CARD_URLS], warnings
 
 
+def post_public_directory_discover(url: str, need: str):
+    """Make one bounded metadata-only directory search, not an A2A task."""
+    if url not in PUBLIC_DISCOVERY_ENDPOINTS or need not in PUBLIC_DISCOVERY_TOPICS:
+        raise DiscoveryError("Unsupported public directory request")
+    require_public_https(url)
+    body = json.dumps({"need": need, "alive": True,
+                       "protocols": ["A2A"], "endpoint": "a2a",
+                       "limit": MAX_PUBLIC_DISCOVERY_ROWS},
+                      separators=(",", ":")).encode("utf-8")
+    headers = {"User-Agent": USER_AGENT, "Accept": "application/json",
+               "Content-Type": "application/json"}
+    try:
+        with OPENER.open(urllib.request.Request(
+                url, data=body, headers=headers, method="POST"), timeout=7) as response:
+            if response.status != 200:
+                raise DiscoveryError("Directory metadata unavailable")
+            media = response.headers.get("Content-Type", "").split(";", 1)[0].lower()
+            if media != "application/json" and not (
+                    media.startswith("application/") and media.endswith("+json")):
+                raise DiscoveryError("Directory metadata is not JSON")
+            data = response.read(MAX_PUBLIC_DISCOVERY_BYTES + 1)
+            if len(data) > MAX_PUBLIC_DISCOVERY_BYTES:
+                raise DiscoveryError("Oversized directory metadata")
+            return json.loads(data)
+    except (ValueError, RecursionError, urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise DiscoveryError("Directory metadata unavailable") from exc
+
+
+def public_directory_sources(config, post=post_public_directory_discover):
+    """Harvest only card metadata from explicitly enabled public search APIs.
+
+    Search queries are fixed, non-personal topical strings. A daily three-topic
+    rotation offers broad recall without costs or remote task execution.
+    """
+    configured = config.get("public_directory_apis", [])
+    cards, links, warnings = [], [], []
+    if not isinstance(configured, list):
+        return cards, links, warnings
+    rotation = config.get("rotation_index")
+    if type(rotation) is not int or rotation < 0:
+        rotation = datetime.now(timezone.utc).date().toordinal()
+    for entry in configured[:MAX_PUBLIC_DISCOVERY_APIS]:
+        if not isinstance(entry, dict) or entry.get("enabled") is not True:
+            continue
+        endpoint = entry.get("endpoint")
+        if endpoint not in PUBLIC_DISCOVERY_ENDPOINTS:
+            warnings.append("Public directory source unsupported")
+            continue
+        local_links = []
+        for i in range(MAX_PUBLIC_DISCOVERY_TOPICS_PER_RUN):
+            topic = PUBLIC_DISCOVERY_TOPICS[
+                (rotation * MAX_PUBLIC_DISCOVERY_TOPICS_PER_RUN + i)
+                % len(PUBLIC_DISCOVERY_TOPICS)]
+            try:
+                document = post(endpoint, topic)
+                if isinstance(document, dict) and isinstance(document.get("matches"), list):
+                    rows = document["matches"][:MAX_PUBLIC_DISCOVERY_ROWS]
+                else:
+                    rows = extract_registry_items(document, limit=MAX_PUBLIC_DISCOVERY_ROWS)
+                for item in rows:
+                    if not isinstance(item, dict):
+                        continue
+                    refs = card_references(item, endpoint)
+                    if refs:
+                        local_links.extend(refs)
+                        continue
+                    # The directory's /discover URL is NOT an Agent Card URL.
+                    # Derive only a canonical HTTPS card probe from an explicitly
+                    # labeled A2A endpoint and let existing GET validation decide.
+                    embedded = item.get("card") or item.get("agentCard")
+                    services = item.get("endpoints")
+                    reach = item.get("reach")
+                    a2a = (embedded.get("url") if isinstance(embedded, dict) else None)
+                    if not a2a and isinstance(services, dict):
+                        a2a = services.get("a2a")
+                    if (not a2a and isinstance(reach, dict)
+                            and reach.get("type") == "a2a"):
+                        a2a = reach.get("door")
+                    if not isinstance(a2a, str):
+                        continue
+                    try:
+                        parsed = urllib.parse.urlsplit(a2a)
+                        if (parsed.scheme != "https" or not parsed.hostname
+                                or parsed.username or parsed.password
+                                or parsed.port not in (None, 443)):
+                            continue
+                        derived = public_card_link(
+                            "https://" + parsed.hostname + "/.well-known/agent-card.json",
+                            endpoint, explicit_card=True)
+                    except ValueError:
+                        continue
+                    if derived:
+                        local_links.append(derived)
+            except (DiscoveryError, ValueError, TypeError, RecursionError):
+                warnings.append("Public directory metadata unavailable")
+        links.extend(local_links)
+    return cards, list(dict.fromkeys(links))[:MAX_FOLLOWUP_CARD_URLS], warnings
+
+
 def candidate_sources(config):
     candidates = []
     for url in config.get("card_urls", []):
@@ -1037,7 +1146,8 @@ def rank(record, query: str) -> int:
 
 def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github=github_sources,
              private_fetch=fetch_json, dns_fetch=fetch_json, chain_rpc=post_chain_rpc,
-             oci_read=fetch_oci_bytes, mcp_post=post_mcp_metadata):
+             oci_read=fetch_oci_bytes, mcp_post=post_mcp_metadata,
+             public_discover=post_public_directory_discover):
     results = {}
     warnings = []
     candidates = candidate_sources(config)
@@ -1059,6 +1169,15 @@ def discover(query: str, config: dict, token: str = "", fetch=fetch_json, github
         results.setdefault(record["id"], record)
     candidates.extend((link, "mcp-resource") for link in mcp_links)
     warnings.extend(mcp_warnings)
+    # A directory search is metadata-only, enabled for scheduled indexing,
+    # never used to service a live end-user query.
+    if not query:
+        public_cards, public_links, public_warnings = public_directory_sources(
+            config, post=public_discover)
+        for record in public_cards:
+            results.setdefault(record["id"], record)
+        candidates.extend((link, "public-directory") for link in public_links)
+        warnings.extend(public_warnings)
     rotation = config.get('rotation_index')
     if type(rotation) is not int or rotation < 0:
         rotation = datetime.now(timezone.utc).date().toordinal()
