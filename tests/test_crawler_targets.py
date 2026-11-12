@@ -28,6 +28,10 @@ class CrawlerTargetsTests(unittest.TestCase):
             "https://agents.example.com/agent.json",
             "https://agents.example.com/a2a/.well-known/agent.json",
             "https://agents.example.com/.wellknown/agent-card.json",
+            "https://agents.example.com/agent-card.json",
+            "https://agents.example.com/.well-known/ai-catalog.json",
+            "https://agents.example.com/.well-known/ard.json",
+            "https://agents.example.com/.well-known/agent-registration.json",
         ])
 
     def test_no_arbitrary_domain_paths_ports_or_assistant_enumeration(self):
@@ -35,7 +39,7 @@ class CrawlerTargetsTests(unittest.TestCase):
                     "http://insecure.example", "https://agents.example.com:8443"],
                   "assistant_ids": {"https://agents.example.com": ["known-1", "bad/id", ""]}}
         found = [url for url, _ in discover.domain_sources(config)]
-        self.assertEqual(len(found), 8)
+        self.assertEqual(len(found), 12)
         self.assertEqual(found[-1],
                          "https://agents.example.com/.well-known/agent-card.json?assistant_id=known-1")
         self.assertTrue(all(url.startswith("https://agents.example.com/") for url in found))
