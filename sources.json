@@ -71,13 +71,17 @@
       "enabled": true,
       "rpc_url": "https://mainnet.base.org",
       "registry_address": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
-      "lookback_blocks": 512
+      "lookback_blocks": 512,
+      "window_blocks": 4096,
+      "finality_blocks": 64
     },
     {
       "enabled": true,
       "rpc_url": "https://ethereum-rpc.publicnode.com",
       "registry_address": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
-      "lookback_blocks": 512
+      "lookback_blocks": 512,
+      "window_blocks": 4096,
+      "finality_blocks": 64
     }
   ],
   "agntcy_oci_sources": [],

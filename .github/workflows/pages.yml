@@ -28,6 +28,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Load durable ERC-8004 checkpoint
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 src/crawl_checkpoint.py load .crawl-state/previous.json
       - name: Build public catalog
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -38,12 +42,20 @@ jobs:
         run: |
           mkdir -p dist
           cp -R site/. dist/
-          python3 src/discover.py --output dist/api/v1/catalog.json
+          python3 src/discover.py --output dist/api/v1/catalog.json \
+            --checkpoint-in .crawl-state/previous.json \
+            --checkpoint-out .crawl-state/staged.json
       - name: Ingest scheduled crawl into persistent registry
         env:
           REGISTRY_API_URL: ${{ vars.SEARCHA2A_API_URL }}
           REGISTRY_SYNC_SECRET: ${{ secrets.RESULT_CALLBACK_SECRET }}
         run: python3 src/registry_sync.py --catalog dist/api/v1/catalog.json
+      # Never advance on a failed/unconfirmed ingest. An interrupted crawl
+      # retries the previous numeric block range on the next scheduled run.
+      - name: Commit durable ERC-8004 checkpoint
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 src/crawl_checkpoint.py save .crawl-state/staged.json
       - name: Export Azphalt external-agent listings
         run: python3 src/azphalt_listings.py --catalog dist/api/v1/catalog.json --output dist/api/v1/azphalt-listings.json
       - name: Mirror published Azphalt feed to GitHub raw CDN
