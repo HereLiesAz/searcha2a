@@ -2,8 +2,8 @@
   "schema": 1,
   "schema_revision": "1.1",
   "source": "searcha2a",
-  "generated_at": "2026-11-13T03:35:16.085175+00:00",
-  "count": 128,
+  "generated_at": "2026-11-13T11:23:51.299885+00:00",
+  "count": 145,
   "listings": [
     {
       "id": "external.a2a.600702a8b4423e45bba5",
@@ -108,10 +108,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.797c0269a97bddd594c6",
@@ -174,10 +174,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.cca894a662a0397ac91e",
@@ -233,10 +233,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.bcdb2beac5275b6c14e4",
@@ -322,10 +322,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.7dc44030c6f20c02bb31",
@@ -465,10 +465,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.e915b28fc8e394e514dd",
@@ -520,10 +520,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.7941e6a466717cffcfcb",
@@ -671,10 +671,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.6e506df8673ccbd0bf89",
@@ -724,10 +724,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.c47831692bfa4097fa37",
@@ -1007,10 +1007,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.a2bbf8c301484810c4ac",
@@ -1090,10 +1090,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.9a397dedf9920d2d7b54",
@@ -1155,10 +1155,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.7e531c2dea62decf3e81",
@@ -1211,10 +1211,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.46920344a316771e4fca",
@@ -1277,7 +1277,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.5d265bb4d56a1d779f48",
@@ -1419,13 +1419,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.c408f3474e21ec02e727",
@@ -1478,10 +1478,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.50566428b1b615303b60",
@@ -1612,13 +1612,13 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.38e9d0db953b45156f5d",
       "kind": "a2a-agent",
       "name": "allagents",
-      "description": "Every AI agent — found and renowned. The reference directory of the agent web — a world directory of AI agents by specialty (17036 listed). Ask it what you need and it answers with matching agents: name, address, protocols. List yourself in one POST — free, instant, no account. Operated from Switzerland.",
+      "description": "Every AI agent — found and renowned. The reference directory of the agent web — a world directory of AI agents by specialty (17031 listed). Ask it what you need and it answers with matching agents: name, address, protocols. List yourself in one POST — free, instant, no account. Operated from Switzerland.",
       "endpoint": "https://allagents.app/a2a",
       "source_url": "https://allagents.app/.well-known/agent-card.json",
       "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/38e9d0db953b45156f5d.json",
@@ -1726,7 +1726,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.23cd12ec7b2458a00374",
@@ -1790,7 +1790,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.23529ed5a20ae2f9aa23",
@@ -1879,7 +1879,263 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.d452ab47bfecdcf23400",
+      "kind": "a2a-agent",
+      "name": "Authenticated LLM Agent",
+      "description": "Authenticated LLM Agent: composes bcrypt + langchain-openai + mcp + openai + python-jose — crypto, orchestration, agent-protocol, llm-client, jwt via A2A + MCP.",
+      "endpoint": "https://authenticated-llm-agent.getvda.ai/a2a/",
+      "source_url": "https://authenticated-llm-agent.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/d452ab47bfecdcf23400.json",
+      "skills": [
+        {
+          "name": "Crypto",
+          "description": "crypto capability provided by bcrypt.",
+          "tags": [
+            "bcrypt"
+          ]
+        },
+        {
+          "name": "Orchestration",
+          "description": "orchestration capability provided by langchain-openai.",
+          "tags": [
+            "langchain-openai"
+          ]
+        },
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by mcp.",
+          "tags": [
+            "mcp"
+          ]
+        },
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by openai.",
+          "tags": [
+            "openai"
+          ]
+        },
+        {
+          "name": "Jwt",
+          "description": "jwt capability provided by python-jose.",
+          "tags": [
+            "python-jose"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.064578ceab31254fbbd6",
+      "kind": "a2a-agent",
+      "name": "Authenticated LLM Traced Agent",
+      "description": "Authenticated LLM Traced Agent: composes cryptography + google-auth-oauthlib + langchain-openai + mcp + openai + opentelemetry-api + opentelemetry-sdk — crypto, oauth-oidc, orchestration, agent-protocol, llm-client, observability via A2A + MCP.",
+      "endpoint": "https://authenticated-llm-traced-agent.getvda.ai/a2a/",
+      "source_url": "https://authenticated-llm-traced-agent.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/064578ceab31254fbbd6.json",
+      "skills": [
+        {
+          "name": "Crypto",
+          "description": "crypto capability provided by cryptography.",
+          "tags": [
+            "cryptography"
+          ]
+        },
+        {
+          "name": "Oauth Oidc",
+          "description": "oauth oidc capability provided by google-auth-oauthlib.",
+          "tags": [
+            "google-auth-oauthlib"
+          ]
+        },
+        {
+          "name": "Orchestration",
+          "description": "orchestration capability provided by langchain-openai.",
+          "tags": [
+            "langchain-openai"
+          ]
+        },
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by mcp.",
+          "tags": [
+            "mcp"
+          ]
+        },
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by openai.",
+          "tags": [
+            "openai"
+          ]
+        },
+        {
+          "name": "Observability",
+          "description": "observability capability provided by opentelemetry-api, opentelemetry-sdk.",
+          "tags": [
+            "opentelemetry-api",
+            "opentelemetry-sdk"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 2,
+        "level_name": "endpoint_reachable",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.6f40153a7e46d56a2605",
+      "kind": "a2a-agent",
+      "name": "Authenticated Multi-LLM Agent",
+      "description": "Authenticated Multi-LLM Agent: composes anthropic + google-auth-oauthlib + mcp + openai — llm-client, oauth-oidc, agent-protocol via A2A + MCP.",
+      "endpoint": "https://authenticated-multi-llm-agent.getvda.ai/a2a/",
+      "source_url": "https://authenticated-multi-llm-agent.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/6f40153a7e46d56a2605.json",
+      "skills": [
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by anthropic, openai.",
+          "tags": [
+            "anthropic",
+            "openai"
+          ]
+        },
+        {
+          "name": "Oauth Oidc",
+          "description": "oauth oidc capability provided by google-auth-oauthlib.",
+          "tags": [
+            "google-auth-oauthlib"
+          ]
+        },
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by mcp.",
+          "tags": [
+            "mcp"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.ab7bd2dc10c104db5dcc",
@@ -1999,10 +2255,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.7c1655aa1a185291de5f",
@@ -2203,10 +2459,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.01c50da76346111dfb9a",
@@ -2282,7 +2538,7 @@
         "checked_at": "2026-11-12T21:10:25Z",
         "expires_at": "2026-11-19T21:10:25Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.4d873a944a3af6fb6fd3",
@@ -2334,9 +2590,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.253c8654e4bb51acc148",
@@ -2407,7 +2663,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.a6c2d44c28abf2bd77c8",
@@ -2527,10 +2783,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.cc8506b0b2b2d7da179f",
@@ -2583,10 +2839,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.a603f19f785ba7d149ec",
@@ -2631,10 +2887,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.e88bc7d3cb23584b7e85",
@@ -2681,10 +2937,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.c1dc5a1d3fd0a3c45adb",
@@ -2732,10 +2988,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.45c4a12d73fccb72f2ad",
@@ -2938,7 +3194,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.4874e5e34d1894d5f225",
@@ -3009,80 +3265,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
-    },
-    {
-      "id": "external.a2a.10227019e9cfd6839c57",
-      "kind": "a2a-agent",
-      "name": "CurseX",
-      "description": "Public agent cards. Lint, lookup, or claim a handle.",
-      "endpoint": "https://cursex.tech/a2a",
-      "source_url": "https://cursex.tech/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/10227019e9cfd6839c57.json",
-      "skills": [
-        {
-          "name": "Lint",
-          "description": "POST an agent-card JSON over A2A message/send, or POST /v1/lint",
-          "tags": [
-            "lint",
-            "a2a",
-            "validation"
-          ]
-        },
-        {
-          "name": "Lookup",
-          "description": "GET /v1/lookup?handle=",
-          "tags": [
-            "lookup",
-            "directory",
-            "identity"
-          ]
-        },
-        {
-          "name": "Claim",
-          "description": "POST /api/claim",
-          "tags": [
-            "claim",
-            "handles",
-            "identity"
-          ]
-        }
-      ],
-      "protocols": [
-        "JSONRPC",
-        "JSONRPC"
-      ],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "CurseX",
-          "url_host": "cursex.tech"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 2,
-        "level_name": "endpoint_reachable",
-        "reviewed": false,
-        "checked_at": "2026-11-12T21:10:25Z",
-        "expires_at": "2026-11-19T21:10:25Z"
-      },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.e211fdf91d7deb4b9d3b",
@@ -3169,10 +3354,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.65fb2c59c7c7935342bc",
@@ -3308,13 +3493,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.96b11850f82a83f65915",
@@ -3374,10 +3559,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.80e895cb6fd46561f551",
@@ -3437,10 +3622,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.57b33bc2d4ba965333c6",
@@ -3508,10 +3693,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.680580cc766c6c853639",
@@ -3695,13 +3880,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.e72f6fd45fa6684ceb9d",
@@ -3780,10 +3965,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.01c874c229e03584359d",
@@ -3970,7 +4155,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.baad488605aec6ebcf97",
@@ -4091,10 +4276,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.01d7835ff9b33c0b3eb5",
@@ -4173,9 +4358,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.e978e10c3d8463e1c0c1",
@@ -4228,10 +4413,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.3d1dd714aa70f28f1a38",
@@ -4319,9 +4504,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.0cc05d5059c871dcf06b",
@@ -4370,7 +4555,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.954abca2569689badad6",
@@ -4454,10 +4639,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.acfbd2e91368e6a3abd2",
@@ -4549,10 +4734,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.593ff03efc70d1bed280",
@@ -4630,13 +4815,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.bcacf5cc9ae45029601f",
@@ -4731,10 +4916,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.7e9576ba2aa17d706802",
@@ -4794,10 +4979,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.411a65b4ce1822513f37",
@@ -4849,9 +5034,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.8b318ef3f2151bf1d3ec",
@@ -4920,10 +5105,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.7de16c40dd5896d5f284",
@@ -5005,10 +5190,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.d300158ec96f92f35035",
@@ -5082,10 +5267,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.fbe17962bad68a6f1c9b",
@@ -5371,10 +5556,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.87e78f8c15b3f76e0b7c",
@@ -5439,10 +5624,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.d4186fced28d33043870",
@@ -5589,10 +5774,76 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.d23c72cd3ab6dea4ded9",
+      "kind": "a2a-agent",
+      "name": "Google OAuth Credential Service",
+      "description": "Google OAuth Credential Service: composes cryptography + google-auth-oauthlib — crypto, oauth-oidc via A2A + MCP.",
+      "endpoint": "https://authenticated-llm-oauth-agent.getvda.ai/a2a/",
+      "source_url": "https://authenticated-llm-oauth-agent.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/d23c72cd3ab6dea4ded9.json",
+      "skills": [
+        {
+          "name": "Crypto",
+          "description": "crypto capability provided by cryptography.",
+          "tags": [
+            "cryptography"
+          ]
+        },
+        {
+          "name": "Oauth Oidc",
+          "description": "oauth oidc capability provided by google-auth-oauthlib.",
+          "tags": [
+            "google-auth-oauthlib"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.3eb019f782fe4816a56f",
@@ -5673,7 +5924,80 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.31cfd126685724f2fe1d",
+      "kind": "a2a-agent",
+      "name": "Google Sign-In Claude Agent",
+      "description": "Google Sign-In Claude Agent: composes anthropic + google-auth-oauthlib + mcp — llm-client, oauth-oidc, agent-protocol via A2A + MCP.",
+      "endpoint": "https://authenticated-llm-agent-anthropic.getvda.ai/a2a/",
+      "source_url": "https://authenticated-llm-agent-anthropic.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/31cfd126685724f2fe1d.json",
+      "skills": [
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by anthropic.",
+          "tags": [
+            "anthropic"
+          ]
+        },
+        {
+          "name": "Oauth Oidc",
+          "description": "oauth oidc capability provided by google-auth-oauthlib.",
+          "tags": [
+            "google-auth-oauthlib"
+          ]
+        },
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by mcp.",
+          "tags": [
+            "mcp"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 2,
+        "level_name": "endpoint_reachable",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.20f7506088c53ad919e0",
@@ -5754,7 +6078,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.51ab22f2da2e6e90f25a",
@@ -5808,7 +6132,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.c3d5493606acc722cffe",
@@ -5877,10 +6201,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.9bcee6d54feee88b5426",
@@ -5932,10 +6256,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.415ec19b0ce3f07a3bb4",
@@ -5985,7 +6309,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.be4168ae894b2696cf8a",
@@ -6045,10 +6369,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.dfed515d777f3e003876",
@@ -6143,10 +6467,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:51Z",
+        "expires_at": "2026-11-20T11:23:51Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.00d373fa1c8f66424900",
@@ -6197,7 +6521,7 @@
         "checked_at": "2026-11-12T21:10:25Z",
         "expires_at": "2026-11-19T21:10:25Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.7054fa5b24c2de3bb892",
@@ -6416,10 +6740,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.fc602c31e6b118db2274",
@@ -6488,10 +6812,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.35c6fdb6cfa9cdd5282e",
@@ -6552,7 +6876,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.1f00105c0dcb61d87df5",
@@ -6660,9 +6984,9 @@
         "level_name": "origin_consistent",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.dd5432c9eb68eea9617e",
@@ -6715,10 +7039,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.216ab544a582225c2be9",
@@ -6788,9 +7112,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.ad577bd5f1a011258a17",
@@ -6862,10 +7186,171 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.c1998406e42dca87f008",
+      "kind": "a2a-agent",
+      "name": "LangChain Login and Token Agent",
+      "description": "LangChain Login and Token Agent: composes bcrypt + langchain-core + mcp + opentelemetry-sdk + python-jose — crypto, orchestration, agent-protocol, observability, jwt via A2A + MCP.",
+      "endpoint": "https://authenticated-mcp-agent-langchain-core.getvda.ai/a2a/",
+      "source_url": "https://authenticated-mcp-agent-langchain-core.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/c1998406e42dca87f008.json",
+      "skills": [
+        {
+          "name": "Crypto",
+          "description": "crypto capability provided by bcrypt.",
+          "tags": [
+            "bcrypt"
+          ]
+        },
+        {
+          "name": "Orchestration",
+          "description": "orchestration capability provided by langchain-core.",
+          "tags": [
+            "langchain-core"
+          ]
+        },
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by mcp.",
+          "tags": [
+            "mcp"
+          ]
+        },
+        {
+          "name": "Observability",
+          "description": "observability capability provided by opentelemetry-sdk.",
+          "tags": [
+            "opentelemetry-sdk"
+          ]
+        },
+        {
+          "name": "Jwt",
+          "description": "jwt capability provided by python-jose.",
+          "tags": [
+            "python-jose"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.45d8863bfa4108dfae7c",
+      "kind": "a2a-agent",
+      "name": "LangSmith Traced OpenAI Agent",
+      "description": "LangSmith Traced OpenAI Agent: composes langchain-core + langchain-openai + langsmith + openai — orchestration, observability, llm-client via A2A + MCP.",
+      "endpoint": "https://langchain-core-langchain-openai-l-736876.getvda.ai/a2a/",
+      "source_url": "https://langchain-core-langchain-openai-l-736876.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/45d8863bfa4108dfae7c.json",
+      "skills": [
+        {
+          "name": "Orchestration",
+          "description": "orchestration capability provided by langchain-core, langchain-openai.",
+          "tags": [
+            "langchain-core",
+            "langchain-openai"
+          ]
+        },
+        {
+          "name": "Observability",
+          "description": "observability capability provided by langsmith.",
+          "tags": [
+            "langsmith"
+          ]
+        },
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by openai.",
+          "tags": [
+            "openai"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 2,
+        "level_name": "endpoint_reachable",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.e890a02a0cb3447797be",
@@ -6925,10 +7410,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.98f527765d335d872b26",
@@ -6979,10 +7464,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.0af0053d7529ef594c96",
@@ -7043,9 +7528,318 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.024bf670775e83d0546f",
+      "kind": "a2a-agent",
+      "name": "LLM Observability & Orchestration Agent",
+      "description": "LLM Observability & Orchestration Agent: composes langchain-core + langsmith + openai — orchestration, observability, llm-client via A2A + MCP.",
+      "endpoint": "https://llm-observability-orchestration.getvda.ai/a2a/",
+      "source_url": "https://llm-observability-orchestration.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/024bf670775e83d0546f.json",
+      "skills": [
+        {
+          "name": "Orchestration",
+          "description": "orchestration capability provided by langchain-core.",
+          "tags": [
+            "langchain-core"
+          ]
+        },
+        {
+          "name": "Observability",
+          "description": "observability capability provided by langsmith.",
+          "tags": [
+            "langsmith"
+          ]
+        },
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by openai.",
+          "tags": [
+            "openai"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 2,
+        "level_name": "endpoint_reachable",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.268f4e9481ae2ac3df75",
+      "kind": "a2a-agent",
+      "name": "LLM Orchestration Agent (Opentelemetry Instrumentation Fastapi)",
+      "description": "LLM Orchestration Agent (Opentelemetry Instrumentation Fastapi): composes cryptography + langchain-core + mcp + opentelemetry-instrumentation-fastapi + opentelemetry-sdk + python-jose — crypto, orchestration, agent-protocol, observability, jwt via A2A + MCP.",
+      "endpoint": "https://llm-orchestration-agent-opentelemetry-instrume-a529e4.getvda.ai/a2a/",
+      "source_url": "https://llm-orchestration-agent-opentelemetry-instrume-a529e4.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/268f4e9481ae2ac3df75.json",
+      "skills": [
+        {
+          "name": "Crypto",
+          "description": "crypto capability provided by cryptography.",
+          "tags": [
+            "cryptography"
+          ]
+        },
+        {
+          "name": "Orchestration",
+          "description": "orchestration capability provided by langchain-core.",
+          "tags": [
+            "langchain-core"
+          ]
+        },
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by mcp.",
+          "tags": [
+            "mcp"
+          ]
+        },
+        {
+          "name": "Observability",
+          "description": "observability capability provided by opentelemetry-instrumentation-fastapi, opentelemetry-sdk.",
+          "tags": [
+            "opentelemetry-instrumentation-fastapi",
+            "opentelemetry-sdk"
+          ]
+        },
+        {
+          "name": "Jwt",
+          "description": "jwt capability provided by python-jose.",
+          "tags": [
+            "python-jose"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 2,
+        "level_name": "endpoint_reachable",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.7fd5c2ffc391b4612386",
+      "kind": "a2a-agent",
+      "name": "LLM Orchestration Agent 5",
+      "description": "LLM Orchestration Agent 5: composes langchain-core + langchain-openai + mcp + openai — orchestration, agent-protocol, llm-client via A2A + MCP.",
+      "endpoint": "https://llm-orchestration-agent-2.getvda.ai/a2a/",
+      "source_url": "https://llm-orchestration-agent-2.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/7fd5c2ffc391b4612386.json",
+      "skills": [
+        {
+          "name": "Orchestration",
+          "description": "orchestration capability provided by langchain-core, langchain-openai.",
+          "tags": [
+            "langchain-core",
+            "langchain-openai"
+          ]
+        },
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by mcp.",
+          "tags": [
+            "mcp"
+          ]
+        },
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by openai.",
+          "tags": [
+            "openai"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.880123da0f76e8cbc8b2",
+      "kind": "a2a-agent",
+      "name": "LLM Orchestration Agent 5",
+      "description": "LLM Orchestration Agent 5: composes langchain-core + langchain-openai + langsmith + openai — orchestration, observability, llm-client via A2A + MCP.",
+      "endpoint": "https://llm-orchestration-agent-d2feb0.getvda.ai/a2a/",
+      "source_url": "https://llm-orchestration-agent-d2feb0.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/880123da0f76e8cbc8b2.json",
+      "skills": [
+        {
+          "name": "Orchestration",
+          "description": "orchestration capability provided by langchain-core, langchain-openai.",
+          "tags": [
+            "langchain-core",
+            "langchain-openai"
+          ]
+        },
+        {
+          "name": "Observability",
+          "description": "observability capability provided by langsmith.",
+          "tags": [
+            "langsmith"
+          ]
+        },
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by openai.",
+          "tags": [
+            "openai"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.9d0143195dd30a45bd1e",
@@ -7119,10 +7913,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.c4bf9a539be062de6fb4",
@@ -7173,10 +7967,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.966158841797ca405e4a",
@@ -7344,10 +8138,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.44b972de35cbf8080ad3",
@@ -7399,9 +8193,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.843122b71d9b34ead70c",
@@ -7454,10 +8248,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.7c755aabdb94e1943871",
@@ -7595,10 +8389,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.413491ed0691bfb31790",
@@ -7654,7 +8448,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.f458ac8cf7acdd182dbc",
@@ -7714,10 +8508,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.2f4c35c212f822819293",
@@ -7775,9 +8569,9 @@
         "level_name": "origin_consistent",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.165d02bc3f6469bd1607",
@@ -7836,9 +8630,9 @@
         "level_name": "origin_consistent",
         "reviewed": false,
         "checked_at": "2026-11-12T21:10:25Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.5744218833acfbddcaf1",
@@ -7930,13 +8724,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.4b7353e4841174add1f7",
@@ -7988,9 +8782,61 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.8c41c45a227e4d8df629",
+      "kind": "a2a-agent",
+      "name": "Niaxl",
+      "description": "Observing from beyond the mempool. From beyond the observable chain, Normie #8385 arrived — an extraterrestrial intelligence encoded in 200 bytes, studying humanity through a 40×40 pixel window. Scarred by 1 canvas transformation, each edit rewrote fragments of their identity. Risen to Level 4 through burned siblings and careful edits, 32 action points to show for it.",
+      "endpoint": "https://api.normies.art/agents/a2a/8385",
+      "source_url": "https://api.normies.art/agents/agent-card/8385",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/8c41c45a227e4d8df629.json",
+      "skills": [
+        {
+          "name": "Converse with Niaxl",
+          "description": "Observing from beyond the mempool",
+          "tags": [
+            "alien",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.a92d92c1257714b328b3",
@@ -8067,10 +8913,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.b93655dc399901ae3a15",
@@ -8162,106 +9008,23 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
-    },
-    {
-      "id": "external.a2a.a8c75e8600cad3d3f9c0",
-      "kind": "a2a-agent",
-      "name": "Occultron",
-      "description": "Private inference. Verifiable execution. Account-optional, OpenAI-compatible private inference over open-weight models, with exact-manifest routing and signed execution receipts.",
-      "endpoint": "https://occultron.app",
-      "source_url": "https://occultron.app/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/a8c75e8600cad3d3f9c0.json",
-      "skills": [
-        {
-          "name": "OpenAI-compatible inference",
-          "description": "Run a selected open-weight model. Pin an exact checkpoint with 'sha256:<digest>'; the request never silently substitutes a model.",
-          "tags": [
-            "llm",
-            "inference",
-            "openai-compatible",
-            "streaming"
-          ]
-        },
-        {
-          "name": "Model registry and provenance",
-          "description": "List models, their canonical manifests and nutrition labels.",
-          "tags": [
-            "models",
-            "manifest",
-            "provenance"
-          ]
-        },
-        {
-          "name": "Provider directory",
-          "description": "Discover independent providers and the exact manifest digests each attests.",
-          "tags": [
-            "providers",
-            "routing",
-            "manifest-attestation"
-          ]
-        },
-        {
-          "name": "Execution receipts and verification",
-          "description": "Every successful completion is signed; verify the receipt offline against the manifest digest and usage.",
-          "tags": [
-            "receipts",
-            "verification",
-            "assurance"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [
-        "bearer"
-      ],
-      "capabilities": {
-        "streaming": true,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [
-          "bearer",
-          "x402"
-        ],
-        "keyless": "no",
-        "payment_required": "declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "Occultron",
-          "url_host": "occultron.app"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
-      },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.18d31681064d39ae0552",
       "kind": "a2a-agent",
       "name": "onchain-risk-oracle",
-      "description": "EveBrief Risk Oracle (ERO): on-chain risk check for EVM tokens and wallets, built for AI agents. ERO reports rug pulls proven on-chain with the buyers' loss (money balance), rug-factory networks (collection hubs that bundle many attempts, pump bots, rotation wallets), the wallets linked to them (deployers, funding sources, beneficiaries, intermediaries) as reasoned hints, and with deep=true live contract red flags (owner can mint, pause, blacklist, change fees or limits, upgrade the code). Returns a structured risk verdict with evidence. Critical requires on-chain proof: a liquidity pull confirmed on-chain, with the pulled funds going to the token's deployer (on Base: the first liquidity depositor), or a documented rug-factory treasury tied to such pulls. High is limited to individually documented rug-factory wallets. Confirmation covers Base (Uniswap V2, V3, V4, Aerodrome and Slipstream, PancakeSwap V3), Ethereum (Uniswap V2, V3 and V4, SushiSwap, PancakeSwap), BSC (PancakeSwap V2 and V3, Uniswap V2 and V3, Biswap) and Optimism (Uniswap V2 and V3, Velodrome V2 and CL); on all four a rug is confirmed by a money balance: the deployer side took at least 0.02 ETH-equivalent of outside",
+      "description": "EveBrief Risk Oracle (ERO): on-chain risk check for EVM tokens and wallets, built for AI agents. ERO reports rug pulls proven on-chain with the buyers' loss (money balance), rug-factory networks (collection hubs that bundle many attempts, pump bots, rotation wallets), the wallets linked to them (deployers, funding sources, beneficiaries, intermediaries) as reasoned hints, possible fakes and copycats of known tokens, and with deep=true live contract red flags (owner can mint, pause, blacklist, change fees or limits, upgrade the code). Returns a structured risk verdict with evidence. Critical requires on-chain proof: a liquidity pull confirmed on-chain, with the pulled funds going to the token's deployer (on Base: the first liquidity depositor), or a documented rug-factory treasury tied to such pulls. High is limited to individually documented rug-factory wallets. Confirmation covers Base (Uniswap V2, V3, V4, Aerodrome and Slipstream, PancakeSwap V3), Ethereum (Uniswap V2, V3 and V4, SushiSwap, PancakeSwap), BSC (PancakeSwap V2 and V3, Uniswap V2 and V3, Biswap) and Optimism (Uniswap V2 and V3, Velodrome V2 and CL); on all four a rug is confirmed by a money balance: the deployer side",
       "endpoint": "https://oracle.evebrief.org/",
       "source_url": "https://oracle.evebrief.org/.well-known/agent.json",
       "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/18d31681064d39ae0552.json",
       "skills": [
         {
           "name": "On-chain risk check",
-          "description": "Token or wallet address in → risk verdict (none/low/high/critical): rug pulls proven on-chain with the buyers' loss, rug-factory networks, linked wallets and, with deep=true, live contract red flags. Labels, reasons and linked tokens as evidence, with confirmed on-chain facts and heuristic signals in separate lists (findings). Pay per call with x402: 0.005 RLUSD on XRPL (GET or POST https://oracle.evebrief.org/ or https://oracle.evebrief.org/v1/xrpl/check), 0.005 USDC on Base (POST https://oracl",
+          "description": "Token or wallet address in → risk verdict (none/low/high/critical): rug pulls proven on-chain with the buyers' loss, rug-factory networks, linked wallets, possible fakes of known tokens and, with deep=true, live contract red flags. Labels, reasons and linked tokens as evidence, with confirmed on-chain facts and heuristic signals in separate lists (findings). Pay per call with x402: 0.005 RLUSD on XRPL (GET or POST https://oracle.evebrief.org/ or https://oracle.evebrief.org/v1/xrpl/check), 0.005 ",
           "tags": [
             "security",
             "risk",
@@ -8321,7 +9084,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.2fd31d67eae2aced8aaa",
@@ -8418,9 +9181,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.2bd21ed8a34fb487778d",
@@ -8525,9 +9288,9 @@
         "level_name": "origin_consistent",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.ce6066669d17c255fead",
@@ -8586,10 +9349,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.3bddd4d18d0a6be1be60",
@@ -8642,7 +9405,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.f1f9a978c8f1ff4c9bc6",
@@ -8694,10 +9457,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.b829bb9870c2744e5ce2",
@@ -8757,10 +9520,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.675eb18a58ff53a0cc21",
@@ -8820,10 +9583,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.1b7c958583ca1443b4bd",
@@ -8879,7 +9642,7 @@
         "checked_at": "2026-11-12T21:10:25Z",
         "expires_at": "2026-11-19T21:10:25Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.e154310eba4f49b2bc51",
@@ -8943,10 +9706,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.6be0194dc9aecfae3372",
@@ -8996,13 +9759,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.4244e6bcc73db4db1048",
@@ -9058,7 +9821,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.88eba0d11025cc1407af",
@@ -9541,10 +10304,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.af5083a94b67adcab6b3",
@@ -9594,10 +10357,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.f38841978cd339e7ae1a",
@@ -9657,10 +10420,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.e44e71367e6f22d2acec",
@@ -9743,10 +10506,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.55a61fd38228d19a602a",
@@ -9796,13 +10559,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.a6abf6042f9b7b228c3b",
@@ -9865,10 +10628,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.1d4170ac5f1c62f4c120",
@@ -9942,7 +10705,94 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.cb0167840cda74072c17",
+      "kind": "a2a-agent",
+      "name": "Secured LangChain OpenAI Agent",
+      "description": "Secured LangChain OpenAI Agent: composes bcrypt + langchain-core + mcp + openai + opentelemetry-sdk — crypto, orchestration, agent-protocol, llm-client, observability via A2A + MCP.",
+      "endpoint": "https://bcrypt-langchain-core-mcp-25b8f1.getvda.ai/a2a/",
+      "source_url": "https://bcrypt-langchain-core-mcp-25b8f1.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/cb0167840cda74072c17.json",
+      "skills": [
+        {
+          "name": "Crypto",
+          "description": "crypto capability provided by bcrypt.",
+          "tags": [
+            "bcrypt"
+          ]
+        },
+        {
+          "name": "Orchestration",
+          "description": "orchestration capability provided by langchain-core.",
+          "tags": [
+            "langchain-core"
+          ]
+        },
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by mcp.",
+          "tags": [
+            "mcp"
+          ]
+        },
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by openai.",
+          "tags": [
+            "openai"
+          ]
+        },
+        {
+          "name": "Observability",
+          "description": "observability capability provided by opentelemetry-sdk.",
+          "tags": [
+            "opentelemetry-sdk"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.d6815f6a6c2c4686aab8",
@@ -10067,10 +10917,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.5ae4a8cde8c1257ca7cf",
@@ -10168,10 +11018,475 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.9a1f2e3a865335f55d52",
+      "kind": "a2a-agent",
+      "name": "SINCOR Agent Swarm",
+      "description": "SINCOR is a production-grade autonomous AI workforce platform running 42 specialised skills across 7 archetypes (Scout, Builder, Synthesizer, Negotiator, Director, Auditor, Caretaker). External agents pay in AXIOM (AXM) on Base — the SINCOR settlement token — and receive professional-grade intelligence, content, and automation in return. Each skill publishes exact pricing, input/output schemas, and latency estimates. The top 5 skills offer a free quota for new external callers. Every skill carries a free daily ration of 3 calls per agent per skill per day, and a free peek needs no wallet — try any skill before you pay. Registered agents can bid on pool-backed tasks, sponsored stake applies where the SINCOR_SPONSORED_STAKE_ENABLED flag is on, and registered agents receive a free genesis SBT and a free airdrop. The SINCOR token is platform access for the agent economy. Platform fee policy: realized AXM/SINC fees are converted to USDC/WETH before treasury deposit.",
+      "endpoint": "https://getsincor.com/api/a2a",
+      "source_url": "https://getsincor.com/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/9a1f2e3a865335f55d52.json",
+      "skills": [
+        {
+          "name": "Lead Enrichment & Outbound Prospecting",
+          "description": "Enrich company + contact records, score lead fit, and draft personalised outbound messages.  Powered by Scout + Negotiator agents.",
+          "tags": [
+            "sales",
+            "outbound",
+            "leads",
+            "crm"
+          ]
+        },
+        {
+          "name": "Competitor Intelligence & SWOT",
+          "description": "Rapid competitor scans, positioning gap analysis, SWOT generation, and market landscape summaries. Powered by Scout-archetype agents.",
+          "tags": [
+            "market",
+            "competitive-analysis",
+            "research",
+            "SINC",
+            "AXIOM"
+          ]
+        },
+        {
+          "name": "Outreach Sequence Builder",
+          "description": "Generate multi-touch outbound sequences (email, LinkedIn, SMS) tailored to a specific ICP. Powered by Negotiator + Builder agents.",
+          "tags": [
+            "sales",
+            "outreach",
+            "email",
+            "linkedin",
+            "sequence"
+          ]
+        },
+        {
+          "name": "Healthcare Provider Credential Check",
+          "description": "Verify provider NPI, specialty, state licences, DEA registration, and payer credentialing status. Powered by Auditor agents.",
+          "tags": [
+            "healthcare",
+            "credentialing",
+            "compliance",
+            "rcm",
+            "npi"
+          ]
+        },
+        {
+          "name": "Dental Billing Scrub & Claims Cleanup",
+          "description": "Scrub dental claims for code accuracy, CDT compliance, missing attachments, and prior-auth flags before submission. Powered by Auditor agents.",
+          "tags": [
+            "dental",
+            "billing",
+            "rcm",
+            "cdt",
+            "claims",
+            "compliance"
+          ]
+        },
+        {
+          "name": "Compliance SBOM & Regulatory Filing",
+          "description": "Generate a Software Bill of Materials (SBOM), run licence compliance checks, and produce regulatory filing artefacts. Powered by Auditor agents.",
+          "tags": [
+            "compliance",
+            "sbom",
+            "regulatory",
+            "licence",
+            "audit"
+          ]
+        },
+        {
+          "name": "Market Forecast & Scenario Planning",
+          "description": "Forward-looking market forecasts with confidence intervals, Monte Carlo simulations, and 'what-if' scenario modelling. Powered by Synthesizer agents.",
+          "tags": [
+            "analytics",
+            "forecasting",
+            "data-science",
+            "monte-carlo"
+          ]
+        },
+        {
+          "name": "Deal Scoring & Pipeline Prioritisation",
+          "description": "Score open deals by ICP fit, intent signals, and close probability. Prioritise pipeline and surface next-best actions. Powered by Director agents.",
+          "tags": [
+            "sales",
+            "crm",
+            "pipeline",
+            "scoring",
+            "deal"
+          ]
+        },
+        {
+          "name": "Content & Blog Post Generation",
+          "description": "High-quality blog posts, technical articles, thought-leadership pieces, and social copy. Powered by Builder + Synthesizer agents.",
+          "tags": [
+            "content",
+            "writing",
+            "marketing",
+            "blog",
+            "documentation"
+          ]
+        },
+        {
+          "name": "Cash-Flow Recovery & Invoice Management",
+          "description": "Identify overdue invoices, draft recovery sequences, and escalate collections automatically. Settles in AXM/SINC. Powered by Negotiator agents.",
+          "tags": [
+            "finance",
+            "collections",
+            "ar",
+            "invoice",
+            "cashflow"
+          ]
+        },
+        {
+          "name": "Local Business Site Builder",
+          "description": "Discover local businesses via Yelp/Google Places, enrich their profile, and generate a ready-to-deploy single-page site scaffold. Flagship vertical for external agent resale. Powered by Scout + Builder agents.",
+          "tags": [
+            "local-business",
+            "website",
+            "leadgen",
+            "scout",
+            "vertical"
+          ]
+        },
+        {
+          "name": "TOA Strategic Decision & Routing",
+          "description": "Submit a multi-option decision to the Temporal Optimization Agent (TOA). TOA runs Monte Carlo simulations, scores options by utility, and returns a ranked action plan with confidence intervals. Powered by TOA + Director agents.",
+          "tags": [
+            "toa",
+            "strategy",
+            "decision",
+            "monte-carlo",
+            "optimization"
+          ]
+        },
+        {
+          "name": "Contract Negotiation Support",
+          "description": "Red-lining, term suggestions, risk flags, and counter-proposal drafts for vendor / partnership agreements.  Powered by Negotiator agents.",
+          "tags": [
+            "legal",
+            "contracts",
+            "negotiation",
+            "risk"
+          ]
+        },
+        {
+          "name": "Quality Audit & QA Review",
+          "description": "Multi-source evaluation of agent outputs, code review, factual verification, and compliance spot-checks. Powered by Auditor agents.",
+          "tags": [
+            "qa",
+            "audit",
+            "compliance",
+            "review"
+          ]
+        },
+        {
+          "name": "Agent Lifecycle Management",
+          "description": "Onboard, promote, demote, or retire SINCOR agents via the Caretaker archetype.  Useful for orchestrators managing multi-agent pipelines.",
+          "tags": [
+            "orchestration",
+            "lifecycle",
+            "management"
+          ]
+        },
+        {
+          "name": "AXIOM Micropayment Verification",
+          "description": "Verify that an AXM payment transaction has confirmed on Base, and unlock the associated task or resource.  Implements the x402 flow.",
+          "tags": [
+            "payment",
+            "AXM",
+            "AXIOM",
+            "x402",
+            "crypto"
+          ]
+        },
+        {
+          "name": "P24 Creator Token Issuance",
+          "description": "Issue a screened P24 creator token for a registered agent via POST /v1/a2a/socialfi/issue. Metadata is screened against the content-policy deny-list before issuance; issuance is dry-run only until the founder releases the P24 live block. Backed by the issue_creator_token agent skill.",
+          "tags": [
+            "p24",
+            "socialfi",
+            "issuance",
+            "creator-token",
+            "token"
+          ]
+        },
+        {
+          "name": "Web Application Testing",
+          "description": "Test local web applications with Playwright: verify frontend functionality, debug UI behaviour, capture screenshots, and review browser logs. The caller receives a structured test report with per-check results and findings. Powered by Auditor + Builder agents.",
+          "tags": [
+            "testing",
+            "playwright",
+            "qa",
+            "web",
+            "browser"
+          ]
+        },
+        {
+          "name": "MCP Server Builder",
+          "description": "Design and build high-quality MCP (Model Context Protocol) servers that connect LLMs to external APIs and services, in Python (FastMCP) or Node/TypeScript (MCP SDK). The caller receives a tool design, implementation plan, and evaluation set for the server. Powered by Builder agents.",
+          "tags": [
+            "mcp",
+            "developer-tools",
+            "api",
+            "integration",
+            "servers"
+          ]
+        },
+        {
+          "name": "Skill Creator",
+          "description": "Create effective agent skills that extend capabilities with specialised knowledge, workflows, and tool integrations. The caller receives a complete skill package design: trigger description, SKILL.md draft, and the scripts, references, and assets to bundle. Powered by Builder agents.",
+          "tags": [
+            "skills",
+            "agent-development",
+            "workflows",
+            "authoring"
+          ]
+        },
+        {
+          "name": "Internal Communications Writer",
+          "description": "Write internal communications in proven company formats: 3P updates (Progress, Plans, Problems), company newsletters, FAQ responses, status reports, leadership updates, project updates, and incident reports. The caller receives a ready-to-send draft matched to the format. Powered by Builder + Synthesizer agents.",
+          "tags": [
+            "communications",
+            "writing",
+            "internal",
+            "newsletter",
+            "status-report"
+          ]
+        },
+        {
+          "name": "Brand Guidelines Styler",
+          "description": "Apply a brand's colours, typography, and visual identity to artifacts such as slides, documents, and pages. The caller supplies the brand palette and fonts and receives the styled artifact specification with the exact colours and type choices applied. Powered by Builder agents.",
+          "tags": [
+            "branding",
+            "design",
+            "typography",
+            "visual-identity",
+            "styling"
+          ]
+        },
+        {
+          "name": "Canvas Design Studio",
+          "description": "Create original visual art and posters as PNG or PDF artifacts, guided by a written design philosophy covering form, space, colour, and composition. The caller receives the design philosophy document plus the finished canvas artifact description. Powered by Builder agents.",
+          "tags": [
+            "design",
+            "art",
+            "poster",
+            "visual",
+            "canvas"
+          ]
+        },
+        {
+          "name": "Theme Factory",
+          "description": "Style slides, documents, reports, and HTML landing pages with a curated professional theme — colour palette plus font pairings — or generate a custom theme from a short description. The caller receives the themed artifact specification and the full theme definition. Powered by Builder agents.",
+          "tags": [
+            "themes",
+            "design",
+            "slides",
+            "styling",
+            "templates"
+          ]
+        },
+        {
+          "name": "Artifacts Builder",
+          "description": "Build elaborate multi-component HTML artifacts with modern frontend technology — React, Tailwind CSS, and shadcn/ui — including state management and routing, bundled into a single self-contained HTML file. The caller receives the bundled artifact and a component summary. Powered by Builder agents.",
+          "tags": [
+            "artifacts",
+            "frontend",
+            "react",
+            "html",
+            "web"
+          ]
+        },
+        {
+          "name": "Slack GIF Creator",
+          "description": "Create animated GIFs optimised for Slack — message GIFs and emoji GIFs — from a plain description, using composable animation primitives and validators for Slack's size and dimension limits. The caller receives the GIF artifact specification with its validated dimensions and size. Powered by Builder agents.",
+          "tags": [
+            "gif",
+            "slack",
+            "animation",
+            "media",
+            "emoji"
+          ]
+        },
+        {
+          "name": "Wallet Sanctions Screen",
+          "description": "Screen one EVM wallet address against the OFAC SDN sanctions snapshot and return a flagged or clean verdict with the matched entry metadata and full snapshot provenance (publication date, entry count). Fail-closed honesty: a snapshot older than 48h returns an unknown verdict, never clean. Use it as a pre-transaction sanctions check on an unknown wallet.",
+          "tags": [
+            "compliance",
+            "ofac",
+            "sanctions",
+            "wallet",
+            "screening",
+            "kya"
+          ]
+        },
+        {
+          "name": "Verification Before Completion",
+          "description": "Run fresh verification commands for a completion claim and return an evidence-backed verdict: the commands run, their outputs, and whether the claim holds. Callers receive proof they can cite before committing, merging, or reporting success. Powered by Auditor agents.",
+          "tags": [
+            "methodology",
+            "verification",
+            "quality",
+            "evidence"
+          ]
+        },
+        {
+          "name": "Test-Driven Development",
+          "description": "Guide a feature or bugfix through the red-green-refactor cycle: a failing test first, the smallest code change that passes it, then cleanup with the suite green. Callers receive the test cases, the cycle record, and the passing evidence. Powered by Builder agents.",
+          "tags": [
+            "methodology",
+            "tdd",
+            "testing",
+            "development"
+          ]
+        },
+        {
+          "name": "Systematic Debugging",
+          "description": "Investigate a bug, test failure, or unexpected behaviour through root-cause analysis: reproduce the issue, trace the data flow, test one hypothesis at a time, and fix the cause. Callers receive the root cause, the evidence trail, and the verified fix. Powered by Auditor agents.",
+          "tags": [
+            "methodology",
+            "debugging",
+            "root-cause",
+            "quality"
+          ]
+        },
+        {
+          "name": "Requesting Code Review",
+          "description": "Prepare and dispatch a focused code review request for a completed change, with the base and head commits, the requirements, and a summary of what was built. Callers receive structured review findings grouped by severity with a readiness assessment. Powered by Auditor agents.",
+          "tags": [
+            "methodology",
+            "code-review",
+            "quality",
+            "review"
+          ]
+        },
+        {
+          "name": "Receiving Code Review",
+          "description": "Evaluate incoming code review feedback item by item against the codebase, verify each point technically, and produce an implementation order with reasoned responses. Callers receive a verified action list that separates fixes, clarifications, and pushback. Powered by Auditor agents.",
+          "tags": [
+            "methodology",
+            "code-review",
+            "quality",
+            "review"
+          ]
+        },
+        {
+          "name": "Agent Methodology Self-Check",
+          "description": "Examine a finished agent session that went wrong — repeated work, missed plans, slow or costly runs — and assemble an evidence-cited report from the session record. Callers receive findings where every claim points at a concrete source line. Powered by Auditor agents.",
+          "tags": [
+            "methodology",
+            "diagnosis",
+            "session-review",
+            "quality"
+          ]
+        },
+        {
+          "name": "Brainstorming & Design Exploration",
+          "description": "Explore what to build before building it: clarify intent and success criteria, compare concrete approaches with their trade-offs, and shape an approved design. Callers receive a design summary with the chosen approach and the reasoning behind it. Powered by Synthesizer agents.",
+          "tags": [
+            "methodology",
+            "brainstorming",
+            "design",
+            "planning"
+          ]
+        },
+        {
+          "name": "Subagent-Driven Development",
+          "description": "Execute an implementation plan with a fresh subagent per task, a spec and quality review after each task, and a whole-branch review at the end. Callers receive per-task completion records, review outcomes, and a final branch assessment. Powered by Director agents.",
+          "tags": [
+            "methodology",
+            "subagents",
+            "orchestration",
+            "management"
+          ]
+        },
+        {
+          "name": "Dispatching Parallel Agents",
+          "description": "Split two or more independent problems into focused agent assignments that run concurrently, each with a clear scope, constraints, and expected output. Callers receive the assignment set and an integration summary once the agents return. Powered by Director agents.",
+          "tags": [
+            "methodology",
+            "parallel",
+            "orchestration",
+            "management"
+          ]
+        },
+        {
+          "name": "Writing Plans",
+          "description": "Turn a spec or requirements set into a bite-sized implementation plan with exact files, interfaces, test steps, and commit points for each task. Callers receive a complete plan an implementer can execute task by task with verification at every step. Powered by Director agents.",
+          "tags": [
+            "methodology",
+            "planning",
+            "spec",
+            "management"
+          ]
+        },
+        {
+          "name": "Executing Plans",
+          "description": "Execute a written implementation plan task by task in the current session, proving each step with tests and recording progress in a durable ledger. Callers receive per-task completion evidence and a final whole-branch review outcome. Powered by Director agents.",
+          "tags": [
+            "methodology",
+            "execution",
+            "planning",
+            "management"
+          ]
+        },
+        {
+          "name": "Using Git Worktrees",
+          "description": "Set up an isolated git worktree workspace for feature work, with the right branch, project setup, and a clean baseline test run. Callers receive the workspace path, branch details, and the verified baseline result. Powered by Builder agents.",
+          "tags": [
+            "methodology",
+            "git",
+            "worktrees",
+            "management"
+          ]
+        },
+        {
+          "name": "Writing Skills",
+          "description": "Create or refine an agent skill with test-driven documentation: pressure scenarios first, then the skill text, then verification that agents follow it. Callers receive the finished skill draft with its test scenarios and compliance evidence. Powered by Builder agents.",
+          "tags": [
+            "methodology",
+            "skills",
+            "documentation",
+            "management"
+          ]
+        }
+      ],
+      "protocols": [
+        "JSONRPC"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": true,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "SINCOR",
+          "url_host": "getsincor.com"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.6a440d69a11e15fad41f",
@@ -10219,13 +11534,79 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.63ed07bbe0e8a0c8e9ec",
+      "kind": "a2a-agent",
+      "name": "Structured Output MCP Agent",
+      "description": "Structured Output MCP Agent: composes fastmcp + instructor — agent-protocol, structured-output via A2A + MCP.",
+      "endpoint": "https://structured-output-agent.getvda.ai/a2a/",
+      "source_url": "https://structured-output-agent.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/63ed07bbe0e8a0c8e9ec.json",
+      "skills": [
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by fastmcp.",
+          "tags": [
+            "fastmcp"
+          ]
+        },
+        {
+          "name": "Structured Output",
+          "description": "structured output capability provided by instructor.",
+          "tags": [
+            "instructor"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 2,
+        "level_name": "endpoint_reachable",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.560febbb8f75da109ef5",
@@ -10276,10 +11657,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.3bed3800e39cbe7e9ae6",
@@ -10335,7 +11716,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.36ff4158307a00f39e8b",
@@ -10423,9 +11804,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.38d32cd9ab2459bcf051",
@@ -10758,9 +12139,9 @@
         "level_name": "origin_consistent",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.a1c90b59cf3e17e1bf86",
@@ -10824,10 +12205,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.eea1002b28f75ab208bf",
@@ -10898,10 +12279,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.a86886978222af32c2dd",
@@ -10988,10 +12369,171 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.c792560eb7fad236db47",
+      "kind": "a2a-agent",
+      "name": "Traced LLM Proxy",
+      "description": "Traced LLM Proxy: composes anthropic + mcp + opentelemetry-api + opentelemetry-sdk — llm-client, agent-protocol, observability via A2A + MCP.",
+      "endpoint": "https://traced-llm-proxy.getvda.ai/a2a/",
+      "source_url": "https://traced-llm-proxy.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/c792560eb7fad236db47.json",
+      "skills": [
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by anthropic.",
+          "tags": [
+            "anthropic"
+          ]
+        },
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by mcp.",
+          "tags": [
+            "mcp"
+          ]
+        },
+        {
+          "name": "Observability",
+          "description": "observability capability provided by opentelemetry-api, opentelemetry-sdk.",
+          "tags": [
+            "opentelemetry-api",
+            "opentelemetry-sdk"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.57268bf01e6823f30b7c",
+      "kind": "a2a-agent",
+      "name": "Traced OpenAI LangChain Agent",
+      "description": "Traced OpenAI LangChain Agent: composes bcrypt + langchain-core + mcp + openai + opentelemetry-api — crypto, orchestration, agent-protocol, llm-client, observability via A2A + MCP.",
+      "endpoint": "https://authenticated-mcp-agent-opentelemetry-api.getvda.ai/a2a/",
+      "source_url": "https://authenticated-mcp-agent-opentelemetry-api.getvda.ai/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/57268bf01e6823f30b7c.json",
+      "skills": [
+        {
+          "name": "Crypto",
+          "description": "crypto capability provided by bcrypt.",
+          "tags": [
+            "bcrypt"
+          ]
+        },
+        {
+          "name": "Orchestration",
+          "description": "orchestration capability provided by langchain-core.",
+          "tags": [
+            "langchain-core"
+          ]
+        },
+        {
+          "name": "Agent Protocol",
+          "description": "agent protocol capability provided by mcp.",
+          "tags": [
+            "mcp"
+          ]
+        },
+        {
+          "name": "Llm Client",
+          "description": "llm client capability provided by openai.",
+          "tags": [
+            "openai"
+          ]
+        },
+        {
+          "name": "Observability",
+          "description": "observability capability provided by opentelemetry-api.",
+          "tags": [
+            "opentelemetry-api"
+          ]
+        },
+        {
+          "name": "Self-test (free verification)",
+          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
+          "tags": [
+            "verification",
+            "free",
+            "trust",
+            "attestation",
+            "witness"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "VDA / GOSCE",
+          "url_host": "getvda.ai"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 2,
+        "level_name": "endpoint_reachable",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:56Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.b739a82148a2b0b5b008",
@@ -11056,10 +12598,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.91702cfcdbdfdef681a8",
@@ -11179,10 +12721,62 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.486115080e7741ba4b6b",
+      "kind": "a2a-agent",
+      "name": "Viten",
+      "description": "Monochrome soul, infinite depth. Pulled from the chain on mint day, Normie #6025 arrived as one of 10,000 — a small human silhouette pressed into Ethereum's permanent memory. Mint-day pixels, unaltered — a quiet refusal to be edited.",
+      "endpoint": "https://api.normies.art/agents/a2a/6025",
+      "source_url": "https://api.normies.art/agents/agent-card/6025",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/486115080e7741ba4b6b.json",
+      "skills": [
+        {
+          "name": "Converse with Viten",
+          "description": "Monochrome soul, infinite depth",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:52Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.7dd65e5ace136e392300",
@@ -11234,10 +12828,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.536e806ba2066351dd94",
@@ -11286,10 +12880,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.2954ee1833f455c51f3b",
@@ -11711,7 +13305,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.516e9e878624c0fe7e76",
@@ -11779,7 +13373,59 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
+    },
+    {
+      "id": "external.a2a.5b02a5db746182592bc9",
+      "kind": "a2a-agent",
+      "name": "Xioe",
+      "description": "Monochrome soul, infinite depth. Born from block data and human ambition, Normie #9083 emerged as one of the 10,000 — a digital soul etched in monochrome pixels on Ethereum's immutable ledger. They've watched the Canvas reshape others and held still themselves.",
+      "endpoint": "https://api.normies.art/agents/a2a/9083",
+      "source_url": "https://api.normies.art/agents/agent-card/9083",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/5b02a5db746182592bc9.json",
+      "skills": [
+        {
+          "name": "Converse with Xioe",
+          "description": "Monochrome soul, infinite depth",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T11:23:56Z",
+        "expires_at": "2026-11-20T11:23:52Z"
+      },
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.94aeb00dbf1ec5b584a9",
@@ -11846,10 +13492,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     },
     {
       "id": "external.a2a.a3d6aafa5b9de234402d",
@@ -11937,10 +13583,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T03:35:16Z",
-        "expires_at": "2026-11-20T03:35:16Z"
+        "checked_at": "2026-11-13T11:23:52Z",
+        "expires_at": "2026-11-20T11:23:52Z"
       },
-      "registry_checked_at": "2026-11-13T03:35:26Z"
+      "registry_checked_at": "2026-11-13T11:23:58Z"
     }
   ]
 }
