@@ -1,6 +1,9 @@
 /** Scheduled registry, unified semantic ANS search, and legacy result mailboxes. */
 import { rankAgentCandidates, descriptionOf, EMBEDDING_MODEL, validEmbeddings } from './semantic.mjs';
 import { normalizeAnsName, parseAnsClaim } from './ans.mjs';
+import {
+  validFacets, HEALTH_STATE_STATUS, HEALTH_STATUSES, CHALLENGES, stateFromHttp,
+} from './facets.mjs';
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -61,6 +64,13 @@ export class AgentRegistry {
       http_status INTEGER,
       checked_at TEXT NOT NULL
     )`);
+    // Additive honest-taxonomy columns; the legacy status/http_status columns keep their meaning.
+    const healthColumns = new Set(this.sql.exec('PRAGMA table_info(agent_health)').toArray()
+      .map(row => row.name));
+    for (const [column, type] of [['state', 'TEXT'], ['redirect', 'INTEGER'],
+        ['challenge', 'TEXT'], ['tls_not_after', 'TEXT']]) {
+      if (!healthColumns.has(column)) this.sql.exec(`ALTER TABLE agent_health ADD COLUMN ${column} ${type}`);
+    }
     this.sql.exec(`CREATE TABLE IF NOT EXISTS registry_audit (
       revision INTEGER PRIMARY KEY AUTOINCREMENT,
       agent_id TEXT NOT NULL,
@@ -124,7 +134,8 @@ export class AgentRegistry {
             || (a.skills.length === 0 && (a.schema_status !== 'partial_agent_card'
               || typeof a.endpoint !== 'string' || !a.endpoint.startsWith('https://')
               || !Array.isArray(a.protocols) || !a.protocols.length))
-            || a.verification !== 'card_read_only')) {
+            || a.verification !== 'card_read_only'
+            || !validFacets(a))) {
         return respond({ error: 'Invalid Agent Card record' }, 400);
       }
       const updatedAt = new Date().toISOString();
@@ -225,33 +236,29 @@ export class AgentRegistry {
     if (request.method === 'POST' && path === '/health') {
       let data;
       try { data = await request.json(); } catch { return respond({ error: 'Invalid JSON' }, 400); }
-      if (!data || !Array.isArray(data.results) || data.results.length > 60 ||
-          data.results.some(item => !item || !/^[0-9a-f]{20}$/.test(item.id || '') ||
-            typeof item.endpoint !== 'string' || !item.endpoint.startsWith('https://') ||
-            item.endpoint.length > 1000 ||
-            !['responding', 'server_error', 'unreachable', 'skipped'].includes(item.status) ||
-            !(item.http_status === null || (Number.isInteger(item.http_status) &&
-              item.http_status >= 100 && item.http_status <= 599)) ||
-            ((item.status === 'responding' || item.status === 'server_error') !==
-              (item.http_status !== null)) ||
-            (item.status === 'responding' && item.http_status >= 500) ||
-            (item.status === 'server_error' && item.http_status < 500))) {
+      const reports = Array.isArray(data?.results) && data.results.length <= 60
+        ? data.results.map(normalizeHealthReport) : null;
+      if (!reports || reports.some(item => item === null)) {
         return respond({ error: 'Invalid health report' }, 400);
       }
       const timestamp = new Date().toISOString();
       let stored = 0;
       this.ctx.storage.transactionSync(() => {
-        for (const item of data.results) {
+        for (const item of reports) {
           const current = this.sql.exec(`SELECT record FROM agents WHERE id=?
             AND listing_state='active' AND review_status != 'rejected'`, item.id).toArray()[0];
           if (!current) continue;
           const agent = JSON.parse(current.record);
           if (agent.endpoint !== item.endpoint || agent.source === 'authorized-catalog') continue;
-          this.sql.exec(`INSERT INTO agent_health (id, endpoint, status, http_status, checked_at)
-            VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET
+          this.sql.exec(`INSERT INTO agent_health (id, endpoint, status, http_status, checked_at,
+              state, redirect, challenge, tls_not_after)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET
             endpoint=excluded.endpoint, status=excluded.status,
-            http_status=excluded.http_status, checked_at=excluded.checked_at`,
-            item.id, item.endpoint, item.status, item.http_status, timestamp);
+            http_status=excluded.http_status, checked_at=excluded.checked_at,
+            state=excluded.state, redirect=excluded.redirect, challenge=excluded.challenge,
+            tls_not_after=excluded.tls_not_after`,
+            item.id, item.endpoint, item.status, item.http_status, timestamp,
+            item.state, item.redirect ? 1 : 0, item.challenge, item.tls_not_after);
           stored++;
         }
       });
@@ -261,7 +268,8 @@ export class AgentRegistry {
     const health = path.match(/^\/health\/([0-9a-f]{20})$/);
     if (request.method === 'GET' && health) {
       const record = this.sql.exec(`SELECT agents.record, agent_health.endpoint, agent_health.status,
-        agent_health.http_status, agent_health.checked_at FROM agents
+        agent_health.http_status, agent_health.checked_at, agent_health.state,
+        agent_health.redirect, agent_health.challenge, agent_health.tls_not_after FROM agents
         LEFT JOIN agent_health ON agent_health.id=agents.id
         WHERE agents.id=? AND agents.listing_state='active'
           AND agents.review_status != 'rejected'`, health[1]).toArray()[0];
@@ -276,9 +284,12 @@ export class AgentRegistry {
         return respond({ id: health[1], status: 'stale', checked_at: record.checked_at,
           protocol_verified: false });
       }
-      return respond({ id: health[1], status: record.status,
+      const observed = healthFacts(record);
+      return respond({ id: health[1], status: observed.status,
         http_status: record.http_status, checked_at: record.checked_at,
-        protocol_verified: false });
+        protocol_verified: false, state: observed.state, redirect: observed.redirect,
+        ...(record.challenge ? { challenge: record.challenge } : {}),
+        ...(record.tls_not_after ? { tls_not_after: record.tls_not_after } : {}) });
     }
 
     const audit = path.match(/^\/audit\/([0-9a-f]{20})$/);
@@ -394,6 +405,49 @@ export class AgentRegistry {
     }
     return respond({ error: 'Not found' }, 404);
   }
+}
+
+const TLS_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+
+/**
+ * Validate one scheduled health report. The honest state is recomputed from the HTTP code,
+ * so an older crawler that calls a 404 "responding" can never store that claim.
+ * Returns null for a malformed report.
+ */
+function normalizeHealthReport(item) {
+  if (!item || typeof item !== 'object' || !/^[0-9a-f]{20}$/.test(item.id || '') ||
+      typeof item.endpoint !== 'string' || !item.endpoint.startsWith('https://') ||
+      item.endpoint.length > 1000 || !HEALTH_STATUSES.has(item.status)) return null;
+  const code = item.http_status;
+  if (!(code === null || (Number.isInteger(code) && code >= 100 && code <= 599))) return null;
+  const noResponse = item.status === 'unreachable' || item.status === 'skipped';
+  if (noResponse !== (code === null)) return null;
+  let state;
+  if (noResponse) {
+    state = item.state ?? item.status;
+    if (HEALTH_STATE_STATUS[state] !== item.status) return null;
+  } else {
+    const redirect = item.redirect === true;
+    state = stateFromHttp(code, { redirectTargetValid: redirect && item.state === 'reachable' });
+    if (item.state !== undefined && (item.state !== state ||
+        HEALTH_STATE_STATUS[item.state] !== item.status)) return null;
+    if (item.state === undefined && item.status === 'responding' && code >= 500) return null;
+  }
+  if (item.challenge !== undefined && item.challenge !== null && !CHALLENGES.has(item.challenge)) return null;
+  if (item.tls_not_after !== undefined && item.tls_not_after !== null &&
+      !(typeof item.tls_not_after === 'string' && TLS_TIME.test(item.tls_not_after))) return null;
+  return {
+    id: item.id, endpoint: item.endpoint, http_status: code, state,
+    status: HEALTH_STATE_STATUS[state], redirect: item.redirect === true && code !== null && code < 400,
+    challenge: item.challenge ?? null, tls_not_after: item.tls_not_after ?? null,
+  };
+}
+
+/** Stored health row to honest facts; rows written before the taxonomy are reclassified. */
+function healthFacts(row) {
+  const state = row.state || (row.http_status === null
+    ? (row.status === 'skipped' ? 'skipped' : 'unreachable') : stateFromHttp(row.http_status));
+  return { state, status: HEALTH_STATE_STATUS[state] || row.status, redirect: row.redirect === 1 };
 }
 
 function registryStub(env) {
