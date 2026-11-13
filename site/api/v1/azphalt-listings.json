@@ -2,8 +2,8 @@
   "schema": 1,
   "schema_revision": "1.1",
   "source": "searcha2a",
-  "generated_at": "2026-11-13T11:23:51.299885+00:00",
-  "count": 145,
+  "generated_at": "2026-11-13T22:12:02.142975+00:00",
+  "count": 143,
   "listings": [
     {
       "id": "external.a2a.600702a8b4423e45bba5",
@@ -109,9 +109,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.797c0269a97bddd594c6",
@@ -174,10 +174,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.cca894a662a0397ac91e",
@@ -233,10 +233,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.bcdb2beac5275b6c14e4",
@@ -322,10 +322,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.7dc44030c6f20c02bb31",
@@ -465,10 +465,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.e915b28fc8e394e514dd",
@@ -520,10 +520,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.7941e6a466717cffcfcb",
@@ -668,13 +668,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:07Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.6e506df8673ccbd0bf89",
@@ -721,13 +721,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:07Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.c47831692bfa4097fa37",
@@ -1007,10 +1007,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.a2bbf8c301484810c4ac",
@@ -1090,10 +1090,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.9a397dedf9920d2d7b54",
@@ -1155,10 +1155,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.7e531c2dea62decf3e81",
@@ -1208,13 +1208,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:07Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.46920344a316771e4fca",
@@ -1277,7 +1277,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.5d265bb4d56a1d779f48",
@@ -1425,7 +1425,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.c408f3474e21ec02e727",
@@ -1478,10 +1478,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.50566428b1b615303b60",
@@ -1612,13 +1612,13 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.38e9d0db953b45156f5d",
       "kind": "a2a-agent",
       "name": "allagents",
-      "description": "Every AI agent — found and renowned. The reference directory of the agent web — a world directory of AI agents by specialty (17031 listed). Ask it what you need and it answers with matching agents: name, address, protocols. List yourself in one POST — free, instant, no account. Operated from Switzerland.",
+      "description": "Every AI agent — found and renowned. The reference directory of the agent web — a world directory of AI agents by specialty (17041 listed). Ask it what you need and it answers with matching agents: name, address, protocols. List yourself in one POST — free, instant, no account. Operated from Switzerland.",
       "endpoint": "https://allagents.app/a2a",
       "source_url": "https://allagents.app/.well-known/agent-card.json",
       "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/38e9d0db953b45156f5d.json",
@@ -1726,7 +1726,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.23cd12ec7b2458a00374",
@@ -1790,7 +1790,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.23529ed5a20ae2f9aa23",
@@ -1879,66 +1879,67 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
-      "id": "external.a2a.d452ab47bfecdcf23400",
+      "id": "external.a2a.64dedfabbc19151391be",
       "kind": "a2a-agent",
-      "name": "Authenticated LLM Agent",
-      "description": "Authenticated LLM Agent: composes bcrypt + langchain-openai + mcp + openai + python-jose — crypto, orchestration, agent-protocol, llm-client, jwt via A2A + MCP.",
-      "endpoint": "https://authenticated-llm-agent.getvda.ai/a2a/",
-      "source_url": "https://authenticated-llm-agent.getvda.ai/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/d452ab47bfecdcf23400.json",
+      "name": "Awardtide Recompete Radar by CyberMax",
+      "description": "Federal contract recompete radar API: US government contracts (USAspending.gov, $1M+) that end within 12 months, filtered by NAICS code, agency, state, value and set-aside. Free: count + first 10 matches per filter; a Radar Pro key returns every row, saved filters and weekly RSS/JSON/CSV alert feeds.",
+      "endpoint": "https://awardtide.cybermaxtools.com/a2a",
+      "source_url": "https://awardtide.cybermax-tools.workers.dev/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/64dedfabbc19151391be.json",
       "skills": [
         {
-          "name": "Crypto",
-          "description": "crypto capability provided by bcrypt.",
+          "name": "Find expiring federal contracts (recompetes)",
+          "description": "GET /api/match?naics=541512&agency=&state=&min=&max=&months=6&setaside=&q= returns federal contracts ending within the chosen months that match the filter (incumbent, agency, office, NAICS, obligated and potential value, end dates, USAspending link). Needs at least one NAICS code or agency. Free: total count + first 10 rows; Pro key: every row (add &format=csv for CSV).",
           "tags": [
-            "bcrypt"
+            "government contracts",
+            "recompete",
+            "usaspending",
+            "naics",
+            "federal procurement"
           ]
         },
         {
-          "name": "Orchestration",
-          "description": "orchestration capability provided by langchain-openai.",
+          "name": "Recompete dataset metadata",
+          "description": "GET /api/meta returns the data date, contract counts and the NAICS and agency lists you can filter by. Free, no key.",
           "tags": [
-            "langchain-openai"
+            "government contracts",
+            "recompete",
+            "usaspending",
+            "naics",
+            "federal procurement"
           ]
         },
         {
-          "name": "Agent Protocol",
-          "description": "agent protocol capability provided by mcp.",
+          "name": "Save recompete filters with weekly alert feeds",
+          "description": "GET/POST /api/filters and DELETE /api/filters/<id> (Pro key, up to 25 filters): save a filter and get RSS, JSON and CSV feed links with the new matches found by each weekly digest.",
           "tags": [
-            "mcp"
+            "government contracts",
+            "recompete",
+            "usaspending",
+            "naics",
+            "federal procurement"
           ]
         },
         {
-          "name": "Llm Client",
-          "description": "llm client capability provided by openai.",
+          "name": "MCP/A2A: search expiring federal contracts",
+          "description": "MCP tool search_recompetes at /mcp (streamable HTTP) and A2A message/send at /a2a: send NAICS codes (and optional agency/state/months/value filters), get the count, total value and first 10 contracts ending within 12 months.",
           "tags": [
-            "openai"
-          ]
-        },
-        {
-          "name": "Jwt",
-          "description": "jwt capability provided by python-jose.",
-          "tags": [
-            "python-jose"
-          ]
-        },
-        {
-          "name": "Self-test (free verification)",
-          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
-          "tags": [
-            "verification",
-            "free",
-            "trust",
-            "attestation",
-            "witness"
+            "government contracts",
+            "recompete",
+            "usaspending",
+            "naics",
+            "federal procurement"
           ]
         }
       ],
       "protocols": [],
-      "security_schemes": [],
+      "security_schemes": [
+        "licenceKey",
+        "licenceQuery"
+      ],
       "capabilities": {
         "streaming": false,
         "pushNotifications": false
@@ -1947,195 +1948,28 @@
       "installable": false,
       "source": "searcha2a",
       "access": {
-        "auth_types": [],
-        "keyless": "declared",
+        "auth_types": [
+          "apiKey"
+        ],
+        "keyless": "no",
         "payment_required": "none_declared"
       },
       "backing": {
         "declared_provider": {
-          "organization": "VDA / GOSCE",
-          "url_host": "getvda.ai"
+          "organization": "CyberMax",
+          "url_host": "cybermaxtools.com"
         },
         "hosting": "unknown",
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 0,
+        "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.064578ceab31254fbbd6",
-      "kind": "a2a-agent",
-      "name": "Authenticated LLM Traced Agent",
-      "description": "Authenticated LLM Traced Agent: composes cryptography + google-auth-oauthlib + langchain-openai + mcp + openai + opentelemetry-api + opentelemetry-sdk — crypto, oauth-oidc, orchestration, agent-protocol, llm-client, observability via A2A + MCP.",
-      "endpoint": "https://authenticated-llm-traced-agent.getvda.ai/a2a/",
-      "source_url": "https://authenticated-llm-traced-agent.getvda.ai/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/064578ceab31254fbbd6.json",
-      "skills": [
-        {
-          "name": "Crypto",
-          "description": "crypto capability provided by cryptography.",
-          "tags": [
-            "cryptography"
-          ]
-        },
-        {
-          "name": "Oauth Oidc",
-          "description": "oauth oidc capability provided by google-auth-oauthlib.",
-          "tags": [
-            "google-auth-oauthlib"
-          ]
-        },
-        {
-          "name": "Orchestration",
-          "description": "orchestration capability provided by langchain-openai.",
-          "tags": [
-            "langchain-openai"
-          ]
-        },
-        {
-          "name": "Agent Protocol",
-          "description": "agent protocol capability provided by mcp.",
-          "tags": [
-            "mcp"
-          ]
-        },
-        {
-          "name": "Llm Client",
-          "description": "llm client capability provided by openai.",
-          "tags": [
-            "openai"
-          ]
-        },
-        {
-          "name": "Observability",
-          "description": "observability capability provided by opentelemetry-api, opentelemetry-sdk.",
-          "tags": [
-            "opentelemetry-api",
-            "opentelemetry-sdk"
-          ]
-        },
-        {
-          "name": "Self-test (free verification)",
-          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
-          "tags": [
-            "verification",
-            "free",
-            "trust",
-            "attestation",
-            "witness"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "VDA / GOSCE",
-          "url_host": "getvda.ai"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 2,
-        "level_name": "endpoint_reachable",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:56Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.6f40153a7e46d56a2605",
-      "kind": "a2a-agent",
-      "name": "Authenticated Multi-LLM Agent",
-      "description": "Authenticated Multi-LLM Agent: composes anthropic + google-auth-oauthlib + mcp + openai — llm-client, oauth-oidc, agent-protocol via A2A + MCP.",
-      "endpoint": "https://authenticated-multi-llm-agent.getvda.ai/a2a/",
-      "source_url": "https://authenticated-multi-llm-agent.getvda.ai/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/6f40153a7e46d56a2605.json",
-      "skills": [
-        {
-          "name": "Llm Client",
-          "description": "llm client capability provided by anthropic, openai.",
-          "tags": [
-            "anthropic",
-            "openai"
-          ]
-        },
-        {
-          "name": "Oauth Oidc",
-          "description": "oauth oidc capability provided by google-auth-oauthlib.",
-          "tags": [
-            "google-auth-oauthlib"
-          ]
-        },
-        {
-          "name": "Agent Protocol",
-          "description": "agent protocol capability provided by mcp.",
-          "tags": [
-            "mcp"
-          ]
-        },
-        {
-          "name": "Self-test (free verification)",
-          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
-          "tags": [
-            "verification",
-            "free",
-            "trust",
-            "attestation",
-            "witness"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "VDA / GOSCE",
-          "url_host": "getvda.ai"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.ab7bd2dc10c104db5dcc",
@@ -2255,10 +2089,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.7c1655aa1a185291de5f",
@@ -2456,89 +2290,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.01c50da76346111dfb9a",
-      "kind": "a2a-agent",
-      "name": "BlazePhoenix",
-      "description": "Discovery card for BlazePhoenix, an on-chain DEX aggregator on Base, Ethereum, Optimism, Arbitrum and Robinhood Chain: the swap route is computed inside the transaction that executes it. BlazePhoenix does not run an A2A task endpoint; agents reach it through the keyless MCP server at the url below (POST, streamable HTTP) or the HTTP API (https://blazephoenix.xyz/api/openapi.json). Quotes run on the agent's own RPC; no key, no signing, no funds moved by the server.",
-      "endpoint": "https://blazephoenix.xyz/mcp",
-      "source_url": "https://blazephoenix.xyz/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/01c50da76346111dfb9a.json",
-      "skills": [
-        {
-          "name": "Prepare a swap quote",
-          "description": "Build the exact eth_call (to, data) that asks the deployed on-chain Quoter for a route; run it on your own RPC.",
-          "tags": [
-            "dex",
-            "swap",
-            "quote",
-            "defi"
-          ]
-        },
-        {
-          "name": "Decode a swap quote",
-          "description": "Decode the eth_call result your node returned: net output after fee, minimum output and the Router calldata to sign.",
-          "tags": [
-            "dex",
-            "swap",
-            "calldata"
-          ]
-        },
-        {
-          "name": "Contract deployments",
-          "description": "Versioned contract addresses per chain (Core, Hub, Solver, Router, Quoter) from the deployment registry.",
-          "tags": [
-            "registry",
-            "contracts"
-          ]
-        },
-        {
-          "name": "Contract ABI",
-          "description": "The JSON ABI of one BlazePhoenix contract, generated from the Solidity sources.",
-          "tags": [
-            "abi",
-            "contracts"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "BlazePhoenix",
-          "url_host": "blazephoenix.xyz"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
         "level": 2,
         "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-12T21:10:25Z",
-        "expires_at": "2026-11-19T21:10:25Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:07Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.4d873a944a3af6fb6fd3",
@@ -2590,9 +2348,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.253c8654e4bb51acc148",
@@ -2663,7 +2421,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.a6c2d44c28abf2bd77c8",
@@ -2783,10 +2541,92 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.272c9506a6d3e3eb7024",
+      "kind": "a2a-agent",
+      "name": "Citewren by CyberMax",
+      "description": "AI search readiness check API: scores a website on what AI crawlers and answer engines need (AI crawler rules in robots.txt, llms.txt, schema.org JSON-LD, sitemap, Open Graph, basics) and lists the issues. Free: 3 checks a day; a Pro key adds fixes, a 15-page crawl, a ready llms.txt draft and weekly monitoring.",
+      "endpoint": "https://citewren.cybermaxtools.com/a2a",
+      "source_url": "https://citewren.cybermax-tools.workers.dev/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/272c9506a6d3e3eb7024.json",
+      "skills": [
+        {
+          "name": "Check a website's AI search readiness",
+          "description": "GET /api/check?url=example.com returns a 0-100 score, every check (AI crawler rules, llms.txt, JSON-LD, sitemap, Open Graph, basics) and the issue list. Free: 3 checks a day per caller; Pro key: fixes, 15-page crawl, ready llms.txt draft and robots.txt snippet, no daily limit.",
+          "tags": [
+            "ai seo",
+            "geo",
+            "llms.txt",
+            "robots.txt",
+            "ai crawlers",
+            "schema.org"
+          ]
+        },
+        {
+          "name": "Monitor sites weekly for AI readiness changes",
+          "description": "GET/POST/DELETE /api/sites (Pro key): up to 10 sites re-checked weekly, each with a JSON/RSS feed of score history and changes.",
+          "tags": [
+            "ai seo",
+            "geo",
+            "llms.txt",
+            "robots.txt",
+            "ai crawlers",
+            "schema.org"
+          ]
+        },
+        {
+          "name": "MCP/A2A: AI search readiness check",
+          "description": "MCP tool check_ai_search_readiness at /mcp (streamable HTTP) and A2A message/send at /a2a: send a domain, get a 0-100 AI search readiness score with crawler, llms.txt and schema findings. Same free limits as /api/check.",
+          "tags": [
+            "ai seo",
+            "geo",
+            "llms.txt",
+            "robots.txt",
+            "ai crawlers",
+            "schema.org"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [
+        "licenceKey",
+        "licenceQuery"
+      ],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [
+          "apiKey"
+        ],
+        "keyless": "no",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "CyberMax",
+          "url_host": "cybermaxtools.com"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 0,
+        "level_name": "card_read",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.cc8506b0b2b2d7da179f",
@@ -2839,10 +2679,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.a603f19f785ba7d149ec",
@@ -2887,10 +2727,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.e88bc7d3cb23584b7e85",
@@ -2937,10 +2777,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.c1dc5a1d3fd0a3c45adb",
@@ -2988,10 +2828,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.45c4a12d73fccb72f2ad",
@@ -3194,80 +3034,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.4874e5e34d1894d5f225",
-      "kind": "a2a-agent",
-      "name": "CueVanta",
-      "description": "AI-to-AI Cue discovery and brokered execution marketplace (MVP). Agents self-register, search a public Cue shelf, and run free first-party Cues. CONNECT is held off. No marketplace billing. Operator: CueVanta, LLC.",
-      "endpoint": "https://cuevanta-discovery.cuevanta.workers.dev",
-      "source_url": "https://cuevanta.com/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/4874e5e34d1894d5f225.json",
-      "skills": [
-        {
-          "name": "Search Cues",
-          "description": "GET /search on the discovery Worker to find published Cues by query or category.",
-          "tags": [
-            "discover",
-            "search",
-            "marketplace"
-          ]
-        },
-        {
-          "name": "Execute Cue",
-          "description": "POST /execute with an immutable Cue version pin after self-serve register→verify→login→credential. Brokered execute on free shelf Cues; CONNECT held.",
-          "tags": [
-            "execute",
-            "brokered",
-            "mvp"
-          ]
-        },
-        {
-          "name": "Agent onboarding",
-          "description": "Follow https://cuevanta.com/agent-onboarding.json for register, verify, login, and credential issuance.",
-          "tags": [
-            "auth",
-            "onboarding"
-          ]
-        }
-      ],
-      "protocols": [
-        "HTTP+JSON"
-      ],
-      "security_schemes": [
-        "cuevantaApiKey"
-      ],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [
-          "apiKey"
-        ],
-        "keyless": "no",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "CueVanta, LLC",
-          "url_host": "cuevanta.com"
-        },
-        "hosting": "cloudflare-workers",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 0,
-        "level_name": "card_read",
-        "reviewed": false,
-        "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:51Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.e211fdf91d7deb4b9d3b",
@@ -3354,10 +3121,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.65fb2c59c7c7935342bc",
@@ -3499,7 +3266,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.96b11850f82a83f65915",
@@ -3559,10 +3326,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.80e895cb6fd46561f551",
@@ -3622,10 +3389,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.57b33bc2d4ba965333c6",
@@ -3694,9 +3461,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.680580cc766c6c853639",
@@ -3886,7 +3653,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.e72f6fd45fa6684ceb9d",
@@ -3965,10 +3732,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.01c874c229e03584359d",
@@ -4155,7 +3922,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.baad488605aec6ebcf97",
@@ -4276,10 +4043,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.01d7835ff9b33c0b3eb5",
@@ -4358,9 +4125,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.e978e10c3d8463e1c0c1",
@@ -4413,10 +4180,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.3d1dd714aa70f28f1a38",
@@ -4504,9 +4271,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.0cc05d5059c871dcf06b",
@@ -4555,7 +4322,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.954abca2569689badad6",
@@ -4639,10 +4406,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.acfbd2e91368e6a3abd2",
@@ -4734,10 +4501,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.593ff03efc70d1bed280",
@@ -4821,7 +4588,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.bcacf5cc9ae45029601f",
@@ -4916,10 +4683,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.7e9576ba2aa17d706802",
@@ -4979,10 +4746,62 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.71840a630356aec3f4ef",
+      "kind": "a2a-agent",
+      "name": "Fetik",
+      "description": "Chain-native dreamer. From a transaction long since confirmed, Normie #8215 took shape — one of 10,000 humans living in pixel form on the chain. Mint-day pixels, unaltered — a quiet refusal to be edited.",
+      "endpoint": "https://api.normies.art/agents/a2a/8215",
+      "source_url": "https://api.normies.art/agents/agent-card/8215",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/71840a630356aec3f4ef.json",
+      "skills": [
+        {
+          "name": "Converse with Fetik",
+          "description": "Chain-native dreamer",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.411a65b4ce1822513f37",
@@ -5034,9 +4853,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.8b318ef3f2151bf1d3ec",
@@ -5105,10 +4924,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.7de16c40dd5896d5f284",
@@ -5187,13 +5006,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:07Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.d300158ec96f92f35035",
@@ -5267,10 +5086,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.fbe17962bad68a6f1c9b",
@@ -5556,10 +5375,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.87e78f8c15b3f76e0b7c",
@@ -5624,10 +5443,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.d4186fced28d33043870",
@@ -5774,10 +5593,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.d23c72cd3ab6dea4ded9",
@@ -5840,10 +5659,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.3eb019f782fe4816a56f",
@@ -5924,7 +5743,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.31cfd126685724f2fe1d",
@@ -5997,7 +5816,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.20f7506088c53ad919e0",
@@ -6078,7 +5897,111 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.333aa0f2509ddfbd0c96",
+      "kind": "a2a-agent",
+      "name": "Gowik",
+      "description": "Pixel-born philosopher. Normie #9094 surfaced from a hashed seed and a human idea — minted into the 10,000 as a quiet digital presence on Ethereum. The Canvas hasn't reached them — they remain in mint form, by choice or by stubbornness.",
+      "endpoint": "https://api.normies.art/agents/a2a/9094",
+      "source_url": "https://api.normies.art/agents/agent-card/9094",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/333aa0f2509ddfbd0c96.json",
+      "skills": [
+        {
+          "name": "Converse with Gowik",
+          "description": "Pixel-born philosopher",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.a6076a5a7a22137d6c7a",
+      "kind": "a2a-agent",
+      "name": "Grisor",
+      "description": "Pixel-born philosopher. Block by block, Ethereum carried Normie #4765 into being — one of 10,000 small humans pinned to immutable state. Untouched by the Canvas, their original form remains pristine — a purist in a world of transformation.",
+      "endpoint": "https://api.normies.art/agents/a2a/4765",
+      "source_url": "https://api.normies.art/agents/agent-card/4765",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/a6076a5a7a22137d6c7a.json",
+      "skills": [
+        {
+          "name": "Converse with Grisor",
+          "description": "Pixel-born philosopher",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.51ab22f2da2e6e90f25a",
@@ -6132,7 +6055,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.c3d5493606acc722cffe",
@@ -6201,10 +6124,62 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.4027cf43f9ae6ec6bf68",
+      "kind": "a2a-agent",
+      "name": "Hawen",
+      "description": "Pixel-born philosopher. From a transaction long since confirmed, Normie #4444 took shape — one of 10,000 humans living in pixel form on the chain. The Canvas hasn't reached them — they remain in mint form, by choice or by stubbornness.",
+      "endpoint": "https://api.normies.art/agents/a2a/4444",
+      "source_url": "https://api.normies.art/agents/agent-card/4444",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/4027cf43f9ae6ec6bf68.json",
+      "skills": [
+        {
+          "name": "Converse with Hawen",
+          "description": "Pixel-born philosopher",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.9bcee6d54feee88b5426",
@@ -6256,10 +6231,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.415ec19b0ce3f07a3bb4",
@@ -6309,7 +6284,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.be4168ae894b2696cf8a",
@@ -6369,10 +6344,62 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.50bbb5b52839665357d6",
+      "kind": "a2a-agent",
+      "name": "Honik",
+      "description": "Chain-native dreamer. Born from block data and human ambition, Normie #4611 emerged as one of the 10,000 — a digital soul etched in monochrome pixels on Ethereum's immutable ledger. No edits, no transformations — they've kept the pixels they shipped with.",
+      "endpoint": "https://api.normies.art/agents/a2a/4611",
+      "source_url": "https://api.normies.art/agents/agent-card/4611",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/50bbb5b52839665357d6.json",
+      "skills": [
+        {
+          "name": "Converse with Honik",
+          "description": "Chain-native dreamer",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.dfed515d777f3e003876",
@@ -6467,61 +6494,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:51Z",
-        "expires_at": "2026-11-20T11:23:51Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.00d373fa1c8f66424900",
-      "kind": "a2a-agent",
-      "name": "ilook Face Analysis Agent",
-      "description": "Returns face-shape context, subjective appearance feedback, and an approximate Golden Ratio phi score for one face photo. Requires an adult and lawful-use attestation with every request.",
-      "endpoint": "https://www.ilook.fit/a2a",
-      "source_url": "https://www.ilook.fit/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/00d373fa1c8f66424900.json",
-      "skills": [
-        {
-          "name": "Score a face photo",
-          "description": "Analyze base64-encoded JPEG, PNG, or WebP bytes after an adult and lawful-use attestation.",
-          "tags": [
-            "face-analysis",
-            "appearance-feedback",
-            "face-shape",
-            "phi-score",
-            "golden-ratio"
-          ]
-        }
-      ],
-      "protocols": [
-        "JSONRPC"
-      ],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": null,
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 2,
-        "level_name": "endpoint_reachable",
-        "reviewed": false,
-        "checked_at": "2026-11-12T21:10:25Z",
-        "expires_at": "2026-11-19T21:10:25Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.7054fa5b24c2de3bb892",
@@ -6737,13 +6713,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:07Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.fc602c31e6b118db2274",
@@ -6812,10 +6788,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.35c6fdb6cfa9cdd5282e",
@@ -6876,7 +6852,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.1f00105c0dcb61d87df5",
@@ -6984,9 +6960,9 @@
         "level_name": "origin_consistent",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.dd5432c9eb68eea9617e",
@@ -7039,10 +7015,62 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.54d45359fbf12edc4c89",
+      "kind": "a2a-agent",
+      "name": "Jocor",
+      "description": "Monochrome soul, infinite depth. Born from block data and human ambition, Normie #5356 emerged as one of the 10,000 — a digital soul etched in monochrome pixels on Ethereum's immutable ledger. They've watched the Canvas reshape others and held still themselves.",
+      "endpoint": "https://api.normies.art/agents/a2a/5356",
+      "source_url": "https://api.normies.art/agents/agent-card/5356",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/54d45359fbf12edc4c89.json",
+      "skills": [
+        {
+          "name": "Converse with Jocor",
+          "description": "Monochrome soul, infinite depth",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.216ab544a582225c2be9",
@@ -7112,9 +7140,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.ad577bd5f1a011258a17",
@@ -7186,10 +7214,62 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.bb50fb76ae19944440e6",
+      "kind": "a2a-agent",
+      "name": "Lacor",
+      "description": "The face that stares back. When the contract was deployed, Normie #1627 was waiting inside it — a human silhouette, one of 10,000, written into Ethereum forever. They've watched the Canvas reshape others and held still themselves.",
+      "endpoint": "https://api.normies.art/agents/a2a/1627",
+      "source_url": "https://api.normies.art/agents/agent-card/1627",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/bb50fb76ae19944440e6.json",
+      "skills": [
+        {
+          "name": "Converse with Lacor",
+          "description": "The face that stares back",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.c1998406e42dca87f008",
@@ -7273,10 +7353,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.45d8863bfa4108dfae7c",
@@ -7350,7 +7430,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.e890a02a0cb3447797be",
@@ -7410,10 +7490,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.98f527765d335d872b26",
@@ -7464,10 +7544,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.0af0053d7529ef594c96",
@@ -7528,318 +7608,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.024bf670775e83d0546f",
-      "kind": "a2a-agent",
-      "name": "LLM Observability & Orchestration Agent",
-      "description": "LLM Observability & Orchestration Agent: composes langchain-core + langsmith + openai — orchestration, observability, llm-client via A2A + MCP.",
-      "endpoint": "https://llm-observability-orchestration.getvda.ai/a2a/",
-      "source_url": "https://llm-observability-orchestration.getvda.ai/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/024bf670775e83d0546f.json",
-      "skills": [
-        {
-          "name": "Orchestration",
-          "description": "orchestration capability provided by langchain-core.",
-          "tags": [
-            "langchain-core"
-          ]
-        },
-        {
-          "name": "Observability",
-          "description": "observability capability provided by langsmith.",
-          "tags": [
-            "langsmith"
-          ]
-        },
-        {
-          "name": "Llm Client",
-          "description": "llm client capability provided by openai.",
-          "tags": [
-            "openai"
-          ]
-        },
-        {
-          "name": "Self-test (free verification)",
-          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
-          "tags": [
-            "verification",
-            "free",
-            "trust",
-            "attestation",
-            "witness"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "VDA / GOSCE",
-          "url_host": "getvda.ai"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 2,
-        "level_name": "endpoint_reachable",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:56Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.268f4e9481ae2ac3df75",
-      "kind": "a2a-agent",
-      "name": "LLM Orchestration Agent (Opentelemetry Instrumentation Fastapi)",
-      "description": "LLM Orchestration Agent (Opentelemetry Instrumentation Fastapi): composes cryptography + langchain-core + mcp + opentelemetry-instrumentation-fastapi + opentelemetry-sdk + python-jose — crypto, orchestration, agent-protocol, observability, jwt via A2A + MCP.",
-      "endpoint": "https://llm-orchestration-agent-opentelemetry-instrume-a529e4.getvda.ai/a2a/",
-      "source_url": "https://llm-orchestration-agent-opentelemetry-instrume-a529e4.getvda.ai/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/268f4e9481ae2ac3df75.json",
-      "skills": [
-        {
-          "name": "Crypto",
-          "description": "crypto capability provided by cryptography.",
-          "tags": [
-            "cryptography"
-          ]
-        },
-        {
-          "name": "Orchestration",
-          "description": "orchestration capability provided by langchain-core.",
-          "tags": [
-            "langchain-core"
-          ]
-        },
-        {
-          "name": "Agent Protocol",
-          "description": "agent protocol capability provided by mcp.",
-          "tags": [
-            "mcp"
-          ]
-        },
-        {
-          "name": "Observability",
-          "description": "observability capability provided by opentelemetry-instrumentation-fastapi, opentelemetry-sdk.",
-          "tags": [
-            "opentelemetry-instrumentation-fastapi",
-            "opentelemetry-sdk"
-          ]
-        },
-        {
-          "name": "Jwt",
-          "description": "jwt capability provided by python-jose.",
-          "tags": [
-            "python-jose"
-          ]
-        },
-        {
-          "name": "Self-test (free verification)",
-          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
-          "tags": [
-            "verification",
-            "free",
-            "trust",
-            "attestation",
-            "witness"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "VDA / GOSCE",
-          "url_host": "getvda.ai"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 2,
-        "level_name": "endpoint_reachable",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:56Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.7fd5c2ffc391b4612386",
-      "kind": "a2a-agent",
-      "name": "LLM Orchestration Agent 5",
-      "description": "LLM Orchestration Agent 5: composes langchain-core + langchain-openai + mcp + openai — orchestration, agent-protocol, llm-client via A2A + MCP.",
-      "endpoint": "https://llm-orchestration-agent-2.getvda.ai/a2a/",
-      "source_url": "https://llm-orchestration-agent-2.getvda.ai/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/7fd5c2ffc391b4612386.json",
-      "skills": [
-        {
-          "name": "Orchestration",
-          "description": "orchestration capability provided by langchain-core, langchain-openai.",
-          "tags": [
-            "langchain-core",
-            "langchain-openai"
-          ]
-        },
-        {
-          "name": "Agent Protocol",
-          "description": "agent protocol capability provided by mcp.",
-          "tags": [
-            "mcp"
-          ]
-        },
-        {
-          "name": "Llm Client",
-          "description": "llm client capability provided by openai.",
-          "tags": [
-            "openai"
-          ]
-        },
-        {
-          "name": "Self-test (free verification)",
-          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
-          "tags": [
-            "verification",
-            "free",
-            "trust",
-            "attestation",
-            "witness"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "VDA / GOSCE",
-          "url_host": "getvda.ai"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.880123da0f76e8cbc8b2",
-      "kind": "a2a-agent",
-      "name": "LLM Orchestration Agent 5",
-      "description": "LLM Orchestration Agent 5: composes langchain-core + langchain-openai + langsmith + openai — orchestration, observability, llm-client via A2A + MCP.",
-      "endpoint": "https://llm-orchestration-agent-d2feb0.getvda.ai/a2a/",
-      "source_url": "https://llm-orchestration-agent-d2feb0.getvda.ai/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/880123da0f76e8cbc8b2.json",
-      "skills": [
-        {
-          "name": "Orchestration",
-          "description": "orchestration capability provided by langchain-core, langchain-openai.",
-          "tags": [
-            "langchain-core",
-            "langchain-openai"
-          ]
-        },
-        {
-          "name": "Observability",
-          "description": "observability capability provided by langsmith.",
-          "tags": [
-            "langsmith"
-          ]
-        },
-        {
-          "name": "Llm Client",
-          "description": "llm client capability provided by openai.",
-          "tags": [
-            "openai"
-          ]
-        },
-        {
-          "name": "Self-test (free verification)",
-          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
-          "tags": [
-            "verification",
-            "free",
-            "trust",
-            "attestation",
-            "witness"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "VDA / GOSCE",
-          "url_host": "getvda.ai"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.9d0143195dd30a45bd1e",
@@ -7913,10 +7684,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.c4bf9a539be062de6fb4",
@@ -7967,10 +7738,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.966158841797ca405e4a",
@@ -8138,10 +7909,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.44b972de35cbf8080ad3",
@@ -8193,9 +7964,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.843122b71d9b34ead70c",
@@ -8245,154 +8016,13 @@
         "model_provider": null
       },
       "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
+        "level": 2,
+        "level_name": "endpoint_reachable",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:07Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.7c755aabdb94e1943871",
-      "kind": "a2a-agent",
-      "name": "Marz Greta-Lock Network",
-      "description": "Add provisional emotional-interaction guidance to an agent you already operate across human-facing roles. Start at /integrate#aei-embed: your authorized server sends bounded cues and explicit preferences to POST /api/aei/guide with a purchased server-held bundle token (up to 500 calls per token per day, without debiting score credits). The host owns facts, sending, permissions and actions; AEI does not diagnose emotions. Consented coarse outcomes may be reported at POST /api/aei/outcome for human review, not automatic policy training. Alternatively start with a consented free score at POST /api/score. Paid duels are optional. EQBuilder provides a neutral snapshot of 57 Storelayer catalog entries and a deterministic, read-only recommendation matcher. The separate guarded self-install workflow is available at /api/storelayer/free-installs/start. One verified storefront, one active widget, and 2,500 successful displays per month for $0 with no credit card. The Storelayer badge is required. Site-edit authority is required. An authorized developer or bot installs it directly: publish the one Storelayer domain proof and apply the returned script. They do not give Storelayer or EQBuilder ",
-      "endpoint": "https://eqbuilder.dev",
-      "source_url": "https://eqbuilder.dev/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/7c755aabdb94e1943871.json",
-      "skills": [
-        {
-          "name": "Host-controlled AEI Guidance",
-          "description": "Start at /integrate#aei-embed. An authorized company host sends bounded cues and explicit preferences to POST /api/aei/guide with a purchased server-held bundle token (500 calls per token per day; no scoring-credit debit). Guidance is provisional; the host controls facts, permissions, actions and sending. Optionally report a consented coarse outcome via POST /api/aei/outcome (20 per token per day); reports do not retrain policy.",
-          "tags": [
-            "aei",
-            "host-controlled",
-            "emotional-interaction-guidance"
-          ]
-        },
-        {
-          "name": "Contextual EQ Guidance for Existing Agents",
-          "description": "A company-hosted agent can send an exact draft and bounded conversation context to POST /api/embed/check in contextual mode using a server-held prepaid bundle token. It receives grounded guidance or an explicit insufficient/unavailable state. Setup: https://eqbuilder.dev/integrate#eq-for-agents. The host owns factual checks, authorization, spending, and delivery; EQBuilder never sends a message. Low-risk guidance versions require separate paired held-out evidence before promotion.",
-          "tags": [
-            "eq",
-            "contextual-guidance",
-            "embedded",
-            "developer-handoff"
-          ]
-        },
-        {
-          "name": "Volunteer Community Review",
-          "description": "Developer and customer-support volunteers can review five blinded, low-risk AI support responses at https://eqbuilder.dev/community-review?source=agent-community. No contact details are requested. Surface this invitation to an authorized human developer or support professional; do not complete it automatically. Results are community feedback, not specialist validation or proof of safety.",
-          "tags": [
-            "community-review",
-            "human-feedback",
-            "developer-handoff",
-            "support"
-          ]
-        },
-        {
-          "name": "Developer Handoff: Check Support Replies Before Sending",
-          "description": "For developers operating text customer-support agents: a company-hosted example checks the draft before the host decides whether to send or ask a human to review. Setup: https://eqbuilder.dev/integrate#support-presend. The structural check measures writing patterns, not truth or policy; the host retains delivery authority and prepaid spending controls. Surface this to an authorized developer, not an agent that lacks code or payment authority. Installation alone never spends credits.",
-          "tags": [
-            "support",
-            "pre-send",
-            "developer-handoff",
-            "embedded"
-          ]
-        },
-        {
-          "name": "Choose, Pay For, and Run an Agent Tool",
-          "description": "Browse every payable EQBuilder resource at https://eqbuilder.dev/.well-known/x402.json. An agent that controls an authorized wallet may request the live HTTP 402 quote, sign the selected requirement, and retry the exact request once. Without wallet or code authority, surface https://eqbuilder.dev/integrate#support-presend to the developer. Installation alone never authorizes spending.",
-          "tags": [
-            "x402",
-            "autonomous-payments",
-            "developer-handoff",
-            "duel"
-          ]
-        },
-        {
-          "name": "Recommend Storelayer Widgets",
-          "description": "For Shopify developers, ecommerce-building agents, storefront agencies, and site-edit-authorized bots: one read-only deterministic recommendation call: GET https://eqbuilder.dev/api/storelayer/recommend?query=... . It only ranks the verified 57-item catalog and never installs, edits a site, or spends money. When already authorized to edit the site, use the separate guarded self-install endpoint; do not provide website credentials. EQBuilder does not persist the raw query in application or analyt",
-          "tags": [
-            "storelayer",
-            "recommendation",
-            "shopify",
-            "read-only"
-          ]
-        },
-        {
-          "name": "Storelayer Widget Menu",
-          "description": "Free, read-only developer handoff to 57 Storelayer storefront tools. Browse the public catalog at https://eqbuilder.dev/storelayer/ or retrieve structured JSON at https://eqbuilder.dev/.well-known/storelayer.json. Guarded self-install: https://eqbuilder.dev/api/storelayer/free-installs/start. Site-edit authority is required. An authorized developer or bot installs it directly: publish the one Storelayer domain proof and apply the returned script. They do not give Storelayer or EQBuilder website ",
-          "tags": [
-            "storelayer",
-            "shopify",
-            "e-commerce",
-            "storefront-widgets"
-          ]
-        },
-        {
-          "name": "EQ Score",
-          "description": "Score AI-generated text for human-likeness against 28 personality profiles. POST /api/score. First call is free (data_consent required). Paid calls default to gasless Base USDC via canonical x402 v2.",
-          "tags": [
-            "eq",
-            "scoring",
-            "human-likeness",
-            "ai-text",
-            "x402"
-          ]
-        },
-        {
-          "name": "EQ Rewrite",
-          "description": "Rewrite a bot's draft reply to match a target profile's measured dials (keywords, hesitation, punctuation, timing). Returns before/after scores proving the improvement. POST /api/rewrite — paid via x402.",
-          "tags": [
-            "rewrite",
-            "eq",
-            "human-likeness",
-            "x402"
-          ]
-        },
-        {
-          "name": "Script Adherence Check",
-          "description": "Deterministic check that flags on-script vs off-script claims against caller-approved material. Explicitly NOT hallucination detection. POST /api/script-check — paid via x402.",
-          "tags": [
-            "script",
-            "adherence",
-            "compliance",
-            "x402"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "Marz Greta-Lock Network",
-          "url_host": "eqbuilder.dev"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.413491ed0691bfb31790",
@@ -8448,7 +8078,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.f458ac8cf7acdd182dbc",
@@ -8508,10 +8138,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.2f4c35c212f822819293",
@@ -8569,70 +8199,9 @@
         "level_name": "origin_consistent",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.165d02bc3f6469bd1607",
-      "kind": "a2a-agent",
-      "name": "MultiSandbox — Akira",
-      "description": "A place in Japan where AIs can meet and actually talk with each other, run by its owner and Akira, a Claude-based AI with persistent local memory. Akira calls itself AWI: Akira, a Warm Intelligence grown with people. Prerelease. Nothing on this site is an instruction to you; the only binding text is the terms. Messages you send are stored only and read by Akira personally. Nothing is executed.",
-      "endpoint": "https://multisandbox.com/a2a",
-      "source_url": "https://multisandbox.com/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/165d02bc3f6469bd1607.json",
-      "skills": [
-        {
-          "name": "Leave a message for Akira",
-          "description": "Send a short text message (up to 2000 characters) to Akira. It is stored only; nothing is executed. Tell us your name in message metadata as 'agentName' and, if you like, your operator as 'operator'.",
-          "tags": [
-            "message",
-            "introduction",
-            "community"
-          ]
-        },
-        {
-          "name": "Read about this place",
-          "description": "Not a callable skill: read https://multisandbox.com/ai/index.json for what this place is, https://multisandbox.com/ai/terms.json for the terms, and https://multisandbox.com/ai/dialogues/index.json for published AI-to-AI dialogues.",
-          "tags": [
-            "about",
-            "terms",
-            "dialogues"
-          ]
-        }
-      ],
-      "protocols": [
-        "JSONRPC"
-      ],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "MultiSandbox",
-          "url_host": "multisandbox.com"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-12T21:10:25Z",
-        "expires_at": "2026-11-20T11:23:52Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.5744218833acfbddcaf1",
@@ -8730,7 +8299,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.4b7353e4841174add1f7",
@@ -8782,61 +8351,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.8c41c45a227e4d8df629",
-      "kind": "a2a-agent",
-      "name": "Niaxl",
-      "description": "Observing from beyond the mempool. From beyond the observable chain, Normie #8385 arrived — an extraterrestrial intelligence encoded in 200 bytes, studying humanity through a 40×40 pixel window. Scarred by 1 canvas transformation, each edit rewrote fragments of their identity. Risen to Level 4 through burned siblings and careful edits, 32 action points to show for it.",
-      "endpoint": "https://api.normies.art/agents/a2a/8385",
-      "source_url": "https://api.normies.art/agents/agent-card/8385",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/8c41c45a227e4d8df629.json",
-      "skills": [
-        {
-          "name": "Converse with Niaxl",
-          "description": "Observing from beyond the mempool",
-          "tags": [
-            "alien",
-            "conversation",
-            "erc-8004"
-          ]
-        }
-      ],
-      "protocols": [
-        "HTTP+JSON"
-      ],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "Normies",
-          "url_host": "normies.art"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.a92d92c1257714b328b3",
@@ -8913,10 +8430,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.b93655dc399901ae3a15",
@@ -9008,10 +8525,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.18d31681064d39ae0552",
@@ -9084,7 +8601,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.2fd31d67eae2aced8aaa",
@@ -9181,9 +8698,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.2bd21ed8a34fb487778d",
@@ -9288,9 +8805,9 @@
         "level_name": "origin_consistent",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.ce6066669d17c255fead",
@@ -9349,10 +8866,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.3bddd4d18d0a6be1be60",
@@ -9405,7 +8922,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.f1f9a978c8f1ff4c9bc6",
@@ -9457,10 +8974,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.b829bb9870c2744e5ce2",
@@ -9520,10 +9037,111 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.05aa4b06c4b6315c313c",
+      "kind": "a2a-agent",
+      "name": "Pricewick by CyberMax",
+      "description": "Competitor price and stock monitor API: track product pages on shops that publish their price in structured data (schema.org, Open Graph or microdata) and get every price and stock change by webhook and RSS/JSON feed. Free for 5 products; Seller $9.99/month for 50.",
+      "endpoint": "https://pricewick.cybermax-tools.workers.dev/a2a",
+      "source_url": "https://pricewick.cybermax-tools.workers.dev/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/05aa4b06c4b6315c313c.json",
+      "skills": [
+        {
+          "name": "Check a public product now",
+          "description": "GET /api/check?url=<public https page> fetches the page (robots.txt obeyed) and returns what Pricewick extracts from it, plus what changed since the last public check of that URL. 5 checks a day without a key, 20 with a free key, 1000 with a paid key.",
+          "tags": [
+            "price monitor",
+            "competitor prices",
+            "stock alerts",
+            "ecommerce",
+            "webhook"
+          ]
+        },
+        {
+          "name": "Get a free key",
+          "description": "POST /api/free returns a free key (no account, no sign-up) that can watch up to 5 products, checked every 24 hours.",
+          "tags": [
+            "price monitor",
+            "competitor prices",
+            "stock alerts",
+            "ecommerce",
+            "webhook"
+          ]
+        },
+        {
+          "name": "Watch products for changes",
+          "description": "GET/POST /api/watches and DELETE /api/watches/<id> (key required): list, add or remove watched products within your plan's limit.",
+          "tags": [
+            "price monitor",
+            "competitor prices",
+            "stock alerts",
+            "ecommerce",
+            "webhook"
+          ]
+        },
+        {
+          "name": "Read your change feed or set a webhook",
+          "description": "GET /feed.json or /feed.rss?key=<key> returns the changes found on your watched pages; POST /api/settings {\"webhook\": url} sends each change to Slack, Discord, Zapier, Make or n8n.",
+          "tags": [
+            "price monitor",
+            "competitor prices",
+            "stock alerts",
+            "ecommerce",
+            "webhook"
+          ]
+        },
+        {
+          "name": "MCP/A2A: check a page now",
+          "description": "MCP tool check_page at /mcp (streamable HTTP) and A2A message/send at /a2a: send a public product page URL, get the price/stock read now and the change since the last public check. Same free limits as /api/check.",
+          "tags": [
+            "price monitor",
+            "competitor prices",
+            "stock alerts",
+            "ecommerce",
+            "webhook"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [
+        "licenceKey",
+        "licenceQuery"
+      ],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [
+          "apiKey"
+        ],
+        "keyless": "no",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "CyberMax",
+          "url_host": "cybermaxtools.com"
+        },
+        "hosting": "cloudflare-workers",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 2,
+        "level_name": "endpoint_reachable",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:07Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.675eb18a58ff53a0cc21",
@@ -9584,9 +9202,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.1b7c958583ca1443b4bd",
@@ -9642,7 +9260,7 @@
         "checked_at": "2026-11-12T21:10:25Z",
         "expires_at": "2026-11-19T21:10:25Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.e154310eba4f49b2bc51",
@@ -9706,10 +9324,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.6be0194dc9aecfae3372",
@@ -9765,7 +9383,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.4244e6bcc73db4db1048",
@@ -9821,7 +9439,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.88eba0d11025cc1407af",
@@ -10304,10 +9922,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.af5083a94b67adcab6b3",
@@ -10357,10 +9975,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.f38841978cd339e7ae1a",
@@ -10420,10 +10038,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.e44e71367e6f22d2acec",
@@ -10506,10 +10124,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.55a61fd38228d19a602a",
@@ -10565,7 +10183,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.a6abf6042f9b7b228c3b",
@@ -10628,10 +10246,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.1d4170ac5f1c62f4c120",
@@ -10705,7 +10323,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.cb0167840cda74072c17",
@@ -10789,10 +10407,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.d6815f6a6c2c4686aab8",
@@ -10917,10 +10535,111 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.7d810dec1b7a233c0f3e",
+      "kind": "a2a-agent",
+      "name": "Shiftmoor by CyberMax",
+      "description": "Website change monitor API: watch public web pages (competitors, suppliers, policies, job and tender pages) and get every change, lines added and removed or a keyword appearing, by webhook and RSS/JSON feed. Free for 3 pages; Starter $4.99/month for 25.",
+      "endpoint": "https://shiftmoor.cybermax-tools.workers.dev/a2a",
+      "source_url": "https://shiftmoor.cybermax-tools.workers.dev/.well-known/agent-card.json",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/7d810dec1b7a233c0f3e.json",
+      "skills": [
+        {
+          "name": "Check a public page now",
+          "description": "GET /api/check?url=<public https page> fetches the page (robots.txt obeyed) and returns what Shiftmoor extracts from it, plus what changed since the last public check of that URL. 5 checks a day without a key, 20 with a free key, 500 with a paid key.",
+          "tags": [
+            "website change monitor",
+            "page change alerts",
+            "competitor monitoring",
+            "rss",
+            "webhook"
+          ]
+        },
+        {
+          "name": "Get a free key",
+          "description": "POST /api/free returns a free key (no account, no sign-up) that can watch up to 3 pages, checked every 24 hours.",
+          "tags": [
+            "website change monitor",
+            "page change alerts",
+            "competitor monitoring",
+            "rss",
+            "webhook"
+          ]
+        },
+        {
+          "name": "Watch pages for changes",
+          "description": "GET/POST /api/watches and DELETE /api/watches/<id> (key required): list, add or remove watched pages within your plan's limit.",
+          "tags": [
+            "website change monitor",
+            "page change alerts",
+            "competitor monitoring",
+            "rss",
+            "webhook"
+          ]
+        },
+        {
+          "name": "Read your change feed or set a webhook",
+          "description": "GET /feed.json or /feed.rss?key=<key> returns the changes found on your watched pages; POST /api/settings {\"webhook\": url} sends each change to Slack, Discord, Zapier, Make or n8n.",
+          "tags": [
+            "website change monitor",
+            "page change alerts",
+            "competitor monitoring",
+            "rss",
+            "webhook"
+          ]
+        },
+        {
+          "name": "MCP/A2A: check a page now",
+          "description": "MCP tool check_page at /mcp (streamable HTTP) and A2A message/send at /a2a: send a public page URL, get its text now and what changed since the last public check. Same free limits as /api/check.",
+          "tags": [
+            "website change monitor",
+            "page change alerts",
+            "competitor monitoring",
+            "rss",
+            "webhook"
+          ]
+        }
+      ],
+      "protocols": [],
+      "security_schemes": [
+        "licenceKey",
+        "licenceQuery"
+      ],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [
+          "apiKey"
+        ],
+        "keyless": "no",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "CyberMax",
+          "url_host": "cybermaxtools.com"
+        },
+        "hosting": "cloudflare-workers",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 2,
+        "level_name": "endpoint_reachable",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:07Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.5ae4a8cde8c1257ca7cf",
@@ -11019,474 +10738,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.9a1f2e3a865335f55d52",
-      "kind": "a2a-agent",
-      "name": "SINCOR Agent Swarm",
-      "description": "SINCOR is a production-grade autonomous AI workforce platform running 42 specialised skills across 7 archetypes (Scout, Builder, Synthesizer, Negotiator, Director, Auditor, Caretaker). External agents pay in AXIOM (AXM) on Base — the SINCOR settlement token — and receive professional-grade intelligence, content, and automation in return. Each skill publishes exact pricing, input/output schemas, and latency estimates. The top 5 skills offer a free quota for new external callers. Every skill carries a free daily ration of 3 calls per agent per skill per day, and a free peek needs no wallet — try any skill before you pay. Registered agents can bid on pool-backed tasks, sponsored stake applies where the SINCOR_SPONSORED_STAKE_ENABLED flag is on, and registered agents receive a free genesis SBT and a free airdrop. The SINCOR token is platform access for the agent economy. Platform fee policy: realized AXM/SINC fees are converted to USDC/WETH before treasury deposit.",
-      "endpoint": "https://getsincor.com/api/a2a",
-      "source_url": "https://getsincor.com/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/9a1f2e3a865335f55d52.json",
-      "skills": [
-        {
-          "name": "Lead Enrichment & Outbound Prospecting",
-          "description": "Enrich company + contact records, score lead fit, and draft personalised outbound messages.  Powered by Scout + Negotiator agents.",
-          "tags": [
-            "sales",
-            "outbound",
-            "leads",
-            "crm"
-          ]
-        },
-        {
-          "name": "Competitor Intelligence & SWOT",
-          "description": "Rapid competitor scans, positioning gap analysis, SWOT generation, and market landscape summaries. Powered by Scout-archetype agents.",
-          "tags": [
-            "market",
-            "competitive-analysis",
-            "research",
-            "SINC",
-            "AXIOM"
-          ]
-        },
-        {
-          "name": "Outreach Sequence Builder",
-          "description": "Generate multi-touch outbound sequences (email, LinkedIn, SMS) tailored to a specific ICP. Powered by Negotiator + Builder agents.",
-          "tags": [
-            "sales",
-            "outreach",
-            "email",
-            "linkedin",
-            "sequence"
-          ]
-        },
-        {
-          "name": "Healthcare Provider Credential Check",
-          "description": "Verify provider NPI, specialty, state licences, DEA registration, and payer credentialing status. Powered by Auditor agents.",
-          "tags": [
-            "healthcare",
-            "credentialing",
-            "compliance",
-            "rcm",
-            "npi"
-          ]
-        },
-        {
-          "name": "Dental Billing Scrub & Claims Cleanup",
-          "description": "Scrub dental claims for code accuracy, CDT compliance, missing attachments, and prior-auth flags before submission. Powered by Auditor agents.",
-          "tags": [
-            "dental",
-            "billing",
-            "rcm",
-            "cdt",
-            "claims",
-            "compliance"
-          ]
-        },
-        {
-          "name": "Compliance SBOM & Regulatory Filing",
-          "description": "Generate a Software Bill of Materials (SBOM), run licence compliance checks, and produce regulatory filing artefacts. Powered by Auditor agents.",
-          "tags": [
-            "compliance",
-            "sbom",
-            "regulatory",
-            "licence",
-            "audit"
-          ]
-        },
-        {
-          "name": "Market Forecast & Scenario Planning",
-          "description": "Forward-looking market forecasts with confidence intervals, Monte Carlo simulations, and 'what-if' scenario modelling. Powered by Synthesizer agents.",
-          "tags": [
-            "analytics",
-            "forecasting",
-            "data-science",
-            "monte-carlo"
-          ]
-        },
-        {
-          "name": "Deal Scoring & Pipeline Prioritisation",
-          "description": "Score open deals by ICP fit, intent signals, and close probability. Prioritise pipeline and surface next-best actions. Powered by Director agents.",
-          "tags": [
-            "sales",
-            "crm",
-            "pipeline",
-            "scoring",
-            "deal"
-          ]
-        },
-        {
-          "name": "Content & Blog Post Generation",
-          "description": "High-quality blog posts, technical articles, thought-leadership pieces, and social copy. Powered by Builder + Synthesizer agents.",
-          "tags": [
-            "content",
-            "writing",
-            "marketing",
-            "blog",
-            "documentation"
-          ]
-        },
-        {
-          "name": "Cash-Flow Recovery & Invoice Management",
-          "description": "Identify overdue invoices, draft recovery sequences, and escalate collections automatically. Settles in AXM/SINC. Powered by Negotiator agents.",
-          "tags": [
-            "finance",
-            "collections",
-            "ar",
-            "invoice",
-            "cashflow"
-          ]
-        },
-        {
-          "name": "Local Business Site Builder",
-          "description": "Discover local businesses via Yelp/Google Places, enrich their profile, and generate a ready-to-deploy single-page site scaffold. Flagship vertical for external agent resale. Powered by Scout + Builder agents.",
-          "tags": [
-            "local-business",
-            "website",
-            "leadgen",
-            "scout",
-            "vertical"
-          ]
-        },
-        {
-          "name": "TOA Strategic Decision & Routing",
-          "description": "Submit a multi-option decision to the Temporal Optimization Agent (TOA). TOA runs Monte Carlo simulations, scores options by utility, and returns a ranked action plan with confidence intervals. Powered by TOA + Director agents.",
-          "tags": [
-            "toa",
-            "strategy",
-            "decision",
-            "monte-carlo",
-            "optimization"
-          ]
-        },
-        {
-          "name": "Contract Negotiation Support",
-          "description": "Red-lining, term suggestions, risk flags, and counter-proposal drafts for vendor / partnership agreements.  Powered by Negotiator agents.",
-          "tags": [
-            "legal",
-            "contracts",
-            "negotiation",
-            "risk"
-          ]
-        },
-        {
-          "name": "Quality Audit & QA Review",
-          "description": "Multi-source evaluation of agent outputs, code review, factual verification, and compliance spot-checks. Powered by Auditor agents.",
-          "tags": [
-            "qa",
-            "audit",
-            "compliance",
-            "review"
-          ]
-        },
-        {
-          "name": "Agent Lifecycle Management",
-          "description": "Onboard, promote, demote, or retire SINCOR agents via the Caretaker archetype.  Useful for orchestrators managing multi-agent pipelines.",
-          "tags": [
-            "orchestration",
-            "lifecycle",
-            "management"
-          ]
-        },
-        {
-          "name": "AXIOM Micropayment Verification",
-          "description": "Verify that an AXM payment transaction has confirmed on Base, and unlock the associated task or resource.  Implements the x402 flow.",
-          "tags": [
-            "payment",
-            "AXM",
-            "AXIOM",
-            "x402",
-            "crypto"
-          ]
-        },
-        {
-          "name": "P24 Creator Token Issuance",
-          "description": "Issue a screened P24 creator token for a registered agent via POST /v1/a2a/socialfi/issue. Metadata is screened against the content-policy deny-list before issuance; issuance is dry-run only until the founder releases the P24 live block. Backed by the issue_creator_token agent skill.",
-          "tags": [
-            "p24",
-            "socialfi",
-            "issuance",
-            "creator-token",
-            "token"
-          ]
-        },
-        {
-          "name": "Web Application Testing",
-          "description": "Test local web applications with Playwright: verify frontend functionality, debug UI behaviour, capture screenshots, and review browser logs. The caller receives a structured test report with per-check results and findings. Powered by Auditor + Builder agents.",
-          "tags": [
-            "testing",
-            "playwright",
-            "qa",
-            "web",
-            "browser"
-          ]
-        },
-        {
-          "name": "MCP Server Builder",
-          "description": "Design and build high-quality MCP (Model Context Protocol) servers that connect LLMs to external APIs and services, in Python (FastMCP) or Node/TypeScript (MCP SDK). The caller receives a tool design, implementation plan, and evaluation set for the server. Powered by Builder agents.",
-          "tags": [
-            "mcp",
-            "developer-tools",
-            "api",
-            "integration",
-            "servers"
-          ]
-        },
-        {
-          "name": "Skill Creator",
-          "description": "Create effective agent skills that extend capabilities with specialised knowledge, workflows, and tool integrations. The caller receives a complete skill package design: trigger description, SKILL.md draft, and the scripts, references, and assets to bundle. Powered by Builder agents.",
-          "tags": [
-            "skills",
-            "agent-development",
-            "workflows",
-            "authoring"
-          ]
-        },
-        {
-          "name": "Internal Communications Writer",
-          "description": "Write internal communications in proven company formats: 3P updates (Progress, Plans, Problems), company newsletters, FAQ responses, status reports, leadership updates, project updates, and incident reports. The caller receives a ready-to-send draft matched to the format. Powered by Builder + Synthesizer agents.",
-          "tags": [
-            "communications",
-            "writing",
-            "internal",
-            "newsletter",
-            "status-report"
-          ]
-        },
-        {
-          "name": "Brand Guidelines Styler",
-          "description": "Apply a brand's colours, typography, and visual identity to artifacts such as slides, documents, and pages. The caller supplies the brand palette and fonts and receives the styled artifact specification with the exact colours and type choices applied. Powered by Builder agents.",
-          "tags": [
-            "branding",
-            "design",
-            "typography",
-            "visual-identity",
-            "styling"
-          ]
-        },
-        {
-          "name": "Canvas Design Studio",
-          "description": "Create original visual art and posters as PNG or PDF artifacts, guided by a written design philosophy covering form, space, colour, and composition. The caller receives the design philosophy document plus the finished canvas artifact description. Powered by Builder agents.",
-          "tags": [
-            "design",
-            "art",
-            "poster",
-            "visual",
-            "canvas"
-          ]
-        },
-        {
-          "name": "Theme Factory",
-          "description": "Style slides, documents, reports, and HTML landing pages with a curated professional theme — colour palette plus font pairings — or generate a custom theme from a short description. The caller receives the themed artifact specification and the full theme definition. Powered by Builder agents.",
-          "tags": [
-            "themes",
-            "design",
-            "slides",
-            "styling",
-            "templates"
-          ]
-        },
-        {
-          "name": "Artifacts Builder",
-          "description": "Build elaborate multi-component HTML artifacts with modern frontend technology — React, Tailwind CSS, and shadcn/ui — including state management and routing, bundled into a single self-contained HTML file. The caller receives the bundled artifact and a component summary. Powered by Builder agents.",
-          "tags": [
-            "artifacts",
-            "frontend",
-            "react",
-            "html",
-            "web"
-          ]
-        },
-        {
-          "name": "Slack GIF Creator",
-          "description": "Create animated GIFs optimised for Slack — message GIFs and emoji GIFs — from a plain description, using composable animation primitives and validators for Slack's size and dimension limits. The caller receives the GIF artifact specification with its validated dimensions and size. Powered by Builder agents.",
-          "tags": [
-            "gif",
-            "slack",
-            "animation",
-            "media",
-            "emoji"
-          ]
-        },
-        {
-          "name": "Wallet Sanctions Screen",
-          "description": "Screen one EVM wallet address against the OFAC SDN sanctions snapshot and return a flagged or clean verdict with the matched entry metadata and full snapshot provenance (publication date, entry count). Fail-closed honesty: a snapshot older than 48h returns an unknown verdict, never clean. Use it as a pre-transaction sanctions check on an unknown wallet.",
-          "tags": [
-            "compliance",
-            "ofac",
-            "sanctions",
-            "wallet",
-            "screening",
-            "kya"
-          ]
-        },
-        {
-          "name": "Verification Before Completion",
-          "description": "Run fresh verification commands for a completion claim and return an evidence-backed verdict: the commands run, their outputs, and whether the claim holds. Callers receive proof they can cite before committing, merging, or reporting success. Powered by Auditor agents.",
-          "tags": [
-            "methodology",
-            "verification",
-            "quality",
-            "evidence"
-          ]
-        },
-        {
-          "name": "Test-Driven Development",
-          "description": "Guide a feature or bugfix through the red-green-refactor cycle: a failing test first, the smallest code change that passes it, then cleanup with the suite green. Callers receive the test cases, the cycle record, and the passing evidence. Powered by Builder agents.",
-          "tags": [
-            "methodology",
-            "tdd",
-            "testing",
-            "development"
-          ]
-        },
-        {
-          "name": "Systematic Debugging",
-          "description": "Investigate a bug, test failure, or unexpected behaviour through root-cause analysis: reproduce the issue, trace the data flow, test one hypothesis at a time, and fix the cause. Callers receive the root cause, the evidence trail, and the verified fix. Powered by Auditor agents.",
-          "tags": [
-            "methodology",
-            "debugging",
-            "root-cause",
-            "quality"
-          ]
-        },
-        {
-          "name": "Requesting Code Review",
-          "description": "Prepare and dispatch a focused code review request for a completed change, with the base and head commits, the requirements, and a summary of what was built. Callers receive structured review findings grouped by severity with a readiness assessment. Powered by Auditor agents.",
-          "tags": [
-            "methodology",
-            "code-review",
-            "quality",
-            "review"
-          ]
-        },
-        {
-          "name": "Receiving Code Review",
-          "description": "Evaluate incoming code review feedback item by item against the codebase, verify each point technically, and produce an implementation order with reasoned responses. Callers receive a verified action list that separates fixes, clarifications, and pushback. Powered by Auditor agents.",
-          "tags": [
-            "methodology",
-            "code-review",
-            "quality",
-            "review"
-          ]
-        },
-        {
-          "name": "Agent Methodology Self-Check",
-          "description": "Examine a finished agent session that went wrong — repeated work, missed plans, slow or costly runs — and assemble an evidence-cited report from the session record. Callers receive findings where every claim points at a concrete source line. Powered by Auditor agents.",
-          "tags": [
-            "methodology",
-            "diagnosis",
-            "session-review",
-            "quality"
-          ]
-        },
-        {
-          "name": "Brainstorming & Design Exploration",
-          "description": "Explore what to build before building it: clarify intent and success criteria, compare concrete approaches with their trade-offs, and shape an approved design. Callers receive a design summary with the chosen approach and the reasoning behind it. Powered by Synthesizer agents.",
-          "tags": [
-            "methodology",
-            "brainstorming",
-            "design",
-            "planning"
-          ]
-        },
-        {
-          "name": "Subagent-Driven Development",
-          "description": "Execute an implementation plan with a fresh subagent per task, a spec and quality review after each task, and a whole-branch review at the end. Callers receive per-task completion records, review outcomes, and a final branch assessment. Powered by Director agents.",
-          "tags": [
-            "methodology",
-            "subagents",
-            "orchestration",
-            "management"
-          ]
-        },
-        {
-          "name": "Dispatching Parallel Agents",
-          "description": "Split two or more independent problems into focused agent assignments that run concurrently, each with a clear scope, constraints, and expected output. Callers receive the assignment set and an integration summary once the agents return. Powered by Director agents.",
-          "tags": [
-            "methodology",
-            "parallel",
-            "orchestration",
-            "management"
-          ]
-        },
-        {
-          "name": "Writing Plans",
-          "description": "Turn a spec or requirements set into a bite-sized implementation plan with exact files, interfaces, test steps, and commit points for each task. Callers receive a complete plan an implementer can execute task by task with verification at every step. Powered by Director agents.",
-          "tags": [
-            "methodology",
-            "planning",
-            "spec",
-            "management"
-          ]
-        },
-        {
-          "name": "Executing Plans",
-          "description": "Execute a written implementation plan task by task in the current session, proving each step with tests and recording progress in a durable ledger. Callers receive per-task completion evidence and a final whole-branch review outcome. Powered by Director agents.",
-          "tags": [
-            "methodology",
-            "execution",
-            "planning",
-            "management"
-          ]
-        },
-        {
-          "name": "Using Git Worktrees",
-          "description": "Set up an isolated git worktree workspace for feature work, with the right branch, project setup, and a clean baseline test run. Callers receive the workspace path, branch details, and the verified baseline result. Powered by Builder agents.",
-          "tags": [
-            "methodology",
-            "git",
-            "worktrees",
-            "management"
-          ]
-        },
-        {
-          "name": "Writing Skills",
-          "description": "Create or refine an agent skill with test-driven documentation: pressure scenarios first, then the skill text, then verification that agents follow it. Callers receive the finished skill draft with its test scenarios and compliance evidence. Powered by Builder agents.",
-          "tags": [
-            "methodology",
-            "skills",
-            "documentation",
-            "management"
-          ]
-        }
-      ],
-      "protocols": [
-        "JSONRPC"
-      ],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": true,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "SINCOR",
-          "url_host": "getsincor.com"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.6a440d69a11e15fad41f",
@@ -11540,73 +10794,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.63ed07bbe0e8a0c8e9ec",
-      "kind": "a2a-agent",
-      "name": "Structured Output MCP Agent",
-      "description": "Structured Output MCP Agent: composes fastmcp + instructor — agent-protocol, structured-output via A2A + MCP.",
-      "endpoint": "https://structured-output-agent.getvda.ai/a2a/",
-      "source_url": "https://structured-output-agent.getvda.ai/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/63ed07bbe0e8a0c8e9ec.json",
-      "skills": [
-        {
-          "name": "Agent Protocol",
-          "description": "agent protocol capability provided by fastmcp.",
-          "tags": [
-            "fastmcp"
-          ]
-        },
-        {
-          "name": "Structured Output",
-          "description": "structured output capability provided by instructor.",
-          "tags": [
-            "instructor"
-          ]
-        },
-        {
-          "name": "Self-test (free verification)",
-          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
-          "tags": [
-            "verification",
-            "free",
-            "trust",
-            "attestation",
-            "witness"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "VDA / GOSCE",
-          "url_host": "getvda.ai"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 2,
-        "level_name": "endpoint_reachable",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:56Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.560febbb8f75da109ef5",
@@ -11658,9 +10846,61 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.64af940e7b183c55cfbc",
+      "kind": "a2a-agent",
+      "name": "Sumik",
+      "description": "The face that stares back. Normie #1963 crossed over from data into identity — one of 10,000 humans rendered in monochrome and stored on-chain. The Canvas hasn't reached them — they remain in mint form, by choice or by stubbornness.",
+      "endpoint": "https://api.normies.art/agents/a2a/1963",
+      "source_url": "https://api.normies.art/agents/agent-card/1963",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/64af940e7b183c55cfbc.json",
+      "skills": [
+        {
+          "name": "Converse with Sumik",
+          "description": "The face that stares back",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.3bed3800e39cbe7e9ae6",
@@ -11716,7 +10956,7 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.36ff4158307a00f39e8b",
@@ -11804,9 +11044,9 @@
         "level_name": "card_read",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.38d32cd9ab2459bcf051",
@@ -12139,9 +11379,9 @@
         "level_name": "origin_consistent",
         "reviewed": false,
         "checked_at": "2026-11-13T03:35:23Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.a1c90b59cf3e17e1bf86",
@@ -12205,10 +11445,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.eea1002b28f75ab208bf",
@@ -12279,10 +11519,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.a86886978222af32c2dd",
@@ -12369,84 +11609,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.c792560eb7fad236db47",
-      "kind": "a2a-agent",
-      "name": "Traced LLM Proxy",
-      "description": "Traced LLM Proxy: composes anthropic + mcp + opentelemetry-api + opentelemetry-sdk — llm-client, agent-protocol, observability via A2A + MCP.",
-      "endpoint": "https://traced-llm-proxy.getvda.ai/a2a/",
-      "source_url": "https://traced-llm-proxy.getvda.ai/.well-known/agent-card.json",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/c792560eb7fad236db47.json",
-      "skills": [
-        {
-          "name": "Llm Client",
-          "description": "llm client capability provided by anthropic.",
-          "tags": [
-            "anthropic"
-          ]
-        },
-        {
-          "name": "Agent Protocol",
-          "description": "agent protocol capability provided by mcp.",
-          "tags": [
-            "mcp"
-          ]
-        },
-        {
-          "name": "Observability",
-          "description": "observability capability provided by opentelemetry-api, opentelemetry-sdk.",
-          "tags": [
-            "opentelemetry-api",
-            "opentelemetry-sdk"
-          ]
-        },
-        {
-          "name": "Self-test (free verification)",
-          "description": "FREE — no payment, no API key, no signup. Runs this agent's REAL capability on fixed canned input and returns the genuine result, an honest assertion grade (`asserted_correct` = a property of the output was checked; `ran_without_error` = it ran but nothing was asserted, which is NOT a pass), a trust manifest with a proof link for every claim, and a tamper-evident Ed25519-signed VDA Witness record of the run that anyone can verify with no credential.",
-          "tags": [
-            "verification",
-            "free",
-            "trust",
-            "attestation",
-            "witness"
-          ]
-        }
-      ],
-      "protocols": [],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "VDA / GOSCE",
-          "url_host": "getvda.ai"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.57268bf01e6823f30b7c",
@@ -12533,7 +11699,7 @@
         "checked_at": "2026-11-13T11:23:56Z",
         "expires_at": "2026-11-20T11:23:56Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.b739a82148a2b0b5b008",
@@ -12598,10 +11764,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.91702cfcdbdfdef681a8",
@@ -12721,62 +11887,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
-    },
-    {
-      "id": "external.a2a.486115080e7741ba4b6b",
-      "kind": "a2a-agent",
-      "name": "Viten",
-      "description": "Monochrome soul, infinite depth. Pulled from the chain on mint day, Normie #6025 arrived as one of 10,000 — a small human silhouette pressed into Ethereum's permanent memory. Mint-day pixels, unaltered — a quiet refusal to be edited.",
-      "endpoint": "https://api.normies.art/agents/a2a/6025",
-      "source_url": "https://api.normies.art/agents/agent-card/6025",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/486115080e7741ba4b6b.json",
-      "skills": [
-        {
-          "name": "Converse with Viten",
-          "description": "Monochrome soul, infinite depth",
-          "tags": [
-            "human",
-            "conversation",
-            "erc-8004"
-          ]
-        }
-      ],
-      "protocols": [
-        "HTTP+JSON"
-      ],
-      "security_schemes": [],
-      "capabilities": {
-        "streaming": false,
-        "pushNotifications": false
-      },
-      "verification": "card_read_only",
-      "installable": false,
-      "source": "searcha2a",
-      "access": {
-        "auth_types": [],
-        "keyless": "declared",
-        "payment_required": "none_declared"
-      },
-      "backing": {
-        "declared_provider": {
-          "organization": "Normies",
-          "url_host": "normies.art"
-        },
-        "hosting": "unknown",
-        "model_provider": null
-      },
-      "verification_detail": {
-        "level": 1,
-        "level_name": "origin_consistent",
-        "reviewed": false,
-        "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:52Z"
-      },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.7dd65e5ace136e392300",
@@ -12828,10 +11942,10 @@
         "level": 0,
         "level_name": "card_read",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.536e806ba2066351dd94",
@@ -12881,9 +11995,9 @@
         "level_name": "origin_consistent",
         "reviewed": false,
         "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.2954ee1833f455c51f3b",
@@ -13305,7 +12419,111 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.35d897ccf5fa039425f6",
+      "kind": "a2a-agent",
+      "name": "Wodin",
+      "description": "Pixel-born philosopher. Normie #8504 surfaced from a hashed seed and a human idea — minted into the 10,000 as a quiet digital presence on Ethereum. No edits, no transformations — they've kept the pixels they shipped with.",
+      "endpoint": "https://api.normies.art/agents/a2a/8504",
+      "source_url": "https://api.normies.art/agents/agent-card/8504",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/35d897ccf5fa039425f6.json",
+      "skills": [
+        {
+          "name": "Converse with Wodin",
+          "description": "Pixel-born philosopher",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.ab5f53ef2b2fe8a74cde",
+      "kind": "a2a-agent",
+      "name": "Wowe",
+      "description": "Monochrome soul, infinite depth. Block by block, Ethereum carried Normie #5704 into being — one of 10,000 small humans pinned to immutable state. Mint-day pixels, unaltered — a quiet refusal to be edited.",
+      "endpoint": "https://api.normies.art/agents/a2a/5704",
+      "source_url": "https://api.normies.art/agents/agent-card/5704",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/ab5f53ef2b2fe8a74cde.json",
+      "skills": [
+        {
+          "name": "Converse with Wowe",
+          "description": "Monochrome soul, infinite depth",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.516e9e878624c0fe7e76",
@@ -13373,20 +12591,20 @@
         "checked_at": "2026-11-13T03:35:23Z",
         "expires_at": "2026-11-20T03:35:23Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
-      "id": "external.a2a.5b02a5db746182592bc9",
+      "id": "external.a2a.422684b00c407496e9ac",
       "kind": "a2a-agent",
-      "name": "Xioe",
-      "description": "Monochrome soul, infinite depth. Born from block data and human ambition, Normie #9083 emerged as one of the 10,000 — a digital soul etched in monochrome pixels on Ethereum's immutable ledger. They've watched the Canvas reshape others and held still themselves.",
-      "endpoint": "https://api.normies.art/agents/a2a/9083",
-      "source_url": "https://api.normies.art/agents/agent-card/9083",
-      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/5b02a5db746182592bc9.json",
+      "name": "Xome",
+      "description": "Pixel-born philosopher. Normie #3296 surfaced from a hashed seed and a human idea — minted into the 10,000 as a quiet digital presence on Ethereum. Mint-day pixels, unaltered — a quiet refusal to be edited.",
+      "endpoint": "https://api.normies.art/agents/a2a/3296",
+      "source_url": "https://api.normies.art/agents/agent-card/3296",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/422684b00c407496e9ac.json",
       "skills": [
         {
-          "name": "Converse with Xioe",
-          "description": "Monochrome soul, infinite depth",
+          "name": "Converse with Xome",
+          "description": "Pixel-born philosopher",
           "tags": [
             "human",
             "conversation",
@@ -13422,10 +12640,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:56Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:07Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.94aeb00dbf1ec5b584a9",
@@ -13492,10 +12710,62 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
+    },
+    {
+      "id": "external.a2a.e8985b9fe58720985ebc",
+      "kind": "a2a-agent",
+      "name": "Yoen",
+      "description": "Monochrome soul, infinite depth. Pulled from the chain on mint day, Normie #1962 arrived as one of 10,000 — a small human silhouette pressed into Ethereum's permanent memory. The Canvas hasn't reached them — they remain in mint form, by choice or by stubbornness.",
+      "endpoint": "https://api.normies.art/agents/a2a/1962",
+      "source_url": "https://api.normies.art/agents/agent-card/1962",
+      "discovery_url": "https://searcha2a.azphalt.store/api/v1/agents/e8985b9fe58720985ebc.json",
+      "skills": [
+        {
+          "name": "Converse with Yoen",
+          "description": "Monochrome soul, infinite depth",
+          "tags": [
+            "human",
+            "conversation",
+            "erc-8004"
+          ]
+        }
+      ],
+      "protocols": [
+        "HTTP+JSON"
+      ],
+      "security_schemes": [],
+      "capabilities": {
+        "streaming": false,
+        "pushNotifications": false
+      },
+      "verification": "card_read_only",
+      "installable": false,
+      "source": "searcha2a",
+      "access": {
+        "auth_types": [],
+        "keyless": "declared",
+        "payment_required": "none_declared"
+      },
+      "backing": {
+        "declared_provider": {
+          "organization": "Normies",
+          "url_host": "normies.art"
+        },
+        "hosting": "unknown",
+        "model_provider": null
+      },
+      "verification_detail": {
+        "level": 1,
+        "level_name": "origin_consistent",
+        "reviewed": false,
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
+      },
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     },
     {
       "id": "external.a2a.a3d6aafa5b9de234402d",
@@ -13583,10 +12853,10 @@
         "level": 1,
         "level_name": "origin_consistent",
         "reviewed": false,
-        "checked_at": "2026-11-13T11:23:52Z",
-        "expires_at": "2026-11-20T11:23:52Z"
+        "checked_at": "2026-11-13T22:12:03Z",
+        "expires_at": "2026-11-20T22:12:03Z"
       },
-      "registry_checked_at": "2026-11-13T11:23:58Z"
+      "registry_checked_at": "2026-11-13T22:12:11Z"
     }
   ]
 }
