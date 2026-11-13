@@ -4,6 +4,8 @@ import { normalizeAnsName, parseAnsClaim } from './ans.mjs';
 import {
   validFacets, HEALTH_STATE_STATUS, HEALTH_STATUSES, CHALLENGES, stateFromHttp,
 } from './facets.mjs';
+import { handleMcp } from './mcp.mjs';
+import { parseFilters, matchesFilters, sortEntries, MAX_FILTER_SCAN } from './search.mjs';
 import { computeVerification, verificationDetail, effectiveAccess } from './verification.mjs';
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -115,17 +117,20 @@ export class AgentRegistry {
     return stored;
   }
 
-  /** Evidence rows for a page of agents: health probes and the latest approval time. */
+  /** Evidence rows for agents: health probes and the latest approval time (chunked for SQL limits). */
   verificationFor(rows, now) {
-    if (!rows.length) return [];
-    const marks = rows.map(() => '?').join(', ');
-    const ids = rows.map(row => row.id);
-    const health = new Map(this.sql.exec(`SELECT id, endpoint, status, http_status, checked_at,
-      state, redirect, challenge, tls_not_after FROM agent_health WHERE id IN (${marks})`,
-    ...ids).toArray().map(item => [item.id, item]));
-    const approvals = new Map(this.sql.exec(`SELECT agent_id, MAX(changed_at) AS approved_at
-      FROM registry_audit WHERE action='approve' AND agent_id IN (${marks}) GROUP BY agent_id`,
-    ...ids).toArray().map(item => [item.agent_id, item.approved_at]));
+    const health = new Map();
+    const approvals = new Map();
+    for (let start = 0; start < rows.length; start += 80) {
+      const ids = rows.slice(start, start + 80).map(row => row.id);
+      const marks = ids.map(() => '?').join(', ');
+      for (const item of this.sql.exec(`SELECT id, endpoint, status, http_status, checked_at,
+        state, redirect, challenge, tls_not_after FROM agent_health WHERE id IN (${marks})`,
+      ...ids).toArray()) health.set(item.id, item);
+      for (const item of this.sql.exec(`SELECT agent_id, MAX(changed_at) AS approved_at
+        FROM registry_audit WHERE action='approve' AND agent_id IN (${marks}) GROUP BY agent_id`,
+      ...ids).toArray()) approvals.set(item.agent_id, item.approved_at);
+    }
     return rows.map(row => {
       const record = JSON.parse(row.record);
       const evidence = health.get(row.id) || null;
@@ -139,14 +144,22 @@ export class AgentRegistry {
     });
   }
 
-  /** Public form of a stored row: the card record plus additive, read-time evidence. */
-  present(rows) {
+  /** Public form of stored rows, paired with the full evidence they were computed from. */
+  presentEntries(rows) {
     const now = new Date();
     return this.verificationFor(rows, now).map(({ record, health, full }, i) => ({
-      ...record, curation_status: rows[i].review_status,
-      verification_detail: verificationDetail(full),
-      access: effectiveAccess(record, health, now),
+      full,
+      item: {
+        ...record, curation_status: rows[i].review_status,
+        verification_detail: verificationDetail(full),
+        access: effectiveAccess(record, health, now),
+      },
     }));
+  }
+
+  /** Public form of a stored row: the card record plus additive, read-time evidence. */
+  present(rows) {
+    return this.presentEntries(rows).map(entry => entry.item);
   }
 
   async fetch(request) {
@@ -377,12 +390,17 @@ export class AgentRegistry {
       }
       const limit = Number(limitText), offset = Number(offsetText);
       if (limit < 1 || limit > 100 || offset > 100000) return respond({ error: 'Invalid pagination' }, 400);
+      const parsed = parseFilters(url.searchParams);
+      if (parsed.error) return respond({ error: parsed.error }, 400);
+      const extra = parsed.filters;
 
       const terms = (query.toLowerCase().match(/[\p{L}\p{N}-]+/gu) || []).slice(0, 12);
       const filters = terms.map(() => 'search_text LIKE ?').join(' OR ');
       const visible = "listing_state='active' AND review_status != 'rejected'";
-      const where = 'WHERE ' + visible + (filters ? ' AND (' + filters + ')' : '');
-      const bindings = terms.map(term => '%' + term + '%');
+      const where = 'WHERE ' + visible + (filters ? ' AND (' + filters + ')' : '') +
+        (extra.skill ? ' AND skills_search LIKE ?' : '');
+      const bindings = [...terms.map(term => '%' + term + '%'),
+        ...(extra.skill ? ['%' + extra.skill.replace(/[%_\\]/g, ' ') + '%'] : [])];
       const matched = this.sql.exec(`SELECT COUNT(*) AS total FROM agents ${where}`, ...bindings).one().total;
       const total = this.sql.exec(`SELECT COUNT(*) AS total FROM agents WHERE ${visible}`).one().total;
       const relevance = terms.map(() =>
@@ -391,11 +409,27 @@ export class AgentRegistry {
         'CASE WHEN description_search LIKE ? THEN 1 ELSE 0 END)').join(' + ');
       const sort = relevance ? relevance + ' DESC, name_search ASC' : 'name_search ASC';
       const rankParams = terms.flatMap(term => ['%' + term + '%', '%' + term + '%', '%' + term + '%']);
+      const meta = this.sql.exec(
+        "SELECT value FROM registry_meta WHERE key='last_ingested_at'").toArray()[0];
+      if (extra.computed) {
+        // Read-time evidence (level, keyless, freshness) is not a SQL column, so these filters
+        // scan the bounded candidate set, then page. Relevance order is kept unless a sort is asked.
+        const scanned = this.presentEntries(this.sql.exec(
+          `SELECT id, record, review_status, updated_at FROM agents ${where} ORDER BY ${sort} LIMIT ${MAX_FILTER_SCAN}`,
+          ...bindings, ...rankParams).toArray());
+        const now = new Date();
+        const kept = sortEntries(scanned.filter(entry => matchesFilters(entry.item, entry.full, extra, now)),
+          extra.sort);
+        return respond({
+          query, count: kept.length, total, offset, limit,
+          generated_at: meta ? meta.value : null,
+          results: kept.slice(offset, offset + limit).map(entry => entry.item),
+          verified: 'Agent Card metadata only; endpoints are not actively probed',
+        });
+      }
       const rows = this.sql.exec(
         `SELECT id, record, review_status, updated_at FROM agents ${where} ORDER BY ${sort} LIMIT ? OFFSET ?`,
         ...bindings, ...rankParams, limit, offset).toArray();
-      const meta = this.sql.exec(
-        "SELECT value FROM registry_meta WHERE key='last_ingested_at'").toArray()[0];
       return respond({
         query, count: matched, total, offset, limit,
         generated_at: meta ? meta.value : null,
@@ -436,6 +470,17 @@ export class AgentRegistry {
       return record
         ? respond(this.present([record])[0])
         : respond({ error: 'Agent unknown' }, 404);
+    }
+    if (request.method === 'GET' && (path === '/providers' || path === '/status')) {
+      const entries = this.presentEntries(this.sql.exec(`SELECT id, record, review_status, updated_at
+        FROM agents WHERE listing_state='active' AND review_status != 'rejected'
+        ORDER BY name_search ASC, id ASC LIMIT ${MAX_FILTER_SCAN}`).toArray());
+      const meta = Object.fromEntries(this.sql.exec('SELECT key, value FROM registry_meta').toArray()
+        .map(row => [row.key, row.value]));
+      return path === '/providers'
+        ? respondProviders(entries, url.searchParams, meta)
+        : respondStatus(entries, meta, this.sql.exec('SELECT MAX(checked_at) AS last FROM agent_health')
+          .toArray()[0]?.last || null);
     }
     const verification = path.match(/^\/verification\/([0-9a-f]{20})$/);
     if (request.method === 'GET' && verification) {
@@ -490,6 +535,71 @@ function healthFacts(row) {
   const state = row.state || (row.http_status === null
     ? (row.status === 'skipped' ? 'skipped' : 'unreachable') : stateFromHttp(row.http_status));
   return { state, status: HEALTH_STATE_STATUS[state] || row.status, redirect: row.redirect === 1 };
+}
+
+const LEVEL_KEYS = ['0', '1', '2', '3'];
+const histogram = () => Object.fromEntries(LEVEL_KEYS.map(key => [key, 0]));
+
+/** Group visible agents by what the publishers declared. Names are publisher text. */
+function respondProviders(entries, params, meta) {
+  const kind = params.get('kind') || 'declared_provider';
+  const minAgents = Number(params.get('min_agents') || '1');
+  const limit = Number(params.get('limit') || '50');
+  const offset = Number(params.get('offset') || '0');
+  if (!['declared_provider', 'hosting', 'model_provider'].includes(kind) ||
+      !Number.isInteger(minAgents) || minAgents < 1 || minAgents > 1000 ||
+      !Number.isInteger(limit) || limit < 1 || limit > 50 ||
+      !Number.isInteger(offset) || offset < 0 || offset > 200) {
+    return respond({ error: 'Invalid providers request' }, 400);
+  }
+  const groups = new Map();
+  for (const { item } of entries) {
+    let name = null, urlHost = null, basis = 'card.provider', confidence = 'declared';
+    if (kind === 'declared_provider') {
+      name = item.backing?.declared_provider?.organization || item.provider?.organization || null;
+      try { urlHost = item.provider?.url ? new URL(item.provider.url).hostname : null; } catch { urlHost = null; }
+    } else if (kind === 'hosting') {
+      const hosting = item.backing?.hosting;
+      name = hosting && hosting.platform !== 'unknown' ? hosting.platform : null;
+      basis = 'endpoint_host_suffix'; confidence = 'inferred_from_host';
+    } else {
+      name = item.backing?.model_provider?.name || null;
+      basis = 'card_extension';
+    }
+    if (!name) continue;
+    const key = name.toLowerCase();
+    const group = groups.get(key) || { name, url_host: urlHost, agents: 0, keyless_n: 0,
+      level_histogram: histogram(), basis, confidence };
+    group.agents++;
+    if (item.access?.keyless === 'declared') group.keyless_n++;
+    group.level_histogram[String(item.verification_detail.level)]++;
+    groups.set(key, group);
+  }
+  const all = [...groups.values()].filter(group => group.agents >= minAgents)
+    .sort((a, b) => b.agents - a.agents || a.name.localeCompare(b.name));
+  return respond({ kind, total: all.length, offset, limit,
+    registry_generated_at: meta.last_ingested_at || null,
+    sources: all.slice(offset, offset + limit) });
+}
+
+function respondStatus(entries, meta, lastProbe) {
+  const levels = histogram();
+  let withEndpoint = 0, probed = 0, withRaw = 0, withProvider = 0;
+  for (const { item, full } of entries) {
+    levels[String(item.verification_detail.level)]++;
+    if (item.raw_card) withRaw++;
+    if (item.provider || item.backing?.declared_provider) withProvider++;
+    if (item.endpoint) {
+      withEndpoint++;
+      if (full.checks.endpoint.state !== 'unchecked' && full.checks.endpoint.state !== 'expired') probed++;
+    }
+  }
+  return respond({
+    visible_agents: entries.length, with_raw_card: withRaw, with_provider: withProvider,
+    level_histogram: levels, last_ingest_at: meta.last_ingested_at || null,
+    last_probe_at: lastProbe, probe_coverage_7d: withEndpoint ? probed / withEndpoint : 0,
+    schema_revision: '1.1',
+  });
 }
 
 function registryStub(env) {
@@ -628,6 +738,10 @@ async function handle(request, env) {
       return directoryReply({ ...ranked, candidate_scope: 'persistent-registry',
         candidate_count: entries.length, truncated: false });
     } catch { return directoryReply({ error: 'Indexed directory temporarily unavailable' }, 502); }
+  }
+  // Stateless, read-only MCP endpoint. Reads the registry only; disabled unless MCP_ENABLED="true".
+  if (url.pathname === '/mcp') {
+    return handleMcp(request, env, path => registryStub(env).fetch(new Request('https://registry.internal' + path)));
   }
   // Read-only registry endpoints are public APIs, including to other web apps.
   const isPublic = url.pathname === '/api/v1/agents' ||

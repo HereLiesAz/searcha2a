@@ -20,3 +20,5 @@ jobs:
       - run: node --test tests/*.test.mjs
       - run: node --check site/app.js
       - run: node --check worker/index.mjs
+      - run: node --check worker/mcp.mjs
+      - run: node --check worker/verification.mjs
