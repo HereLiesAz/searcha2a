@@ -75,8 +75,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python3 src/crawl_checkpoint.py save .crawl-state/staged.json
+      - name: Save verification evidence for the listings feed
+        continue-on-error: true # Missing evidence only means listings carry no verification_detail.
+        env:
+          REGISTRY_API_URL: ${{ vars.SEARCHA2A_API_URL }}
+          REGISTRY_SYNC_SECRET: ${{ secrets.RESULT_CALLBACK_SECRET }}
+        run: python3 src/registry_sync.py --evidence-export .crawl-state/evidence.json
       - name: Export Azphalt external-agent listings
-        run: python3 src/azphalt_listings.py --catalog dist/api/v1/catalog.json --output dist/api/v1/azphalt-listings.json
+        run: python3 src/azphalt_listings.py --catalog dist/api/v1/catalog.json --output dist/api/v1/azphalt-listings.json --evidence .crawl-state/evidence.json
       - name: Mirror published Azphalt feed to GitHub raw CDN
         env:
           GH_TOKEN: ${{ github.token }}

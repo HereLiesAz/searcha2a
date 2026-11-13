@@ -21,6 +21,10 @@
 - **Live coverage verification.** Gateway deployment tests compare `/api/v1/directory` `candidate_count` with the moderation-filtered `/api/v1/agents` `total`, proving that every visible registry row reached semantic ranking independently of the 20-result cap. The check does not assume a particular catalog size or expose suppressed metadata.
 - **No per-query workflow.** Clicking Search executes a public GET against existing registry records. The retired POST dispatch responds 410. The separate semantic `/api/v1/directory` endpoint ranks all visible records from the persistent registry using 100-record pages with optional Workers AI, not Actions. It fails closed if the registry binding is absent and returns `truncated: false` only after complete candidate pagination.
 
+- **Honest health states.** `agent_health.py` records `state` (`reachable`, `path_not_found`, `redirected`, `server_error`, `unexpected_status`, `unreachable`, `skipped`), the redirect flag, the scheme word of any 401/402/403 challenge and the certificate end date. The per-run budget is still 60 endpoints per day; with N cards, an endpoint is re-checked about every N/60 days, so above roughly 420 cards some probes pass the 7-day freshness limit and listings drop from level 2 to level 1 until re-checked. Raise `MAX_CHECKS` (and the Worker's `LIMIT 60` / 60-report caps together) if the registry grows. Probes are not deduplicated by host.
+- **Verification evidence in the feed.** After the health step, `registry_sync.py --evidence-export` saves the Worker's `GET /internal/registry/evidence-export` to `.crawl-state/evidence.json`, and `azphalt_listings.py --evidence` merges it. Both steps fail soft.
+- **MCP server.** `POST /mcp` is disabled until the Worker variable `MCP_ENABLED` is `"true"`. `tools/call` uses the `MCP_RATE_LIMITER` binding (namespace `1002`, 30 per 60 s, per IP); without the binding `tools/call` returns 503. To roll back, set `MCP_ENABLED` to `"false"`; stored data is additive and consumers ignore unknown keys. The gateway smoke test does not call `/mcp` while it is off. After enabling, check `POST /mcp` `tools/list` returns six tools and `tools/call registry_status` returns a numeric `visible_agents`. See [MCP.md](MCP.md).
+
 ## Settings and credentials
 
 **Repository Actions variable:** `SEARCHA2A_API_URL=https://searcha2a-api.hereliesaz.workers.dev`. The Worker also retains the `AI` binding and `SEARCH_RATE_LIMITER` for the separate semantic directory endpoint.
@@ -65,7 +69,10 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 node --test tests/*.test.mjs
 node --check site/app.js
 node --check worker/index.mjs
+node --check worker/mcp.mjs
 ```
+
+Python tests use `unittest` (the repository's CI command). Worker tests use `node --test` and need Node 22 or later because they run the Worker against the built-in `node:sqlite`, not Cloudflare.
 
 New tests cover SQL persistence, atomic rejection of bad ingest batches, authorization, pagination, query matching, no workflow dispatch, HTTP sync retries, manifest deduplication, safe domain paths, HTML fallback rejection, non-strict card handling, and bounded one-hop discovery. The gateway smoke test verifies the registry binding responds but not the number of cards; a Pages ingest run and subsequent public GET prove data actually reached storage.
 

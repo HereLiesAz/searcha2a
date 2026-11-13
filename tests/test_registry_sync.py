@@ -154,6 +154,26 @@ class RegistrySyncTests(unittest.TestCase):
                 "https://api.example", "private", opener=forbidden)
 
 
+    def test_evidence_export_is_authenticated_bounded_and_fails_soft(self):
+        seen = []
+        def opener(request, timeout):
+            seen.append(request)
+            return Response(json.dumps({"entries": [
+                {"id": "a" * 20, "verification_detail": {"level": 1}},
+                {"id": "bad", "verification_detail": {"level": 1}},
+            ]}).encode())
+        result = registry_sync.fetch_evidence('https://api.example/', 'private', opener=opener)
+        self.assertEqual(list(result), ["a" * 20])
+        self.assertEqual(seen[0].full_url, 'https://api.example/internal/registry/evidence-export')
+        self.assertEqual(seen[0].get_header('Authorization'), 'Bearer private')
+        self.assertEqual(seen[0].get_method(), 'GET')
+
+        def broken(request, timeout):
+            raise urllib.error.URLError('offline')
+        self.assertIsNone(registry_sync.fetch_evidence('https://api.example/', 'private', opener=broken))
+        self.assertIsNone(registry_sync.fetch_evidence('http://insecure.example', 'private', opener=opener))
+        self.assertIsNone(registry_sync.fetch_evidence('https://api.example/', '', opener=opener))
+
 
 if __name__ == '__main__':
     unittest.main()

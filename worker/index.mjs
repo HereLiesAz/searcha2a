@@ -471,6 +471,15 @@ export class AgentRegistry {
         ? respond(this.present([record])[0])
         : respond({ error: 'Agent unknown' }, 404);
     }
+    if (request.method === 'GET' && path === '/evidence-export') {
+      const entries = this.presentEntries(this.sql.exec(`SELECT id, record, review_status, updated_at
+        FROM agents WHERE listing_state='active' AND review_status != 'rejected'
+        ORDER BY id ASC LIMIT ${MAX_FILTER_SCAN}`).toArray());
+      return respond({ generated_at: new Date().toISOString(), entries: entries.map(({ item }) => ({
+        id: item.id, verification_detail: item.verification_detail,
+        access: { keyless: item.access.keyless, observed_challenge: item.access.observed_challenge },
+      })) });
+    }
     if (request.method === 'GET' && (path === '/providers' || path === '/status')) {
       const entries = this.presentEntries(this.sql.exec(`SELECT id, record, review_status, updated_at
         FROM agents WHERE listing_state='active' AND review_status != 'rejected'
@@ -747,7 +756,7 @@ async function handle(request, env) {
   const isPublic = url.pathname === '/api/v1/agents' ||
     /^\/api\/v1\/agents\/[0-9a-f]{20}\/health$/.test(url.pathname) ||
     url.pathname.startsWith('/api/v1/agents/') ||
-    url.pathname === '/api/v1/ans/resolve';
+    url.pathname === '/api/v1/ans/resolve' || url.pathname === '/api/v1/providers';
   const publicReply = (body, status) => {
     const result = respond(body, status);
     result.headers.set('Access-Control-Allow-Origin', '*');
@@ -775,9 +784,20 @@ async function handle(request, env) {
         ? '/verification/' + url.pathname.split('/')[4]
       : url.pathname === '/api/v1/ans/resolve'
         ? '/ans' + url.search
+      : url.pathname === '/api/v1/providers'
+        ? '/providers' + url.search
         : '/agent/' + url.pathname.slice('/api/v1/agents/'.length);
     const result = await registryStub(env).fetch(new Request('https://registry.internal' + path));
     return publicReply(await result.json(), result.status);
+  }
+  if (request.method === 'GET' && url.pathname === '/internal/registry/evidence-export') {
+    if (!env.RESULT_CALLBACK_SECRET ||
+        request.headers.get('Authorization') !== `Bearer ${env.RESULT_CALLBACK_SECRET}`) {
+      return reply({ error: 'Unauthorized' }, 401);
+    }
+    if (!env.REGISTRY) return reply({ error: 'Registry not configured' }, 503);
+    const exported = await registryStub(env).fetch(new Request('https://registry.internal/evidence-export'));
+    return reply(await exported.json(), exported.status);
   }
   if ((request.method === 'GET' && url.pathname === '/internal/registry/health/due') ||
       (request.method === 'POST' && url.pathname === '/internal/registry/health')) {
