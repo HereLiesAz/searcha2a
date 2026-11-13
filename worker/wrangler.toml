@@ -5,6 +5,8 @@ workers_dev = true
 
 [vars]
 ALLOWED_ORIGIN = "https://searcha2a.azphalt.store"
+# MCP endpoint (POST /mcp). Off until you set this to "true" after reviewing docs/MCP.md.
+MCP_ENABLED = "false"
 
 # One SQLite-backed Durable Object per request UUID, created automatically on deploy.
 [[durable_objects.bindings]]
@@ -28,6 +30,14 @@ name = "SEARCH_RATE_LIMITER"
 namespace_id = "1001"
 [ratelimits.simple]
 limit = 5
+period = 60
+
+# tools/call on POST /mcp only. Approximate, per location: abuse damping, not accounting.
+[[ratelimits]]
+name = "MCP_RATE_LIMITER"
+namespace_id = "1002"
+[ratelimits.simple]
+limit = 30
 period = 60
 
 # Optional model inference. A missing entitlement returns explicitly labelled keyword fallback.

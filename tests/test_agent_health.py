@@ -54,6 +54,68 @@ class HealthTests(unittest.TestCase):
         self.assertEqual(self_ref[0].path, "/a2a")
         self.assertNotIn("Authorization", self_ref[0].headers)
 
+    def _probe_with(self, code, headers=None):
+        class Connection:
+            def __init__(self, host, address):
+                self.sock = None
+
+            def request(self, method, path, headers):
+                pass
+
+            def getresponse(self):
+                return type("Response", (), {
+                    "status": code,
+                    "getheader": staticmethod(lambda name, default=None: (headers or {}).get(name, default)),
+                })()
+
+            def close(self):
+                pass
+
+        with patch.object(agent_health, "require_public_https"), \
+             patch.object(agent_health.socket, "getaddrinfo", return_value=[
+                 (2, 1, 6, "", ("8.8.8.8", 443))]), \
+             patch.object(agent_health, "PinnedHTTPSConnection", Connection):
+            return agent_health.probe({"id": "a" * 20, "endpoint": "https://example.org/a2a"})
+
+    def test_honest_taxonomy_for_http_codes(self):
+        expected = {200: ("responding", "reachable"), 204: ("responding", "reachable"),
+                    400: ("responding", "reachable"), 401: ("responding", "reachable"),
+                    405: ("responding", "reachable"), 429: ("responding", "reachable"),
+                    404: ("path_not_found", "path_not_found"),
+                    410: ("path_not_found", "path_not_found"),
+                    418: ("unexpected_status", "unexpected_status"),
+                    500: ("server_error", "server_error"),
+                    502: ("server_error", "server_error")}
+        for code, (status, state) in expected.items():
+            result = self._probe_with(code)
+            self.assertEqual((result["status"], result["state"]), (status, state), code)
+            self.assertEqual(result["http_status"], code)
+
+    def test_404_is_never_called_responding(self):
+        self.assertNotEqual(self._probe_with(404)["status"], "responding")
+
+    def test_redirect_with_valid_https_target_counts_but_is_flagged_and_not_followed(self):
+        result = self._probe_with(302, {"Location": "https://example.org/v2/a2a"})
+        self.assertEqual((result["status"], result["state"]), ("responding", "reachable"))
+        self.assertIs(result["redirect"], True)
+
+    def test_redirect_without_valid_target_is_redirected_not_reachable(self):
+        for location in (None, "http://example.org/a2a", "https://someone@example.org/",
+                         "https://127.0.0.1/x", "https://10.0.0.5/x", "javascript:alert(1)"):
+            result = self._probe_with(308, {"Location": location} if location else {})
+            self.assertEqual((result["status"], result["state"]), ("redirected", "redirected"), location)
+
+    def test_probe_records_only_a_challenge_kind_not_header_values(self):
+        result = self._probe_with(401, {"WWW-Authenticate": 'Bearer realm="private-realm"'})
+        self.assertEqual(result["challenge"], "bearer")
+        self.assertNotIn("private-realm", json.dumps(result))
+
+    def test_failed_probes_carry_matching_state(self):
+        with patch.object(agent_health, "require_public_https"), \
+             patch.object(agent_health.socket, "getaddrinfo", side_effect=OSError("offline")):
+            result = agent_health.probe({"id": "a" * 20, "endpoint": "https://o.example/a2a"})
+        self.assertEqual((result["status"], result["state"]), ("unreachable", "unreachable"))
+
     def test_never_contacts_private_destination_or_tokenized_endpoint(self):
         item = {"id": "a" * 20, "endpoint": "https://example.org/a2a"}
         with patch.object(agent_health, "require_public_https"), \

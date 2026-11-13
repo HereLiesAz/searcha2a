@@ -33,9 +33,20 @@ transparency evidence require a separate verifier.
 - [Published crawl snapshot](https://searcha2a.azphalt.store/api/v1/catalog.json): static JSON for the latest indexing run, distinct from the persistent registry.
 - [Azphalt external-agent directory](https://azphalt.store/agents): read-only discovery listings, not installable Azphalt packages.
 
+- [MCP server](docs/MCP.md): `POST /mcp` lets a planner such as Aive's queen search the directory directly. Read-only, never runs an agent, off until `MCP_ENABLED` is set.
+
 The legacy `POST /api/v1/search` dispatch route now returns **410 Gone**. Existing result UUIDs remain readable until their seven-day retention expires. The separate `/api/v1/directory?q=...` semantic API remains available for clients such as Aive. It ranks candidates from the persistent curated registry with optional Workers AI; it also never triggers a crawl.
 
 See [API](docs/API.md), [Architecture](docs/ARCHITECTURE.md), and [Operations](docs/OPERATIONS.md) for protocol, security, and deployment details.
+
+## Who is behind an agent, and does it need a key?
+
+Each listing says what its card **declares**, nothing more:
+
+- **Source** (where the agent gets its thinking): the card's own `provider` name, with a flag when that website is not the website serving the agent. SearchA2A does not guess models from descriptions.
+- **Host** (where it runs): inferred only from the endpoint's website name, for example `vercel.app`.
+- **Key**: `keyless` is `declared`, `no` or `unknown`. `declared` means the card names no key. It is not proof that none is needed, and it says nothing about price.
+- **How far it was checked**: level 0 (card read), 1 (card and address on the same website), 2 (a server answered at the address in the last week). Levels expire, and no one has tested what any agent does. See [API](docs/API.md#what-verification-levels-mean).
 
 ## Bring your own compute
 

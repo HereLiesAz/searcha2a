@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
 import http.client
 import ipaddress
 import json
@@ -17,6 +18,16 @@ from discover import DiscoveryError, require_public_https, USER_AGENT, NoRedirec
 
 MAX_CHECKS = 60
 TIMEOUT_SECONDS = 5
+
+# A credential-free HEAD can only show that a server answered at the address.
+# Codes that mean "a server is here and wants a POST or a key" count as reachable.
+# 404/410 mean nothing is served at that path; other codes are not interpreted.
+REACHABLE_CODES = frozenset({200, 201, 202, 204, 400, 401, 402, 403, 405, 415, 429})
+# `status` is the legacy field (kept for existing readers); `state` is the honest taxonomy.
+LEGACY_STATUS = {"reachable": "responding", "server_error": "server_error",
+                 "path_not_found": "path_not_found", "redirected": "redirected",
+                 "unexpected_status": "unexpected_status", "unreachable": "unreachable",
+                 "tls_error": "unreachable", "skipped": "skipped"}
 
 
 class PinnedHTTPSConnection(http.client.HTTPSConnection):
@@ -36,10 +47,61 @@ class PinnedHTTPSConnection(http.client.HTTPSConnection):
             raise
 
 
+def valid_redirect_target(location) -> bool:
+    """A redirect only counts when it names an ordinary public https hostname. Never followed."""
+    if not isinstance(location, str) or not location or len(location) > 1000:
+        return False
+    try:
+        parsed = urllib.parse.urlsplit(location)
+        host = parsed.hostname
+        if parsed.scheme != "https" or not host or parsed.username or parsed.password:
+            return False
+        if parsed.port not in (None, 443):
+            return False
+        try:
+            ipaddress.ip_address(host)
+            return False  # IP literals are refused outright
+        except ValueError:
+            return "." in host and not host.endswith((".local", ".internal", ".localhost"))
+    except ValueError:
+        return False
+
+
+def classify(code: int, location=None) -> tuple[str, bool]:
+    """Return (state, redirect_flag) for a HEAD response code."""
+    if 300 <= code < 400:
+        return ("reachable", True) if valid_redirect_target(location) else ("redirected", True)
+    if code >= 500:
+        return "server_error", False
+    if code in (404, 410):
+        return "path_not_found", False
+    if code in REACHABLE_CODES:
+        return "reachable", False
+    return "unexpected_status", False
+
+
+def challenge_kind(value) -> str | None:
+    """Only the authentication scheme word survives; realms and parameters are discarded."""
+    if not isinstance(value, str) or not value.strip():
+        return None
+    word = value.strip().split(" ", 1)[0].lower()
+    return word if word in ("bearer", "basic", "digest", "negotiate") else "other"
+
+
+def _tls_not_after(connection) -> str | None:
+    try:
+        certificate = connection.sock.getpeercert()
+        expires = ssl.cert_time_to_seconds(certificate["notAfter"])
+        return datetime.fromtimestamp(expires, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except Exception:
+        return None
+
+
 def probe(item: dict) -> dict:
     """A single credential-free HEAD, no redirects, private hosts or response bodies."""
     identifier, url = item["id"], item["endpoint"]
-    result = {"id": identifier, "endpoint": url, "status": "skipped", "http_status": None}
+    result = {"id": identifier, "endpoint": url, "status": "skipped", "state": "skipped",
+              "http_status": None}
     try:
         parsed = urllib.parse.urlsplit(url)
         if parsed.query or parsed.fragment:
@@ -51,18 +113,28 @@ def probe(item: dict) -> dict:
         # DNS can change; pin the already-checked address rather than resolving at connect.
         connection = PinnedHTTPSConnection(parsed.hostname, addresses[0][4][0])
         try:
-            connection.request("HEAD", parsed.path or "/" , headers={
+            connection.request("HEAD", parsed.path or "/", headers={
                 "Host": parsed.hostname, "User-Agent": USER_AGENT, "Accept": "*/*",
             })
-            code = connection.getresponse().status
-            result.update(status="responding" if code < 500 else "server_error",
-                          http_status=code)
+            response = connection.getresponse()
+            code = response.status
+            header = getattr(response, "getheader", lambda *_: None)
+            state, redirect = classify(code, header("Location"))
+            result.update(state=state, status=LEGACY_STATUS[state], http_status=code,
+                          redirect=redirect)
+            if code in (401, 402, 403):
+                result["challenge"] = challenge_kind(header("WWW-Authenticate")) or "none"
+            expiry = _tls_not_after(connection)
+            if expiry:
+                result["tls_not_after"] = expiry
         finally:
             connection.close()
     except DiscoveryError:
         return result
-    except (OSError, ssl.SSLError, http.client.HTTPException, ValueError):
-        result["status"] = "unreachable"
+    except ssl.SSLError:
+        result.update(status="unreachable", state="tls_error")
+    except (OSError, http.client.HTTPException, ValueError):
+        result.update(status="unreachable", state="unreachable")
     return result
 
 

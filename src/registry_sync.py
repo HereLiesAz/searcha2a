@@ -96,6 +96,28 @@ def ingest(catalog: dict, base: str, secret: str, *, attempts: int = 18,
             "suppressed_ids": sorted(suppressed)}
 
 
+def fetch_evidence(base: str, token: str, *, opener=urllib.request.urlopen):
+    """Read-time verification summaries for publication. Fails soft: None means publish without them."""
+    if not base.startswith("https://") or not token:
+        return None
+    request = urllib.request.Request(
+        base.rstrip("/") + "/internal/registry/evidence-export", method="GET",
+        headers={"Authorization": "Bearer " + token, "User-Agent": "SearchA2A-Crawler"})
+    try:
+        with opener(request, timeout=20) as response:
+            if response.status != 200:
+                return None
+            data = json.load(response)
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError):
+        return None
+    entries = data.get("entries") if isinstance(data, dict) else None
+    if not isinstance(entries, list) or len(entries) > 5000:
+        return None
+    return {entry["id"]: entry for entry in entries
+            if isinstance(entry, dict) and isinstance(entry.get("id"), str) and len(entry["id"]) == 20
+            and all(ch in "0123456789abcdef" for ch in entry["id"])}
+
+
 def filter_export_catalog(catalog: dict, ingest_response: dict) -> dict:
     """Fail closed unless the registry confirms which IDs must stay unpublished."""
     suppressed = ingest_response.get("suppressed_ids")
@@ -112,10 +134,25 @@ def filter_export_catalog(catalog: dict, ingest_response: dict) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--catalog", type=Path, required=True)
+    parser.add_argument("--catalog", type=Path, help="Crawl catalog to ingest")
+    parser.add_argument("--evidence-export", type=Path,
+                        help="Instead of ingesting, save the registry's verification evidence here "
+                             "(best-effort: exits 0 and writes nothing if unavailable)")
     args = parser.parse_args()
+    base = os.getenv("REGISTRY_API_URL", "")
+    token = os.getenv("REGISTRY_SYNC_SECRET", "")
+    if args.evidence_export:
+        evidence = fetch_evidence(base, token)
+        if evidence is None:
+            print("Evidence export unavailable; listings will carry no verification_detail")
+        else:
+            args.evidence_export.write_text(json.dumps(evidence), encoding="utf-8")
+            print(f"Saved verification evidence for {len(evidence)} agents")
+        return
+    if not args.catalog:
+        parser.error("--catalog is required unless --evidence-export is used")
     data = json.loads(args.catalog.read_text(encoding="utf-8"))
-    result = ingest(data, os.getenv("REGISTRY_API_URL", ""), os.getenv("REGISTRY_SYNC_SECRET", ""))
+    result = ingest(data, base, token)
     publishable = filter_export_catalog(data, result)
     args.catalog.write_text(json.dumps(publishable, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Registry now contains {result['total']} agents; ingested {result['ingested']} cards; "

@@ -157,6 +157,162 @@ def clean_text(value, max_length: int = 500) -> str:
     return value.strip()[:max_length] if isinstance(value, str) else ""
 
 
+SHARED_HOSTING = {
+    "workers.dev": "cloudflare-workers", "pages.dev": "cloudflare-pages",
+    "vercel.app": "vercel", "onrender.com": "render", "supabase.co": "supabase",
+    "netlify.app": "netlify", "railway.app": "railway", "fly.dev": "fly",
+    "herokuapp.com": "heroku", "github.io": "github-pages", "replit.app": "replit",
+}
+BACKING_EXTENSION_URI = "https://searcha2a.azphalt.store/ext/backing/v1"
+_SECOND_LEVEL = {"co", "com", "org", "net", "gov", "ac", "edu"}
+_AUTH_ORDER = ("apiKey", "basic", "bearer", "mtls", "oauth", "openid", "other", "x402")
+_V1_SCHEME_KEYS = {
+    "apikeysecurityscheme": "apiKey", "httpauthsecurityscheme": "http",
+    "oauth2securityscheme": "oauth", "openidconnectsecurityscheme": "openid",
+    "mtlssecurityscheme": "mtls",
+}
+
+
+def registrable_domain(host: str) -> str:
+    """Last two labels (three under common second-level suffixes). Not a public-suffix list."""
+    labels = [label for label in host.lower().strip(".").split(".") if label]
+    if len(labels) <= 2:
+        return ".".join(labels)
+    if len(labels[-1]) == 2 and labels[-2] in _SECOND_LEVEL:
+        return ".".join(labels[-3:])
+    return ".".join(labels[-2:])
+
+
+def hosting_platform(host: str):
+    host = host.lower()
+    for suffix, platform in SHARED_HOSTING.items():
+        if host == suffix or host.endswith("." + suffix):
+            return platform
+    return None
+
+
+def _scheme_type(scheme) -> str:
+    """Map a declared security scheme to a type by its TYPE, never by the publisher's key name."""
+    if not isinstance(scheme, dict):
+        return "other"
+    kind = scheme.get("type")
+    if isinstance(kind, str):
+        kind = kind.lower()
+        if kind == "apikey":
+            return "apiKey"
+        if kind == "http":
+            return "bearer" if str(scheme.get("scheme", "")).lower() == "bearer" else "basic"
+        if kind in ("oauth2", "oauth"):
+            return "oauth"
+        if kind == "openidconnect":
+            return "openid"
+        if kind == "mutualtls":
+            return "mtls"
+        return "other"
+    for key, value in scheme.items():
+        mapped = _V1_SCHEME_KEYS.get(str(key).lower())
+        if mapped == "http":
+            inner = value if isinstance(value, dict) else {}
+            return "bearer" if str(inner.get("scheme", "")).lower() == "bearer" else "basic"
+        if mapped:
+            return mapped
+    return "other"
+
+
+def _mentions_x402(text) -> bool:
+    return isinstance(text, str) and ("x402" in text.lower() or "payment-signature" in text.lower())
+
+
+def derive_provider(card: dict):
+    provider = card.get("provider")
+    if not isinstance(provider, dict):
+        return None
+    organization = clean_text(provider.get("organization"), 160)
+    if not organization:
+        return None
+    url = clean_text(provider.get("url"), 300)
+    return {"organization": organization,
+            "url": url if url.startswith("https://") else ""}
+
+
+def _extensions(card: dict) -> list:
+    capabilities = card.get("capabilities")
+    extensions = capabilities.get("extensions") if isinstance(capabilities, dict) else None
+    return [e for e in extensions[:20] if isinstance(e, dict)] if isinstance(extensions, list) else []
+
+
+def derive_backing(card: dict, endpoint: str, provider) -> dict:
+    """Who the publisher says is behind the agent and where it runs; never guessed."""
+    host = (urllib.parse.urlsplit(endpoint).hostname or "").lower() if endpoint else ""
+    declared = None
+    evidence = []
+    if provider:
+        provider_host = (urllib.parse.urlsplit(provider["url"]).hostname or "").lower() \
+            if provider["url"] else ""
+        declared = {"organization": provider["organization"], "url": provider["url"],
+                    "url_matches_endpoint": bool(provider_host and host and
+                        registrable_domain(provider_host) == registrable_domain(host)),
+                    "source": "card.provider"}
+        evidence.append({"kind": "card_field", "path": "provider.organization"})
+    platform = hosting_platform(host) if host else None
+    hosting = {"platform": platform or "unknown",
+               "basis": "endpoint_host_suffix" if platform else "none",
+               "host": host[:253], "shared_platform": bool(platform)}
+    if platform:
+        evidence.append({"kind": "host_suffix", "value": host.split(".", 1)[-1][:80]})
+    model = None
+    for extension in _extensions(card):
+        if extension.get("uri") == BACKING_EXTENSION_URI:
+            params = extension.get("params")
+            params = params if isinstance(params, dict) else {}
+            name = clean_text(params.get("modelProvider"), 80)
+            if name:
+                model = {"name": name, "model": clean_text(params.get("model"), 80),
+                         "basis": "card_extension", "confidence": "declared"}
+                evidence.append({"kind": "extension", "uri": BACKING_EXTENSION_URI})
+            break
+    return {"declared_provider": declared, "hosting": hosting, "model_provider": model,
+            "confidence": "declared" if declared or model else "unknown",
+            "evidence": evidence[:6],
+            "unknowns": ["actual_model", "subprocessors", "data_retention"]}
+
+
+def derive_access(card: dict) -> dict:
+    """What the card declares about keys and payment. keyless is never 'observed'."""
+    schemes = card.get("securitySchemes")
+    schemes = schemes if isinstance(schemes, dict) else {}
+    types = set()
+    evidence = []
+    flags = []
+    for name, scheme in list(schemes.items())[:30]:
+        types.add(_scheme_type(scheme))
+        description = scheme.get("description") if isinstance(scheme, dict) else None
+        if _mentions_x402(str(name)) or _mentions_x402(description):
+            types.add("x402")
+    if schemes:
+        evidence.append({"kind": "card_field", "path": "securitySchemes"})
+    for extension in _extensions(card):
+        if _mentions_x402(extension.get("uri")):
+            types.add("x402")
+            evidence.append({"kind": "extension", "uri": clean_text(extension.get("uri"), 200)})
+            break
+    requirement = card.get("security") or card.get("securityRequirements")
+    if requirement and not schemes:
+        flags.append("requirement_without_schemes")
+        evidence.append({"kind": "card_field", "path": "security"})
+    ordered = [t for t in _AUTH_ORDER if t in types]
+    declared = "none_declared" if not ordered else ordered[0] if len(ordered) == 1 else "multiple"
+    if ordered:
+        keyless = "no"
+    elif flags:
+        keyless = "unknown"  # a requirement exists but its kind is not declared
+    else:
+        keyless = "declared"  # the card is silent; weaker than an affirmation
+    return {"auth_declared": declared, "auth_types": ordered, "keyless": keyless,
+            "payment_required": "declared" if "x402" in types else "none_declared",
+            "evidence": evidence[:6], "flags": flags}
+
+
 def normalize_card(card, source_url: str, source: str, *, identity_salt: str = ""):
     if not isinstance(card, dict):
         return None
@@ -209,6 +365,8 @@ def normalize_card(card, source_url: str, source: str, *, identity_salt: str = "
     ans_name = raw_name if isinstance(raw_name, str) and len(raw_name) <= 259 else ""
     ans_host = raw_host if isinstance(raw_host, str) and len(raw_host) <= 251 else ""
     raw = json.dumps(card, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    # Extract provider/auth facts from the FULL card before the raw copy may be dropped.
+    provider = derive_provider(card)
     return {
         "id": identity,
         "name": name,
@@ -223,6 +381,9 @@ def normalize_card(card, source_url: str, source: str, *, identity_salt: str = "
         "version": clean_text(card.get("version"), 80),
         "schema_status": "declared_skills" if normalized_skills else "partial_agent_card",
         "raw_sha256": hashlib.sha256(raw).hexdigest(),
+        **({"provider": provider} if provider else {}),
+        "backing": derive_backing(card, endpoint, provider),
+        "access": derive_access(card),
         **({"raw_card": card} if len(raw) <= MAX_RAW_CARD_BYTES else {}),
         **({"ans_name": ans_name, "ans_host": ans_host} if ans_name and ans_host else {}),
         "verification": "card_read_only",  # No L2 protocol probe; don't claim the agent works.
