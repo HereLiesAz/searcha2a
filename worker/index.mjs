@@ -4,6 +4,7 @@ import { normalizeAnsName, parseAnsClaim } from './ans.mjs';
 import {
   validFacets, HEALTH_STATE_STATUS, HEALTH_STATUSES, CHALLENGES, stateFromHttp,
 } from './facets.mjs';
+import { computeVerification, verificationDetail, effectiveAccess } from './verification.mjs';
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -112,6 +113,40 @@ export class AgentRegistry {
       // A model outage must not corrupt a durable index or bypass moderation.
     }
     return stored;
+  }
+
+  /** Evidence rows for a page of agents: health probes and the latest approval time. */
+  verificationFor(rows, now) {
+    if (!rows.length) return [];
+    const marks = rows.map(() => '?').join(', ');
+    const ids = rows.map(row => row.id);
+    const health = new Map(this.sql.exec(`SELECT id, endpoint, status, http_status, checked_at,
+      state, redirect, challenge, tls_not_after FROM agent_health WHERE id IN (${marks})`,
+    ...ids).toArray().map(item => [item.id, item]));
+    const approvals = new Map(this.sql.exec(`SELECT agent_id, MAX(changed_at) AS approved_at
+      FROM registry_audit WHERE action='approve' AND agent_id IN (${marks}) GROUP BY agent_id`,
+    ...ids).toArray().map(item => [item.agent_id, item.approved_at]));
+    return rows.map(row => {
+      const record = JSON.parse(row.record);
+      const evidence = health.get(row.id) || null;
+      return {
+        record, health: evidence,
+        full: computeVerification({
+          record, review_status: row.review_status, updated_at: row.updated_at,
+          health: evidence, approved_at: approvals.get(row.id) || null,
+        }, now),
+      };
+    });
+  }
+
+  /** Public form of a stored row: the card record plus additive, read-time evidence. */
+  present(rows) {
+    const now = new Date();
+    return this.verificationFor(rows, now).map(({ record, health, full }, i) => ({
+      ...record, curation_status: rows[i].review_status,
+      verification_detail: verificationDetail(full),
+      access: effectiveAccess(record, health, now),
+    }));
   }
 
   async fetch(request) {
@@ -357,14 +392,14 @@ export class AgentRegistry {
       const sort = relevance ? relevance + ' DESC, name_search ASC' : 'name_search ASC';
       const rankParams = terms.flatMap(term => ['%' + term + '%', '%' + term + '%', '%' + term + '%']);
       const rows = this.sql.exec(
-        `SELECT record, review_status FROM agents ${where} ORDER BY ${sort} LIMIT ? OFFSET ?`,
+        `SELECT id, record, review_status, updated_at FROM agents ${where} ORDER BY ${sort} LIMIT ? OFFSET ?`,
         ...bindings, ...rankParams, limit, offset).toArray();
       const meta = this.sql.exec(
         "SELECT value FROM registry_meta WHERE key='last_ingested_at'").toArray()[0];
       return respond({
         query, count: matched, total, offset, limit,
         generated_at: meta ? meta.value : null,
-        results: rows.map(row => ({ ...JSON.parse(row.record), curation_status: row.review_status })),
+        results: this.present(rows),
         verified: 'Agent Card metadata only; endpoints are not actively probed',
       });
     }
@@ -386,21 +421,28 @@ export class AgentRegistry {
       const count = this.sql.exec(
         `SELECT COUNT(*) AS total FROM agents WHERE ${visible}`, name).one().total;
       if (!count) return respond({ error: 'ANS name not found in registry' }, 404);
-      const rows = this.sql.exec(`SELECT record, review_status FROM agents
+      const rows = this.sql.exec(`SELECT id, record, review_status, updated_at FROM agents
         WHERE ${visible} ORDER BY name_search ASC, id ASC LIMIT ? OFFSET ?`,
         name, limit, offset).toArray();
       return respond({ name: raw, count, limit, offset,
         truncated: offset + rows.length < count,
         ambiguous: count > 1, identity_verified: false,
-        results: rows.map(row => ({ ...JSON.parse(row.record),
-          curation_status: row.review_status })) });
+        results: this.present(rows) });
     }
     const idMatch = path.match(/^\/agent\/([0-9a-f]{20})$/);
     if (request.method === 'GET' && idMatch) {
-      const record = this.sql.exec(`SELECT record, review_status FROM agents
+      const record = this.sql.exec(`SELECT id, record, review_status, updated_at FROM agents
         WHERE id=? AND listing_state='active' AND review_status != 'rejected'`, idMatch[1]).toArray()[0];
       return record
-        ? respond({ ...JSON.parse(record.record), curation_status: record.review_status })
+        ? respond(this.present([record])[0])
+        : respond({ error: 'Agent unknown' }, 404);
+    }
+    const verification = path.match(/^\/verification\/([0-9a-f]{20})$/);
+    if (request.method === 'GET' && verification) {
+      const row = this.sql.exec(`SELECT id, record, review_status, updated_at FROM agents
+        WHERE id=? AND listing_state='active' AND review_status != 'rejected'`,
+        verification[1]).toArray()[0];
+      return row ? respond(this.verificationFor([row], new Date())[0].full)
         : respond({ error: 'Agent unknown' }, 404);
     }
     return respond({ error: 'Not found' }, 404);
@@ -615,6 +657,8 @@ async function handle(request, env) {
       ? '/search' + url.search
       : /^\/api\/v1\/agents\/[0-9a-f]{20}\/health$/.test(url.pathname)
         ? '/health/' + url.pathname.split('/')[4]
+      : /^\/api\/v1\/agents\/[0-9a-f]{20}\/verification$/.test(url.pathname)
+        ? '/verification/' + url.pathname.split('/')[4]
       : url.pathname === '/api/v1/ans/resolve'
         ? '/ans' + url.search
         : '/agent/' + url.pathname.slice('/api/v1/agents/'.length);

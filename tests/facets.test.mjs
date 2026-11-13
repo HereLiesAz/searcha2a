@@ -28,7 +28,7 @@ test('ingest keeps additive provider, backing and access and leaves old keys alo
     assert.equal((await ingest(state.env, [withFacets()])).status, 200);
     const { body } = await getJson(state.env, '/api/v1/agents/' + A);
     assert.deepEqual(body.backing, backing);
-    assert.deepEqual(body.access, access);
+    assert.deepEqual(body.access, { ...access, observed_challenge: null });
     assert.equal(body.provider.organization, '10ML');
     assert.equal(body.verification, 'card_read_only');
     assert.equal(body.curation_status, 'unreviewed');
