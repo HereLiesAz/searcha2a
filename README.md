@@ -33,7 +33,7 @@ transparency evidence require a separate verifier.
 - [Published crawl snapshot](https://searcha2a.azphalt.store/api/v1/catalog.json): static JSON for the latest indexing run, distinct from the persistent registry.
 - [Azphalt external-agent directory](https://azphalt.store/agents): read-only discovery listings, not installable Azphalt packages.
 
-- [MCP server](docs/MCP.md): `POST /mcp` lets a planner such as Aive's queen search the directory directly. Read-only, never runs an agent, off until `MCP_ENABLED` is set.
+- [MCP server](docs/MCP.md): `POST /mcp` lets a planner such as Aive's queen search the directory directly. Read-only, never runs an agent, on via `MCP_ENABLED` in `worker/wrangler.toml`.
 
 The legacy `POST /api/v1/search` dispatch route now returns **410 Gone**. Existing result UUIDs remain readable until their seven-day retention expires. The separate `/api/v1/directory?q=...` semantic API remains available for clients such as Aive. It ranks candidates from the persistent curated registry with optional Workers AI; it also never triggers a crawl.
 

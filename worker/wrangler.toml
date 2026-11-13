@@ -5,8 +5,8 @@ workers_dev = true
 
 [vars]
 ALLOWED_ORIGIN = "https://searcha2a.azphalt.store"
-# MCP endpoint (POST /mcp). Off until you set this to "true" after reviewing docs/MCP.md.
-MCP_ENABLED = "false"
+# MCP endpoint (POST /mcp). On: the central Worker deploy applies this file, so no dashboard step. Set "false" to roll back (docs/OPERATIONS.md).
+MCP_ENABLED = "true"
 
 # One SQLite-backed Durable Object per request UUID, created automatically on deploy.
 [[durable_objects.bindings]]

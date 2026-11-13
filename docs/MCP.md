@@ -8,7 +8,7 @@ never writes anything.
 - Address: `POST https://searcha2a-api.hereliesaz.workers.dev/mcp`
 - Transport: Streamable HTTP, **stateless**, JSON responses only (never SSE), no session id.
   `GET /mcp` returns 405 with `Allow: POST`.
-- Off by default. Set `MCP_ENABLED = "true"` in `worker/wrangler.toml` (or the dashboard) to turn it on.
+- On in `worker/wrangler.toml` (the central Worker deploy applies it). Set `MCP_ENABLED = "false"` there to turn it off.
   While off, every method returns 404.
 - No account or key. Public data, same posture as `/api/v1/*`.
 
